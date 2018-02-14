@@ -1,0 +1,253 @@
+
+$font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Sans Serif", Tahoma, sans-serif;
+$font-family-ie7:Helvetica, Arial, Tahoma, sans-serif;
+
+$pageBgClr: #FAF9F0;
+
+// Standard white background
+$formElBg: #F0EFE6;
+$bgClr: #FFFFFF;
+$bgCallout: #F0EFE6; // for items like headers with backgrounds
+$linkClr: #1A7F89;
+$linkActiveClr: #18BDCE;
+$textClr: #000000;
+$textSecondaryClr: #666666;
+$textTertiaryClr: #CCCCCC;
+
+$textAlertClr: #FF3300;
+$borderAlertClr: #FF471D;
+$borderOverlayClr: $pageBgClr;
+
+$contentBreakClr: #E4E4E4;
+$selectionHighlight: #E9F5F5;
+
+$footerBg: #0f7581;
+
+// link/hover styles for dark backgrounds (e.g. header & legal styles)
+$dark-background-link-color: #24C1D0;
+$dark-background-hover-color: #74F3FF;
+
+// black background, white text
+$bgGradientAltClr: #363636;
+$bgAltClr: #000000;
+$linkAltClr: #78A59B;
+$linkAltActiveClr: #18BDCE;
+$textAltClr: #FFFFFF;
+
+$bgPopupClr: #000000;
+$bgPopupGradientClr: #484848;
+
+
+/// Button Styles
+$btnColor: #FFFFFF;
+$btnClrStart: #C5C6B4;
+$btnClrEnd: #878777;
+$btnClrHoverStart: $btnClrEnd;
+$btnClrHoverEnd: $btnClrEnd;
+$btnClrActiveStart: #81E6F1;
+$btnClrActiveEnd: #18BDCE;
+
+$btnCtaColor: #FFFFFF;
+$btnCtaClrStart: #5AD1DC;
+$btnCtaClrEnd: #1B8A94;
+$btnCtaClrHoverStart: $btnCtaClrEnd;
+$btnCtaClrHoverEnd: $btnCtaClrEnd;
+$btnCtaClrActiveStart: #81E6F1;
+$btnCtaClrActiveEnd: #18BDCE;
+
+$btnDestructiveClr: #FFFFFF;
+$btnDestructiveClrStart: rgb(240, 199, 200);
+$btnDestructiveClrEnd: rgb(220, 60, 56);
+$btnDestructiveClrHoverStart: $btnDestructiveClrEnd;
+$btnDestructiveClrHoverEnd: $btnDestructiveClrEnd;
+$btnDestructiveClrActiveStart: $btnDestructiveClrEnd;
+$btnDestructiveClrActiveEnd: $btnDestructiveClrEnd;
+
+$btnSecondaryColor: #FFFFFF;
+$btnSecondaryClrStart: #828282;
+$btnSecondaryClrEnd: #000000;
+$btnSecondaryClrHoverStart: $btnSecondaryClrEnd;
+$btnSecondaryClrHoverEnd: $btnSecondaryClrEnd;
+$btnSecondaryClrActiveStart: $btnSecondaryClrStart;
+$btnSecondaryClrActiveEnd: $btnSecondaryClrEnd;
+
+$btnAlertColor: #FFFFFF;
+$btnAlertClrStart: #F5887D;
+$btnAlertClrEnd: #EC4625;
+$btnAlertClrHoverStart: $btnAlertClrEnd;
+$btnAlertClrHoverEnd: $btnAlertClrEnd;
+$btnAlertClrActiveStart: $btnAlertClrStart;
+$btnAlertClrActiveEnd: $btnAlertClrEnd;
+
+$btnModalColor: #000000;
+$btnModalClrStart: #FFFFFF;
+$btnModalClrEnd: #CFCEC8;
+$btnModalClrHoverStart: $btnModalClrEnd;
+$btnModalClrHoverEnd: $btnModalClrEnd;
+$btnModalClrActiveStart: $btnModalClrStart;
+$btnModalClrActiveEnd: $btnModalClrEnd;
+
+//confirm overlay
+$alrtHighlight: #FF3300;
+$overlayMaskColor: #000000;
+$btnHoverColor: #CFCEC8;
+$btnTopGradientColor: #FFFFFF;
+$btnBottomGradientColor: #CFCEC8;
+$hrBorderTopColor: #000000;
+$hrBorderBottomColor: #575756;
+$hrBorderColor: $hrBorderBottomColor;
+
+//Feedback page
+$backgroundColor: #FAF9F0;
+$headerFontColor: black;
+$messageFontColor: red;
+$messageSuccessFontColor: #009000; // darker green
+$directionsFontColor: black;
+$emailErrorFontColor: #DB431F;
+
+//summary
+$summary-scale-header-label-color: #71736C;
+$summary-scale-header-odd-color: #F0F0E4;
+$summary-scale-header-even-color: #E9EAE1;
+$summary-column-header-bg: #EAE9E1;
+$summary-column-header-bg-alt:  $summary-scale-header-odd-color;
+$summary-column-center-divider-color: #FAF9F0;
+$summary-scaled-highlighter: #8d8d8a;
+$summary-raw-score-label-color: #71736C;
+$summary-additional-measures-header-color: #71736C;
+$summary-score-btn-border: #DDDFD3;
+$summary-score-btn-bg: #F0F0E4;
+$summary-score-btn-text: black;
+$summary-question-title-text-color: #71736C;
+$summary-additional-measures-label-color: black;
+$summary-additional-measures-value-color: gray;
+$summary-bullet-color: gray;
+$summary-skills-analysis-incomplete-color: #FF5835;
+$summary-additional-info-title-color: #848382;
+$summary-composite-center-divider: #a8a8a4;
+$summary-composite-right-divider: #e4e3dc;
+$summary-subtest-sortBy-color: #a9aaa0;
+$summary-subtest-subtest-border-bottom-color: #E4E6DA;
+$resultsSubtestRowSeparatorColor: #72726c;
+
+//Battery
+$batteryListItemStartColor: #FFFFFF;
+$batteryListItemEndColor: #ebebeb;
+$batteryExpandedListItemStartColor: #FFFFFF;
+$batteryExpandedListItemEndColor: #FFFFFF;
+$trayListFontColor: #000000;
+$trayListBkgdColor: #FFFFFF;
+$trayBgGradientStartColor: #363636;
+$trayBgGradientEndColor: #000000;
+
+//sorter
+$sorter-repeat-bg: #F7E4E4;
+$sorter-repeat-subtest-text: black;
+$sorter-remove-x: red;
+
+//custom battery
+$repeatedSubtestsBg: #F7E4E4;
+$repeatedSubtestsBorder: #FB2D17;
+$repeatedSubtestsColor1: black;
+$repeatedSubtestsColor2: white;
+$ruleWithStatusWarning: #40C9D8;
+$ruleWithStatusFail: red;
+
+
+//login and logout
+$login-area-text-color: rgb(53, 53, 53);
+$login-area-text-background-color: #FAF9F0;
+$login-area-backgorund-color: white;
+$login-qinteractive-label-color: #ffffff;
+$login-field-label-color: #8D8D7D;
+$login-field-border-color: #dcdcdc;
+$login-input-focus-background-color: #CFF;
+$login-input-background-color: white;
+$login-button-background-color: white;
+$login-area-border: #F3F2D5;
+$login-button-text-color: #959595;
+$login-privacy-text-color: #3b817a;
+$login-privacy-border-color: #CDCCC7;
+$login-table-row-text-color: #959595;
+$login-message-color: #A8A8A8;
+$login-button-background-gradient-start: #686868;
+$login-button-background-gradient-start-pushed: #444444;
+$login-button-background-gradient-end: #000000;
+
+//Usage Tracking page
+$calendar-bkgd-header-color: #76BBB1;
+
+//Notes
+$general-head-color1:rgb(167, 223, 134);
+$general-head-color2:rgb(135, 206, 92);
+$general-head-bottom-color:rgb(112, 198, 63);
+$general-note-color:rgb(188, 245, 156);
+
+$subtest-head-color1:rgb(229, 164, 193);
+$subtest-head-color2:rgb(210, 119, 160);
+$subtest-head-bottom-color:rgb(201, 84, 139);
+$subtest-note-color:rgb(243, 184, 211);
+
+$item-head-color1:rgb(225, 220, 134);
+$item-head-color2:rgb(203, 196, 78);
+$item-head-bottom-color:rgb(191, 183, 43);
+$item-note-color:rgb(254, 249, 143);
+
+$event-head-color1:rgb(91, 91, 89);
+$event-head-color2:rgb(51, 52, 49);
+$event-head-bottom-color:rgb(51, 51, 48);
+$event-note-color:$general-note-color;
+
+$audio-head-color1:rgb(250, 248, 246);
+$audio-head-color2:rgb(228, 226, 218);
+$audio-head-bottom-color:rgb(211, 210, 202);
+$audio-note-color:$general-note-color;
+
+$important-active-top:rgb(137, 219, 225);
+$important-active-bottom:rgb(76, 186, 194);
+
+$color-notes-border: #ebebeb;
+
+//footer
+$footer-divider-color: #E3DCC4;
+
+//wizard
+$wizard-background-color: #555552;
+$wizard-border-color: #c7c5b3;
+$wizard-header-color: #EDEBD8;
+
+$flash-message-background-color: #F3F8FC;
+$flash-message-border-color: #B2D1FF;
+$flash-message-text-color: #6D6D6D;
+
+//support page
+$support-video-text: white;
+$support-video-text-background: black;
+
+//color
+$colorWhite: #FFFFFF;
+$colorBlack: #000000;
+$colorDarkGray: #6D6D6D;
+$bgColorEvenRow: #faf9f1;
+$bgColorEvenRowFirstChild: #e4efe9;
+$bgColorOddRow: #f1efe4;
+$bgColorOddRowFirstChild: #dce6db;
+
+//support admin
+$evenBg:rgb(76, 186, 194);
+
+//api
+//confirm overlay
+$reportHighlight: #FFFFFF;
+$overlayMaskColor: #000000;
+$btnHoverColor: #CFCEC8;
+$btnTopGradientColor: #FFFFFF;
+$btnBottomGradientColor: #CFCEC8;
+$hrBorderTopColor: #000000;
+$hrBorderBottomColor: #575756;
+$hrBorderColor: $hrBorderBottomColor;
+$vrtcl-align: middle;
+
+// practice mode
+$practiceMode: #80a910;
+$practiceModeDark: #64880f;

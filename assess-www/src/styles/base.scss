@@ -1,0 +1,24 @@
+@import 'palette';
+@import 'mixins';
+
+body {
+    margin: 0;
+    padding: 0;
+    @include fontFamily();
+    background-color: black;
+    background-image: url("../images/login-qinteractive_background.png");
+    background-repeat: no-repeat;
+    background-position: center -60px;
+}
+
+
+.pearson-footer {
+	position: fixed;
+	bottom: 0px;
+	height: 44px;
+	width: 100%;
+	background-color: $footerBg;
+	background-image: url("../images/login-pearson_bottom_bar.png");
+	background-repeat: no-repeat; 
+	background-position: center 0px;
+}
