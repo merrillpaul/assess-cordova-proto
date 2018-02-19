@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data:* gap://* tel:* cdvfile://*; style-src 'unsafe-inline' 'self' cdvfile://*; script-src 'self' 'unsafe-eval' cdvfile://*">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' blob: data: blob:* data:* gap://* tel:* cdvfile://*; style-src 'unsafe-inline' 'self' cdvfile://*; script-src 'self' 'unsafe-eval' cdvfile://*; worker-src blob:">
+    <!-- meta http-equiv="Content-Security-Policy" content="default-src * 'self' data:* gap://* tel:* cdvfile://*; style-src 'unsafe-inline' 'self' cdvfile://*; script-src 'self' 'unsafe-eval' cdvfile://*" -->
+    
     <title>Document</title>
 </head>
 

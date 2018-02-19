@@ -1,14 +1,18 @@
 import template from './login-form.html';
 import './login-form.scss';
 
-import { FileService } from '../services/file-service';
+import { ContentProgressState } from '../dto/content-download-status';
+import { ContentTarService } from '../services/content-tar-service';
 import { LoginSpinnerOverlay } from './spinner/login-spinner';
+
+import { FileService } from '../services/file-service';
 
 export class LoginForm {
   private ctr: HTMLElement;
   private usernameFld: HTMLInputElement;
   private passwordFld: HTMLInputElement;
   private loginButton: HTMLButtonElement;
+  private contentTarService = new ContentTarService();
   private fileService = new FileService();
 
   public render(root: HTMLElement | null): void {
@@ -31,52 +35,45 @@ export class LoginForm {
       this.loginButton.addEventListener('click', () => {
         spinnerOverlay = new LoginSpinnerOverlay();
         spinnerOverlay.show();
-        setTimeout(() => spinnerOverlay.dispose(), 4000);
-        this.fileService
-          .recursiveMkDir('/sub1/sub22/sub33')
-          .then(subDir => {
-            this.fileService
-              .writeFile(
-                subDir,
-                'index1.html',
-                new Blob(
-                  [
-                    `
-            <h1> Hello to Inner html ${Date.now()}</h1>
-            <div style="color:red;font-weight:bold: font-size:3em;"> Lorem Ipsum </div>
-            `,
-                  ],
-                  { type: 'text/html' }
-                )
-              )
-              .then(file => {
-                alert('file created');
-                alert(file.fullPath);
-                alert(file.toInternalURL());
-                alert(file.toURL());
-                console.log(
-                  'file created',
-                  file.fullPath,
-                  file.toURL(),
-                  file.nativeURL
-                );
-                window.location.href = file.toInternalURL();
-              })
-              .catch(e => {
-                alert('in er' + e);
-              });
-          })
-          .catch(e => {
-            alert(e);
-          });
-      });
-    }
 
-    if (window.cordova) {
-      // console.log(` Cordova ${cordova.version}`);
-    } else {
-      // console.log("Boo no cordova");
-    }
+        
+       this.contentTarService
+          .downloadAndExtract(
+            //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
+            //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
+            'https://s3.amazonaws.com/qi-qa-tars/non-stim-all-tar-corrected.tar'
+            )
+          .subscribe(
+            status => {
+              console.log('new status', JSON.stringify(status, null, 5));
+              if (status.progress === ContentProgressState.EXTRACTED) {
+                console.log('@@@ Done extracting tar');
+              }
+            },
+            error => {
+              console.log('error', JSON.stringify(error, null, 5));
+              spinnerOverlay.dispose();
+            },
+            () => {
+              spinnerOverlay.dispose();
+              console.log('@@FInAL DONE');
+              this.contentTarService.getContentRoot().subscribe(contentDir => {
+                 console.log('content root', contentDir.fullPath, contentDir.toURL(), contentDir.nativeURL,  contentDir.toInternalURL ? contentDir.toInternalURL(): '');
+                 window.location.href = contentDir.nativeURL + 'give-www/homeUI_en.html';
+              });
+            }
+          );
+          
+          /*this.contentTarService.getContentRoot().subscribe(contentDir => {
+            spinnerOverlay.dispose();
+            console.log('content root', contentDir.fullPath, contentDir.toURL(), contentDir.nativeURL,  contentDir.toInternalURL ? contentDir.toInternalURL(): '');
+            window.location.href = contentDir.nativeURL + 'give-www/homeUI_en.html';
+         });*/
+         //this.contentTarService.testAjax();
+         
+      });
+     
+  }
   }
 
   public dispose(): void {

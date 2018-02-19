@@ -5,6 +5,10 @@
     "importHelpers": true,
     "strict": true,
     "noEmitHelpers": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl":  "./",
+    "paths": {
+      "@appEnvironment": ["src/config/localdev.ts"]
+    }
   }
 }
