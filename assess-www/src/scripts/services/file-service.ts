@@ -56,14 +56,14 @@ export class FileService {
 
       let prevDir = parentDir;      
       const createDir = (dir:string) => {
-        console.log("create dir " + dir);
+        // console.log("create dir " + dir);
         prevDir.getDirectory(dir, { create: true, exclusive: false}, newDir => {
-          console.log("dir created " + newDir.fullPath);
+          // console.log("dir created " + newDir.fullPath);
           prevDir = newDir;
           if (paths.length > 0) {
             createDir(paths.pop() as string);
           } else {
-            console.log("all dir created");
+            // console.log("all dir created");
             res(newDir);
           }
         }, e => {
@@ -103,13 +103,13 @@ export class FileService {
     const subject = new Subject<FileEntry>();
     const parentPath: string = path.substr(0, path.lastIndexOf('/'));
     const fileName: string = path.substr(path.lastIndexOf('/') + 1);
-    console.log('parentPath', parentPath, 'fileName', fileName);
+    // console.log('parentPath', parentPath, 'fileName', fileName);
 
     
     setTimeout(() => {
       this.mkDirs(parentDir, parentPath)
       .then((subDir: DirectoryEntry) => {
-        console.log('subDir', subDir.fullPath, subDir.toURL(), subDir.nativeURL,  subDir.toInternalURL ? subDir.toInternalURL(): '');
+        // console.log('subDir', subDir.fullPath, subDir.toURL(), subDir.nativeURL,  subDir.toInternalURL ? subDir.toInternalURL(): '');
         this.writeFile(subDir, fileName, contents)
           .then(fileEntry => {
             subject.next(fileEntry);

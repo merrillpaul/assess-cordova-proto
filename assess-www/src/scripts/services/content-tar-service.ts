@@ -111,13 +111,13 @@ export class ContentTarService {
             //status.addFile(extractedFile.name);
             subject.next(status);
             this.fileService.createFileWithPath(dir, file.name, file.blob).subscribe(fileEntry => {
-              console.log(
+              /* console.log(
                 'file created',
                 fileEntry.fullPath,
                 fileEntry.toURL(),
                 fileEntry.nativeURL,
                 fileEntry.toInternalURL ? fileEntry.toInternalURL(): ''
-              );
+              );*/
               nextFile();
             }, e => {
               status.progress = ContentProgressState.ERROR_SAVE_FILE;

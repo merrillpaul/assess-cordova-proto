@@ -41,6 +41,9 @@ export class LoginForm {
           .downloadAndExtract(
             //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
             //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
+            // the correction here is to a hacked isDesktopBrowser call for the moment
+            // cause if its false, then all those Assess 'phonegap' plugins will kick in.
+            // We wuld need to update all those bridge code to avoid this hack
             'https://s3.amazonaws.com/qi-qa-tars/non-stim-all-tar-corrected.tar'
             )
           .subscribe(
@@ -59,18 +62,10 @@ export class LoginForm {
               console.log('@@FInAL DONE');
               this.contentTarService.getContentRoot().subscribe(contentDir => {
                  console.log('content root', contentDir.fullPath, contentDir.toURL(), contentDir.nativeURL,  contentDir.toInternalURL ? contentDir.toInternalURL(): '');
-                 window.location.href = contentDir.nativeURL + 'give-www/homeUI_en.html';
+                 window.location.href = contentDir.toInternalURL() + 'give-www/homeUI_en.html';
               });
             }
-          );
-          
-          /*this.contentTarService.getContentRoot().subscribe(contentDir => {
-            spinnerOverlay.dispose();
-            console.log('content root', contentDir.fullPath, contentDir.toURL(), contentDir.nativeURL,  contentDir.toInternalURL ? contentDir.toInternalURL(): '');
-            window.location.href = contentDir.nativeURL + 'give-www/homeUI_en.html';
-         });*/
-         //this.contentTarService.testAjax();
-         
+          ); 
       });
      
   }
