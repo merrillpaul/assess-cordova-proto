@@ -44,7 +44,7 @@ export class LoginForm {
             // the correction here is to a hacked isDesktopBrowser call for the moment
             // cause if its false, then all those Assess 'phonegap' plugins will kick in.
             // We wuld need to update all those bridge code to avoid this hack
-            'https://s3.amazonaws.com/qi-qa-tars/non-stim-all-tar-corrected.tar'
+            'https://s3.amazonaws.com/qi-qa-tars/non-stim-all-corrected.tar'
             )
           .subscribe(
             status => {

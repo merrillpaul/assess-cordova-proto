@@ -10,11 +10,16 @@
 # Run in Browser
 `cordova run browser`
 
+# Run with Xcode
+`cordova platform remove ios && cordova platform add ios && cordova build`
+Then open the platforms/ios/<Name>.xcode project and run it on an ipad simulator.
+
 # Run in iOs Simulator
 `cordova run ios --target="iPad-Retina, 10.2"` . Choose your targets appropriately. Look in cordova docs to see how to list the targets on your machine
 
 # Run just the assess-www
 `cd assess-www && npm start`
+Checkout the readme inside assess-www
 
 # Run just the assess-www webpack build
 `cd assess-www && npm run build`
