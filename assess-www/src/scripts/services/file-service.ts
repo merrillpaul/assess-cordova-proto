@@ -1,6 +1,8 @@
 import { Promise } from 'es6-promise';
 import { Observable, Subject } from 'rxjs';
+import { Service } from 'typedi';
 
+@Service()
 export class FileService {
 
   private rootDir: DirectoryEntry;

@@ -105,7 +105,8 @@ const baseConfig = (env) => {
       modules: ["node_modules", path.resolve(process.cwd(), "src")],
       extensions: [".ts", ".js", "scss"],
       alias: {
-        '@appEnvironment': path.resolve(__dirname, `src/config/${env}.ts`)
+        '@appEnvironment': path.resolve(__dirname, `src/config/${env}.ts`),
+        'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require')
       },
     },
   

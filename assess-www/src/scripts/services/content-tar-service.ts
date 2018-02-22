@@ -9,16 +9,16 @@ import {
 import { FileService } from './file-service';
 
 import * as untar from 'js-untar';
+import { Service, Inject } from 'typedi';
 
 const CONTENT_ROOT_FOLDER = "/contentRoot/";
+
+@Service()
 export class ContentTarService {
 
-  private fileService: FileService;
+  @Inject()
+  private fileService: FileService;  
   
-  constructor() {
-    this.fileService = new FileService();
-  }
-
   public testAjax() {
     axios.get(`data/test.json?q=${Date.now()}`).then(data => {
       console.log('Got data', data);

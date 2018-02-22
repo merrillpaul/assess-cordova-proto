@@ -4,11 +4,15 @@
     "target": "es5",
     "importHelpers": true,
     "strict": true,
-    "noEmitHelpers": true,
     "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "baseUrl":  "./",
     "paths": {
-      "@appEnvironment": ["src/config/localdev.ts"]
+      "@appEnvironment": ["src/config/localdev.ts"],
+      "typedi": ["node_modules/typedi-no-dynamic-require"]
     }
   }
 }
+
+

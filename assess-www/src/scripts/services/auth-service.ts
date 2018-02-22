@@ -1,18 +1,22 @@
-import axios from 'axios';
-import { AxiosInstance } from 'axios';
+
 
 import config from '@appEnvironment';
+import { Observable, Subject } from 'rxjs';
 
-class AuthService {
-  private request: AxiosInstance;
-  constructor() {
-    this.request = axios.create({
-      baseURL: config.centralEndpoint,
-      headers: {
-        'X-Requested-With': 'Assess-App',
-      },
-    });
+import { HttpService } from '../shared/http-service';
+import { Service, Inject } from 'typedi';
+
+@Service()
+export class AuthService {
+
+  @Inject()
+  private httpService: HttpService;
+
+  public login(username: string, password: string): Observable<any> {
+    const subject = new Subject();
+    //http.getCentralRequest().get()
+    return subject;
   }
 }
 
-export default new AuthService();
+

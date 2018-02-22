@@ -7,13 +7,20 @@ import { LoginSpinnerOverlay } from './spinner/login-spinner';
 
 import { FileService } from '../services/file-service';
 
+import { Inject, Service } from 'typedi';
+
+@Service()
 export class LoginForm {
   private ctr: HTMLElement;
   private usernameFld: HTMLInputElement;
   private passwordFld: HTMLInputElement;
   private loginButton: HTMLButtonElement;
-  private contentTarService = new ContentTarService();
-  private fileService = new FileService();
+
+  @Inject()
+  private contentTarService:ContentTarService;
+
+  @Inject()
+  private fileService: FileService;
 
   public render(root: HTMLElement | null): void {
     if (root) {
@@ -37,7 +44,7 @@ export class LoginForm {
         spinnerOverlay.show();
 
         
-       this.contentTarService
+       /*this.contentTarService
           .downloadAndExtract(
             //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
             //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
@@ -65,7 +72,9 @@ export class LoginForm {
                  window.location.href = contentDir.toInternalURL() + 'give-www/homeUI_en.html';
               });
             }
-          ); 
+          ); */
+
+          this.contentTarService.testAjax();
       });
      
   }
