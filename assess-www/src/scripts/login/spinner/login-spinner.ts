@@ -1,4 +1,4 @@
-import { BaseOverlay } from '../../overlay/base-overlay';
+import { BaseOverlay } from '@assess/overlay/base-overlay';
 import spinnerTemplate from './login-spinner.html';
 import './login-spinner.scss';
 

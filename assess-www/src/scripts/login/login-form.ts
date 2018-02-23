@@ -2,14 +2,14 @@ import template from "./login-form.html";
 import "./login-form.scss";
 import { startLogin } from "./actions";
 
-import { ContentProgressState } from "../dto/content-download-status";
-import { ContentTarService } from "../services/content-tar-service";
+import { ContentProgressState } from "@assess/dto/content-download-status";
+import { ContentTarService } from "@assess/services/content-tar-service";
 import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
 import { FileService } from "../services/file-service";
 
 import { Inject, Service } from "typedi";
-import { AppContext } from "../app-context";
+import { AppContext } from "@assess/app-context";
 import { LoginStateProvider } from "./reducers/state-provider";
 
 @Service()

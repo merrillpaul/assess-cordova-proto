@@ -1,5 +1,5 @@
-import constants from '../constants';
-import { LoginState } from '../dto/login-state';
+import constants from '@assess/login/constants';
+import { LoginState } from '@assess/login/dto/login-state';
 
 /*
  * state shape

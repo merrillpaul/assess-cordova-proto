@@ -3,7 +3,7 @@
 import config from '@appEnvironment';
 import { Observable, Subject } from 'rxjs';
 
-import { HttpService } from '../shared/http-service';
+import { HttpService } from '@assess/shared/http-service';
 import { Service, Inject } from 'typedi';
 
 @Service()

@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import {
   ContentDownload,
   ContentProgressState,
-} from '../dto/content-download-status';
+} from '@assess/dto/content-download-status';
 import { FileService } from './file-service';
 
 import * as untar from 'js-untar';
