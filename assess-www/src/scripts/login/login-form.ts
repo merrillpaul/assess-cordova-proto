@@ -1,6 +1,6 @@
 import template from "./login-form.html";
 import "./login-form.scss";
-import { startLogin } from "./actions";
+import { invokeLogin } from "./actions";
 
 import { ContentProgressState } from "@assess/dto/content-download-status";
 import { ContentTarService } from "@assess/services/content-tar-service";
@@ -18,6 +18,7 @@ export class LoginForm {
 	private usernameFld: HTMLInputElement;
 	private passwordFld: HTMLInputElement;
 	private loginButton: HTMLButtonElement;
+	private errorArea: HTMLTableCellElement;
 
 	@Inject() private contentTarService: ContentTarService;
 
@@ -40,19 +41,33 @@ export class LoginForm {
 		this.passwordFld = this.ctr.querySelector(
 			'.password-input-area input[name="j_password"]'
 		) as HTMLInputElement;
+		this.errorArea = this.ctr.querySelector('td.error-message-area') as HTMLTableCellElement;
 
 		let spinnerOverlay: LoginSpinnerOverlay;
+
 		this.appContext.getStore().subscribe(() => {
 			const loginState = this.provider.getState();
 			if (loginState.isLoggingIn) {
 				spinnerOverlay = new LoginSpinnerOverlay();
 				spinnerOverlay.show();
+			} else {
+				spinnerOverlay && spinnerOverlay.dispose();
+
+				if(loginState.errors && loginState.errors.length > 0) {
+					this.errorArea.innerHTML = `
+						<ul>
+							${loginState.errors.map (error => {
+								return `<li class="errors">${error}</li>`;
+							}).join('')}
+						</ul>
+					`;
+				}
 			}
 		});
 
 		this.loginButton.addEventListener("click", () => {
 			this.appContext.dispatchAction(
-				startLogin(this.usernameFld.value, this.passwordFld.value)
+				invokeLogin(this.usernameFld.value, this.passwordFld.value)
 			);
 			//spinnerOverlay = new LoginSpinnerOverlay();
 			//spinnerOverlay.show();

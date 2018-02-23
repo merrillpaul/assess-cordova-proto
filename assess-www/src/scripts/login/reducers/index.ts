@@ -6,6 +6,7 @@ import { LoginState } from '@assess/login/dto/login-state';
   {
     isLoggingIn: true/false ( for spinners),
     loggedIn: true/false
+    startedRequest: true/false
     userInfo: {
        userName: 'asa',
        userId: '1000',
@@ -48,6 +49,7 @@ import { LoginState } from '@assess/login/dto/login-state';
 
 const initialState = {   
    isLoggingIn: false,
+   startedRequest: false,
    loggedIn: false,
    userInfo: {},
    errors: []
@@ -56,9 +58,12 @@ const initialState = {
 const login = (state: any = initialState, action: any): LoginState => {
     let newState: any;
     switch(action.type) {
-        case constants.START_LOGIN:
-            newState = {...state, isLoggingIn: true};
+        case constants.LOGIN_REQUEST:
+            newState = {...state, startedRequest: true, isLoggingIn: true}
             break;
+        case constants.LOGIN_FAILURE:
+            newState = {...state, errors: action.errors, isLoggingIn: false}
+            break;    
         default:
             newState = state;
             break;

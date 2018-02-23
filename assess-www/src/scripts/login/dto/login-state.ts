@@ -8,7 +8,8 @@ export interface LoginUserInfo {
 };
 
 export interface LoginState {
-	isLoggingIn: boolean;
+    isLoggingIn: boolean;
+    startedRequest?: boolean;
 	loggedIn: boolean;
 	userInfo?: LoginUserInfo;
 	errors?: string[];
