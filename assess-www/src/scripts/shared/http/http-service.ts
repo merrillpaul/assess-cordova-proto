@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { AxiosInstance } from 'axios';
+
+import { AxiosInstance, default as axios } from 'axios';
 
 import config from '@appEnvironment';
 import { Service } from 'typedi';

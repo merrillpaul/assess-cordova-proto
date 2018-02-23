@@ -1,5 +1,5 @@
 import constants from '@assess/login/constants';
-import { LoginState } from '@assess/login/dto/login-state';
+import { LoginFormState, LoginState } from '@assess/login/dto/login-state';
 
 /*
  * state shape
@@ -48,22 +48,23 @@ import { LoginState } from '@assess/login/dto/login-state';
  */
 
 const initialState = {   
-   isLoggingIn: false,
-   startedRequest: false,
-   loggedIn: false,
-   userInfo: {},
-   errors: []
+    errors: [],
+    loggedIn: false,
+    userInfo: {}   
 };
 
 const login = (state: any = initialState, action: any): LoginState => {
     let newState: any;
     switch(action.type) {
-        case constants.LOGIN_REQUEST:
-            newState = {...state, startedRequest: true, isLoggingIn: true}
+        case constants.LOGIN_REQUEST_PENDING:        
+            newState = {...state, errors: []};
             break;
-        case constants.LOGIN_FAILURE:
-            newState = {...state, errors: action.errors, isLoggingIn: false}
-            break;    
+        case constants.LOGIN_REQUEST_REJECTED:
+            newState = {...state, errors: action.errors};
+            break;
+        case constants.LOGIN_REQUEST_FULFILLED:
+            newState = {...state, errors: [], loggedIn: true, userInfo: action.payload.data.results[0]};
+            break;     
         default:
             newState = state;
             break;
@@ -71,4 +72,34 @@ const login = (state: any = initialState, action: any): LoginState => {
     return newState;
 }
 
-export default login;
+const loginForm = (state: LoginFormState = {
+    fetching: false,
+    passwordInError: false,
+    usernameInError: false    
+}, action: any): LoginFormState => {
+    let newState: LoginFormState;
+    switch(action.type) {
+        case constants.LOGIN_REQUEST_PENDING:
+        case constants.START_LOGIN:
+            newState = {...state, fetching: true, usernameInError: false, passwordInError: false};
+            break;
+        case constants.USERNAME_ERROR:
+            newState = {...state, fetching: false, usernameInError: true};
+            break;
+        case constants.PASSWORD_ERROR:
+            newState = {...state, fetching: false, passwordInError: true};
+            break;
+        case constants.LOGIN_REQUEST_FULFILLED:                   
+        case constants.LOGIN_REQUEST_REJECTED:
+            newState = {...state, fetching: false };    
+            break; 
+        default:
+            newState = state;
+            break;
+    }
+    return newState;
+}
+
+export default {
+    login, loginForm
+};

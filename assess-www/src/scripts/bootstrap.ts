@@ -1,4 +1,4 @@
-import { Container, Service, Inject } from "typedi";
+import { Container, Inject, Service } from "typedi";
 
 import {
 	applyMiddleware,
@@ -7,9 +7,13 @@ import {
 	createStore,
 	Store
 } from "redux";
+
 import logger from "redux-logger";
 import reducers from "./reducers";
+
 import thunk from "redux-thunk";
+
+import promiseMiddleware from "redux-promise-middleware";
 
 import { AppContext } from './app-context';
 import { LoginForm } from './login/login-form';
@@ -42,9 +46,9 @@ export class Bootstrapper {
 					})
 				: compose;
 
-		const _reducers = combineReducers(reducers as any);
-		const enhancer = composeEnhancers(applyMiddleware(thunk, logger));
-		const store: Store<any> = createStore(_reducers, enhancer);
+		const combinedReducers = combineReducers(reducers as any);
+		const enhancer = composeEnhancers(applyMiddleware(thunk, promiseMiddleware(), logger));
+		const store: Store<any> = createStore(combinedReducers, enhancer);
 		Container.get(AppContext).setStore(store);
 	}
 }

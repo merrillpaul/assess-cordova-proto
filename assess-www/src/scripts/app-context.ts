@@ -1,4 +1,5 @@
 import { Service } from 'typedi';
+
 import { Store } from 'redux';
 
 @Service()

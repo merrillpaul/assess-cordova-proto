@@ -6,47 +6,7 @@ import { Service } from 'typedi';
 export class FileService {
 
   private rootDir: DirectoryEntry;
-  /**
-   * Creates the chain of folders within the root folder
-   * @param path path like "/foler1/subfolder2"
-   */
-  public recursiveMkDir(path: string): Promise<DirectoryEntry> {
-    const paths = path.split('/').filter(it => it.length > 0);
-    const p = new Promise<DirectoryEntry>((res, rej) => {
-      this.getRootPath()
-        .then(rootDir => {
-          const prevDir = rootDir;
-
-          const pathIterator = (
-            subPaths: string[],
-            prevRootDir: DirectoryEntry
-          ) => {
-            if (subPaths.length > 0) {
-              prevRootDir.getDirectory(
-                subPaths[0],
-                { create: true },
-                newDir => {
-                  pathIterator(subPaths.slice(1), newDir);
-                },
-                e => {
-                  rej(e);
-                }
-              );
-            } else {
-              res(prevRootDir);
-            }
-          };
-
-          pathIterator(paths, rootDir);
-        })
-        .catch(e => {          
-          rej(e)
-          
-        });
-    });
-    return p;
-  }
-
+  
   /**
    * Makde dirs recursively under a parent dir
    * @param parentDir 
@@ -124,7 +84,7 @@ export class FileService {
       })
       .catch(e => {
         subject.error(e);
-        console.error(parentPath, fileName, e);
+        // console.error(parentPath, fileName, e);
         subject.complete();
       });
     }, 10);

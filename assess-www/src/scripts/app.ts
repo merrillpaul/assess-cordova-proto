@@ -8,7 +8,7 @@ import { Container } from 'typedi';
 import { Bootstrapper } from './bootstrap';
 
 const bootup = () => {
-  console.log('Target endpoint', config.centralEndpoint);
+  // console.log('Target endpoint', config.centralEndpoint);
   Container.get(Bootstrapper).startup();
 };
 

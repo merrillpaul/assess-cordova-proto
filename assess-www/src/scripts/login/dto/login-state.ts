@@ -14,3 +14,9 @@ export interface LoginState {
 	userInfo?: LoginUserInfo;
 	errors?: string[];
 };
+
+export interface LoginFormState {
+    usernameInError: boolean;
+    passwordInError: boolean;
+    fetching: boolean;
+}

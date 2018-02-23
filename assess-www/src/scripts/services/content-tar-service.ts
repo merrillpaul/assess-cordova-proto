@@ -9,7 +9,7 @@ import {
 import { FileService } from './file-service';
 
 import * as untar from 'js-untar';
-import { Service, Inject } from 'typedi';
+import { Inject, Service } from 'typedi';
 
 const CONTENT_ROOT_FOLDER = "/contentRoot/";
 
@@ -21,10 +21,10 @@ export class ContentTarService {
   
   public testAjax() {
     axios.get(`data/test.json?q=${Date.now()}`).then(data => {
-      console.log('Got data', data);
+      // console.log('Got data', data);
       alert(JSON.stringify(data, null, 6));
     }).catch(e => {
-      console.log("Error in ajax", e);
+      // console.log("Error in ajax", e);
     })
   }
 
@@ -41,9 +41,9 @@ export class ContentTarService {
   }
 
   /**
-     * Will download the tar and extract it     * 
-     * @param url 
-     */
+   * Will download the tar and extract it
+   * @param url 
+   */
   public downloadAndExtract(url: string): Observable<ContentDownload> {
     const status = new ContentDownload(url);
     const subject = new Subject<ContentDownload>();
@@ -95,7 +95,7 @@ export class ContentTarService {
           if (files.length > 0) {
             writeFiles(files.pop() as UntarredFile);
           } else {
-            console.log('Processed all files');
+            // console.log('Processed all files');
             status.progress = ContentProgressState.EXTRACTED;
             subject.next(status);
             subject.complete();
@@ -105,10 +105,10 @@ export class ContentTarService {
 
           if (file) {
             const filename = file.name.split('/').pop() as string;
-            console.log(filename, file.name, file.blob.size);
+            // console.log(filename, file.name, file.blob.size);
             status.progress = ContentProgressState.EXTRACTING;
             status.fileCount += 1;
-            //status.addFile(extractedFile.name);
+            // status.addFile(extractedFile.name);
             subject.next(status);
             this.fileService.createFileWithPath(dir, file.name, file.blob).subscribe(fileEntry => {
               /* console.log(
@@ -122,7 +122,7 @@ export class ContentTarService {
             }, e => {
               status.progress = ContentProgressState.ERROR_SAVE_FILE;
               status.error.push(file.name + ": " +e);
-              console.log('Error in untarring/extraction', e, JSON.stringify(e, null, 5));
+              // console.log('Error in untarring/extraction', e, JSON.stringify(e, null, 5));
               subject.next(status);
               nextFile();
             });         
@@ -134,7 +134,7 @@ export class ContentTarService {
       (e: any) => {
         status.progress = ContentProgressState.ERROR_EXTRACTION;
         status.error.push(e);
-        console.log('Error in untarring/extraction', e, JSON.stringify(e, null, 5));
+        // console.log('Error in untarring/extraction', e, JSON.stringify(e, null, 5));
         subject.error(status);
         subject.complete();
       },

@@ -143,7 +143,7 @@ $content-width: 952px;
       &.disabled {
         background-color: $input-color;
         cursor: $cursor-disabled;
-      }
+      }      
     }
   
     .login-name-input-area input,
@@ -154,6 +154,14 @@ $content-width: 952px;
       &.disabled {
         pointer-events: none;
         color: $gray-light;
+      }
+    }
+    .login-name-input-area,
+    .password-input-area {
+      &.error {
+        input {
+          border: 2px solid $btnDestructiveClrEnd;
+        }
       }
     }
   

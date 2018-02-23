@@ -1,10 +1,10 @@
 
 
 import config from '@appEnvironment';
-import { Observable, Subject } from 'rxjs';
 
-import { HttpService } from '@assess/shared/http-service';
-import { Service, Inject } from 'typedi';
+import { Inject, Service } from 'typedi';
+
+import { HttpService } from '@assess/shared/http/http-service';
 
 @Service()
 export class AuthService {
@@ -12,10 +12,8 @@ export class AuthService {
   @Inject()
   private httpService: HttpService;
 
-  public login(username: string, password: string): Observable<any> {
-    const subject = new Subject();
-    //http.getCentralRequest().get()
-    return subject;
+  public login(username: string, password: string): Promise<any> {
+    return this.httpService.getRequest().get('https://randomuser.me/api/');
   }
 }
 

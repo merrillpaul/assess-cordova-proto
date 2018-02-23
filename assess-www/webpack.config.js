@@ -118,13 +118,14 @@ const baseConfig = (env) => {
     devServer: {
       contentBase: path.join(process.cwd(), "dist"),
       clientLogLevel: "info",
-      port: 8080,
+      port: 3000,
       inline: true,
       historyApiFallback: false,
       watchOptions: {
         aggregateTimeout: 300,
         poll: 500
-      }
+      },
+      open: true
     },
   
     devtool: "source-map"

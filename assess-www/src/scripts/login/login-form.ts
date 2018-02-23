@@ -1,16 +1,16 @@
 import template from "./login-form.html";
 import "./login-form.scss";
-import { invokeLogin } from "./actions";
 
+import { AppContext } from "@assess/app-context";
 import { ContentProgressState } from "@assess/dto/content-download-status";
 import { ContentTarService } from "@assess/services/content-tar-service";
+import { FileService } from "@assess/services/file-service";
+import { LoginStateProvider } from "./reducers/state-provider";
 import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
-import { FileService } from "../services/file-service";
-
 import { Inject, Service } from "typedi";
-import { AppContext } from "@assess/app-context";
-import { LoginStateProvider } from "./reducers/state-provider";
+
+import { LoginActionsCreator } from "./actions";
 
 @Service()
 export class LoginForm {
@@ -28,7 +28,12 @@ export class LoginForm {
 
 	@Inject() private provider: LoginStateProvider;
 
+	@Inject() private actionCreator: LoginActionsCreator;
+
+	private loginSpinner: LoginSpinnerOverlay;
+
 	public createComponent(): HTMLElement {
+
 		this.ctr = document.createElement("div");
 		this.ctr.setAttribute("class", "login-ctr");
 		this.ctr.innerHTML = template;
@@ -43,34 +48,18 @@ export class LoginForm {
 		) as HTMLInputElement;
 		this.errorArea = this.ctr.querySelector('td.error-message-area') as HTMLTableCellElement;
 
-		let spinnerOverlay: LoginSpinnerOverlay;
 
-		this.appContext.getStore().subscribe(() => {
-			const loginState = this.provider.getState();
-			if (loginState.isLoggingIn) {
-				spinnerOverlay = new LoginSpinnerOverlay();
-				spinnerOverlay.show();
-			} else {
-				spinnerOverlay && spinnerOverlay.dispose();
+		this.loginSpinner = new LoginSpinnerOverlay();
 
-				if(loginState.errors && loginState.errors.length > 0) {
-					this.errorArea.innerHTML = `
-						<ul>
-							${loginState.errors.map (error => {
-								return `<li class="errors">${error}</li>`;
-							}).join('')}
-						</ul>
-					`;
-				}
-			}
-		});
+
+		this.initEvents();
 
 		this.loginButton.addEventListener("click", () => {
 			this.appContext.dispatchAction(
-				invokeLogin(this.usernameFld.value, this.passwordFld.value)
+				this.actionCreator.invokeLogin(this.usernameFld.value, this.passwordFld.value)
 			);
-			//spinnerOverlay = new LoginSpinnerOverlay();
-			//spinnerOverlay.show();
+			// spinnerOverlay = new LoginSpinnerOverlay();
+			// spinnerOverlay.show();
 
 			/*this.contentTarService
           .downloadAndExtract(
@@ -102,12 +91,59 @@ export class LoginForm {
             }
           ); */
 
-			//this.contentTarService.testAjax();
-    });
-    return this.ctr;
+			// this.contentTarService.testAjax();
+    	});
+    	return this.ctr;
 	}
 
 	public dispose(): void {
 		this.ctr.remove();
+	}
+
+	private initEvents() {
+		this.provider.onFetching().subscribe (change => {
+			if (change.newVal) {
+				this.errorArea.innerHTML = "";
+			}
+		});
+
+		this.provider.onFetching().subscribe((change) => {			
+			if (change.newVal) {
+				this.loginSpinner.show();
+			} else if (this.loginSpinner) {
+				this.loginSpinner.dispose();					   
+			}
+		});
+
+		this.provider.onLoginErrors().subscribe(change => {
+			const errors = change.newVal;
+			if(errors && errors.length > 0) {
+				this.errorArea.innerHTML = `
+					<ul>
+						${errors.map (error => {
+							return `<li class="errors">${error}</li>`;
+						}).join('')}
+					</ul>
+				`;
+			}
+		});
+
+		this.provider.onChange('loginForm', 'usernameInError').subscribe(change => {
+			const parentElement = this.usernameFld.parentElement;
+			if (change.newVal) {
+				parentElement.classList.add('error')
+			} else {
+				parentElement.classList.remove('error');
+			}			
+		});
+
+		this.provider.onChange('loginForm', 'passwordInError').subscribe(change => {
+			const parentElement = this.passwordFld.parentElement;
+			if (change.newVal) {
+				parentElement.classList.add('error');
+			} else {
+				parentElement.classList.remove('error');
+			}			
+		});
 	}
 }
