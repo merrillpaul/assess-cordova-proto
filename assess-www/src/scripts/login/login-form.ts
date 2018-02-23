@@ -1,50 +1,63 @@
-import template from './login-form.html';
-import './login-form.scss';
+import template from "./login-form.html";
+import "./login-form.scss";
+import { startLogin } from "./actions";
 
-import { ContentProgressState } from '../dto/content-download-status';
-import { ContentTarService } from '../services/content-tar-service';
-import { LoginSpinnerOverlay } from './spinner/login-spinner';
+import { ContentProgressState } from "../dto/content-download-status";
+import { ContentTarService } from "../services/content-tar-service";
+import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
-import { FileService } from '../services/file-service';
+import { FileService } from "../services/file-service";
 
-import { Inject, Service } from 'typedi';
+import { Inject, Service } from "typedi";
+import { AppContext } from "../app-context";
+import { LoginStateProvider } from "./reducers/state-provider";
 
 @Service()
 export class LoginForm {
-  private ctr: HTMLElement;
-  private usernameFld: HTMLInputElement;
-  private passwordFld: HTMLInputElement;
-  private loginButton: HTMLButtonElement;
+	private ctr: HTMLElement;
+	private usernameFld: HTMLInputElement;
+	private passwordFld: HTMLInputElement;
+	private loginButton: HTMLButtonElement;
 
-  @Inject()
-  private contentTarService:ContentTarService;
+	@Inject() private contentTarService: ContentTarService;
 
-  @Inject()
-  private fileService: FileService;
+	@Inject() private fileService: FileService;
 
-  public render(root: HTMLElement | null): void {
-    if (root) {
-      this.ctr = document.createElement('div');
-      this.ctr.setAttribute('class', 'login-ctr');
-      this.ctr.innerHTML = template;
-      root.appendChild(this.ctr);
-      this.loginButton = this.ctr.querySelector(
-        '#login-button'
-      ) as HTMLButtonElement;
-      this.usernameFld = this.ctr.querySelector(
-        '.login-name-input-area input[name="j_username"]'
-      ) as HTMLInputElement;
-      this.passwordFld = this.ctr.querySelector(
-        '.password-input-area input[name="j_password"]'
-      ) as HTMLInputElement;
+	@Inject() private appContext: AppContext;
 
-      let spinnerOverlay: LoginSpinnerOverlay;
-      this.loginButton.addEventListener('click', () => {
-        spinnerOverlay = new LoginSpinnerOverlay();
-        spinnerOverlay.show();
+	@Inject() private provider: LoginStateProvider;
 
-        
-       /*this.contentTarService
+	public createComponent(): HTMLElement {
+		this.ctr = document.createElement("div");
+		this.ctr.setAttribute("class", "login-ctr");
+		this.ctr.innerHTML = template;
+		this.loginButton = this.ctr.querySelector(
+			"#login-button"
+		) as HTMLButtonElement;
+		this.usernameFld = this.ctr.querySelector(
+			'.login-name-input-area input[name="j_username"]'
+		) as HTMLInputElement;
+		this.passwordFld = this.ctr.querySelector(
+			'.password-input-area input[name="j_password"]'
+		) as HTMLInputElement;
+
+		let spinnerOverlay: LoginSpinnerOverlay;
+		this.appContext.getStore().subscribe(() => {
+			const loginState = this.provider.getState();
+			if (loginState.isLoggingIn) {
+				spinnerOverlay = new LoginSpinnerOverlay();
+				spinnerOverlay.show();
+			}
+		});
+
+		this.loginButton.addEventListener("click", () => {
+			this.appContext.dispatchAction(
+				startLogin(this.usernameFld.value, this.passwordFld.value)
+			);
+			//spinnerOverlay = new LoginSpinnerOverlay();
+			//spinnerOverlay.show();
+
+			/*this.contentTarService
           .downloadAndExtract(
             //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
             //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
@@ -74,13 +87,12 @@ export class LoginForm {
             }
           ); */
 
-          this.contentTarService.testAjax();
-      });
-     
-  }
-  }
+			//this.contentTarService.testAjax();
+    });
+    return this.ctr;
+	}
 
-  public dispose(): void {
-    this.ctr.remove();
-  }
+	public dispose(): void {
+		this.ctr.remove();
+	}
 }

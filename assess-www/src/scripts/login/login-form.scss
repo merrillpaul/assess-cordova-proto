@@ -4,9 +4,8 @@
 
 $content-width: 952px;
 
-#login-area {
-  height: 100%;
-  .q-interactive-login-area {
+
+.q-interactive-login-area {
     height: 630px;
     width: $content-width;
     margin: 0;
@@ -314,4 +313,3 @@ $content-width: 952px;
       line-height: 18px;
     }
   }
-}

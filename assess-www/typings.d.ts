@@ -18,6 +18,7 @@ interface UntarredFile {
 	blob: Blob;
 }
 
+
 interface Window {
 	/**
      * Requests a filesystem in which to store application data.
@@ -32,4 +33,6 @@ interface Window {
 		successCallback: (fileSystem: FileSystem) => void,
 		errorCallback?: (fileError: FileError) => void
 	): void;
+
+   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
 }

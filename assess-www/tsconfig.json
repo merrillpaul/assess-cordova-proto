@@ -3,7 +3,7 @@
     "module": "commonjs",
     "target": "es5",
     "importHelpers": true,
-    "strict": true,
+    "strict": false,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
