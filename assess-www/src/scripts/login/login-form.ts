@@ -5,6 +5,7 @@ import { AppContext } from "@assess/app-context";
 import { ContentProgressState } from "@assess/dto/content-download-status";
 import { ContentTarService } from "@assess/services/content-tar-service";
 import { FileService } from "@assess/services/file-service";
+import { BaseComponent } from '@assess/shared/component/base-component';
 import { LoginStateProvider } from "./reducers/state-provider";
 import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
@@ -13,8 +14,7 @@ import { Inject, Service } from "typedi";
 import { startLogin } from "./actions";
 
 @Service()
-export class LoginForm {
-	private ctr: HTMLElement;
+export class LoginForm extends BaseComponent {
 	private usernameFld: HTMLInputElement;
 	private passwordFld: HTMLInputElement;
 	private loginButton: HTMLButtonElement;
@@ -24,36 +24,27 @@ export class LoginForm {
 
 	@Inject() private fileService: FileService;
 
-	@Inject() private appContext: AppContext;
-
 	@Inject() private provider: LoginStateProvider;
 
 	private loginSpinner: LoginSpinnerOverlay;
 
-	public createComponent(): HTMLElement {
-
-		this.ctr = document.createElement("div");
-		this.ctr.setAttribute("class", "login-ctr");
-		this.ctr.innerHTML = template;
-		this.loginButton = this.ctr.querySelector(
+	protected prepareComponent(rootContainer: HTMLDivElement): void {
+		rootContainer.setAttribute("class", "login-ctr");
+		rootContainer.innerHTML = template;
+		this.loginButton = rootContainer.querySelector(
 			"#login-button"
 		) as HTMLButtonElement;
-		this.usernameFld = this.ctr.querySelector(
+		this.usernameFld = rootContainer.querySelector(
 			'.login-name-input-area input[name="j_username"]'
 		) as HTMLInputElement;
-		this.passwordFld = this.ctr.querySelector(
+		this.passwordFld = rootContainer.querySelector(
 			'.password-input-area input[name="j_password"]'
 		) as HTMLInputElement;
-		this.errorArea = this.ctr.querySelector('td.error-message-area') as HTMLTableCellElement;
-
-
+		this.errorArea = rootContainer.querySelector('td.error-message-area') as HTMLTableCellElement;
 		this.loginSpinner = new LoginSpinnerOverlay();
 
-
-		this.initEvents();
-
 		this.loginButton.addEventListener("click", () => {
-			this.appContext.dispatchAction(
+			this.dispatchAction(
 				startLogin(this.usernameFld.value, this.passwordFld.value)
 			);
 			// spinnerOverlay = new LoginSpinnerOverlay();
@@ -91,14 +82,9 @@ export class LoginForm {
 
 			// this.contentTarService.testAjax();
     	});
-    	return this.ctr;
 	}
 
-	public dispose(): void {
-		this.ctr.remove();
-	}
-
-	private initEvents() {
+	protected initEvents(rootContainer: HTMLDivElement) {
 		this.provider.onFetching().subscribe (change => {
 			if (change.newVal) {
 				this.errorArea.innerHTML = "";

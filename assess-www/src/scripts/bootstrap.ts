@@ -5,7 +5,8 @@ import {
 	combineReducers,
 	compose,
 	createStore,
-	Store
+	Dispatch,
+	Store	
 } from "redux";
 import {default as createSagaMiddleware, SagaIterator} from 'redux-saga';
 
@@ -15,6 +16,8 @@ import { rootSaga } from './sagas';
 
 import promiseMiddleware from "redux-promise-middleware";
 
+import { BootstrapStateProvider } from '@assess/shared/state/bootstrap-state-provider';
+import { STARTUP_ACTIONS } from './app-constants';
 import { AppContext } from './app-context';
 import { LoginForm } from './login/login-form';
 
@@ -24,7 +27,12 @@ export class Bootstrapper {
     private appArea: HTMLElement;
 
     @Inject()
-    private loginForm: LoginForm;
+	private loginForm: LoginForm;
+
+	@Inject()
+	private stateProvider: BootstrapStateProvider;
+	
+	private dispatch: Dispatch<any>;
 
     constructor() {
         this.setupRedux();
@@ -32,8 +40,9 @@ export class Bootstrapper {
     }    
 
     public startup(): void {
-       this.appArea.innerHTML = '';
-       this.appArea.appendChild(this.loginForm.createComponent());
+	   this.appArea.innerHTML = '';
+	   this.initEvents();
+	   this.dispatch({type: STARTUP_ACTIONS.BOOTSTRAP});
     }
 
 	private setupRedux() {
@@ -52,5 +61,25 @@ export class Bootstrapper {
 		const store: Store<any> = createStore(combinedReducers, enhancer);
 		sagaMiddleware.run(rootSaga);
 		Container.get(AppContext).setStore(store);
+		this.dispatch = store.dispatch;
+		
+		
+	}
+
+	private initEvents() {
+		this.stateProvider.onTargetPage().subscribe(change => {
+			switch(change.newVal) {
+				case STARTUP_ACTIONS.SHOW_LOGIN :
+						this.addComponent(this.loginForm.createContainer());
+						break;
+					default:
+						break;
+			}
+		});
+	}
+
+	private addComponent(component: HTMLElement): void {
+		this.appArea.innerHTML = '';
+		this.appArea.appendChild(component);
 	}
 }
