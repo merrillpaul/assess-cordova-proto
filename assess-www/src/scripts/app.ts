@@ -1,19 +1,19 @@
 import "reflect-metadata";
 
-import '../styles/base.scss';
+import "../styles/base.scss";
 
-import config from '@appEnvironment';
+import config from "@appEnvironment";
 
-import { Container } from 'typedi';
-import { Bootstrapper } from './bootstrap';
+import { Container } from "typedi";
+import { Bootstrapper } from "./bootstrap";
 
 const bootup = () => {
-  // console.log('Target endpoint', config.centralEndpoint);
-  Container.get(Bootstrapper).startup();
+	// console.log('Target endpoint', config.centralEndpoint);
+	Container.get(Bootstrapper).startup();
 };
 
 if (window.cordova) {
-  document.addEventListener('deviceready', bootup, false);
+	document.addEventListener("deviceready", bootup, false);
 } else {
-  document.addEventListener('DOMContentLoaded', bootup);
+	document.addEventListener("DOMContentLoaded", bootup);
 }
