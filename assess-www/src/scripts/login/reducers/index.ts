@@ -57,7 +57,7 @@ const login = (state: any = initialState, action: any): LoginState => {
     let newState: any;
     switch(action.type) {
         case constants.LOGIN_REQUEST_PENDING:        
-            newState = {...state, errors: []};
+            newState = {...state, errors: [], loggedIn: false, userInfo: {}};
             break;
         case constants.LOGIN_REQUEST_REJECTED:
             newState = {...state, errors: action.errors};

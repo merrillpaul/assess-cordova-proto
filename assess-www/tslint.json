@@ -4,6 +4,6 @@
     "tslint-config-prettier"
   ],
   "rules": {
-    "no-submodule-imports": [true, "@assess"]
+    "no-submodule-imports": [true, "@assess", "redux-saga"]
   }  
 }

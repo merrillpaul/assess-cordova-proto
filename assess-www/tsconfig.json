@@ -5,6 +5,12 @@
     "importHelpers": true,
     "strict": false,
     "sourceMap": true,
+    "lib": [
+      "es5",
+      "dom.iterable",
+      "es2015.iterable",
+      "scripthost"
+    ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "baseUrl":  "./",

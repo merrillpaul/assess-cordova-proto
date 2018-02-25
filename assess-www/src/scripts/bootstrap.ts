@@ -7,11 +7,11 @@ import {
 	createStore,
 	Store
 } from "redux";
+import {default as createSagaMiddleware, SagaIterator} from 'redux-saga';
 
 import logger from "redux-logger";
 import reducers from "./reducers";
-
-import thunk from "redux-thunk";
+import { rootSaga } from './sagas';
 
 import promiseMiddleware from "redux-promise-middleware";
 
@@ -47,8 +47,10 @@ export class Bootstrapper {
 				: compose;
 
 		const combinedReducers = combineReducers(reducers as any);
-		const enhancer = composeEnhancers(applyMiddleware(thunk, promiseMiddleware(), logger));
+		const sagaMiddleware = createSagaMiddleware();
+		const enhancer = composeEnhancers(applyMiddleware(sagaMiddleware, promiseMiddleware(), logger));
 		const store: Store<any> = createStore(combinedReducers, enhancer);
+		sagaMiddleware.run(rootSaga);
 		Container.get(AppContext).setStore(store);
 	}
 }

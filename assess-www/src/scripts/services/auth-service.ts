@@ -13,6 +13,7 @@ export class AuthService {
   private httpService: HttpService;
 
   public login(username: string, password: string): Promise<any> {
+    // console.log('AuthService.login', username, password);
     return this.httpService.getRequest().get('https://randomuser.me/api/');
   }
 }

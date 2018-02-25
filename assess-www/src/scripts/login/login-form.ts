@@ -10,7 +10,7 @@ import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
 import { Inject, Service } from "typedi";
 
-import { LoginActionsCreator } from "./actions";
+import { startLogin } from "./actions";
 
 @Service()
 export class LoginForm {
@@ -27,8 +27,6 @@ export class LoginForm {
 	@Inject() private appContext: AppContext;
 
 	@Inject() private provider: LoginStateProvider;
-
-	@Inject() private actionCreator: LoginActionsCreator;
 
 	private loginSpinner: LoginSpinnerOverlay;
 
@@ -56,7 +54,7 @@ export class LoginForm {
 
 		this.loginButton.addEventListener("click", () => {
 			this.appContext.dispatchAction(
-				this.actionCreator.invokeLogin(this.usernameFld.value, this.passwordFld.value)
+				startLogin(this.usernameFld.value, this.passwordFld.value)
 			);
 			// spinnerOverlay = new LoginSpinnerOverlay();
 			// spinnerOverlay.show();
