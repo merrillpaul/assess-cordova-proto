@@ -66,6 +66,9 @@ export class Bootstrapper {
 	private initEvents() {
 		this.stateProvider.onTargetPage().subscribe(change => {
 			switch (change.newVal) {
+				case STARTUP_ACTIONS.BOOTSTRAP:
+					this.appArea.innerHTML = "";
+					break;
 				case STARTUP_ACTIONS.SHOW_LOGIN:
 					this.addComponent(this.loginForm.createContainer());
 					break;

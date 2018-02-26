@@ -12,7 +12,7 @@ const startup = (state: any = initialState, action: any) => {
 	let newState: any;
 	switch (action.type) {
 		case STARTUP_ACTIONS.BOOTSTRAP:
-			newState = { ...state, started: true };
+			newState = { ...state, started: true, targetPage: STARTUP_ACTIONS.BOOTSTRAP };
 			break;
 		case STARTUP_ACTIONS.SHOW_LOGIN:
 			newState = { ...state, targetPage: STARTUP_ACTIONS.SHOW_LOGIN };
