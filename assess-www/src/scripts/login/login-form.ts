@@ -6,6 +6,7 @@ import { ContentProgressState } from "@assess/dto/content-download-status";
 import { ContentTarService } from "@assess/services/content-tar-service";
 import { FileService } from "@assess/services/file-service";
 import { BaseComponent } from '@assess/shared/component/base-component';
+import { El } from '@assess/shared/component/element';
 import { LoginStateProvider } from "./reducers/state-provider";
 import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
@@ -15,9 +16,17 @@ import { startLogin } from "./actions";
 
 @Service()
 export class LoginForm extends BaseComponent {
+
+	@El('.login-name-input-area input[name="j_username"]')
 	private usernameFld: HTMLInputElement;
+	
+	@El('.password-input-area input[name="j_password"]')
 	private passwordFld: HTMLInputElement;
+	
+	@El('#login-button')
 	private loginButton: HTMLButtonElement;
+	
+	@El('td.error-message-area')
 	private errorArea: HTMLTableCellElement;
 
 	@Inject() private contentTarService: ContentTarService;
@@ -31,7 +40,7 @@ export class LoginForm extends BaseComponent {
 	protected prepareComponent(rootContainer: HTMLDivElement): void {
 		rootContainer.setAttribute("class", "login-ctr");
 		rootContainer.innerHTML = template;
-		this.loginButton = rootContainer.querySelector(
+		/*this.loginButton = rootContainer.querySelector(
 			"#login-button"
 		) as HTMLButtonElement;
 		this.usernameFld = rootContainer.querySelector(
@@ -40,17 +49,15 @@ export class LoginForm extends BaseComponent {
 		this.passwordFld = rootContainer.querySelector(
 			'.password-input-area input[name="j_password"]'
 		) as HTMLInputElement;
-		this.errorArea = rootContainer.querySelector('td.error-message-area') as HTMLTableCellElement;
+		this.errorArea = rootContainer.querySelector('td.error-message-area') as HTMLTableCellElement;*/
 		this.loginSpinner = new LoginSpinnerOverlay();
-
+		/*
 		this.loginButton.addEventListener("click", () => {
-			this.dispatchAction(
-				startLogin(this.usernameFld.value, this.passwordFld.value)
-			);
+			
 			// spinnerOverlay = new LoginSpinnerOverlay();
 			// spinnerOverlay.show();
 
-			/*this.contentTarService
+			this.contentTarService
           .downloadAndExtract(
             //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
             //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
@@ -78,13 +85,20 @@ export class LoginForm extends BaseComponent {
                  window.location.href = contentDir.toInternalURL() + 'give-www/homeUI_en.html';
               });
             }
-          ); */
+          ); 
 
 			// this.contentTarService.testAjax();
-    	});
+    	});*/
 	}
 
 	protected initEvents(rootContainer: HTMLDivElement) {
+
+		this.loginButton.addEventListener("click", () => {
+			this.dispatchAction(
+				startLogin(this.usernameFld.value, this.passwordFld.value)
+			);
+		});
+
 		this.provider.onFetching().subscribe (change => {
 			if (change.newVal) {
 				this.errorArea.innerHTML = "";

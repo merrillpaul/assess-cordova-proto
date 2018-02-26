@@ -15,7 +15,8 @@ export class HttpService {
     constructor() {
         this.centralRequest = axios.create({
           baseURL: config.centralEndpoint,
-          headers: HEADERS
+          headers: HEADERS,
+          withCredentials: true
         });
     }
 
