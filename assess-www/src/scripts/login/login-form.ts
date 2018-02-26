@@ -40,16 +40,6 @@ export class LoginForm extends BaseComponent {
 	protected prepareComponent(rootContainer: HTMLDivElement): void {
 		rootContainer.setAttribute("class", "login-ctr");
 		rootContainer.innerHTML = template;
-		/*this.loginButton = rootContainer.querySelector(
-			"#login-button"
-		) as HTMLButtonElement;
-		this.usernameFld = rootContainer.querySelector(
-			'.login-name-input-area input[name="j_username"]'
-		) as HTMLInputElement;
-		this.passwordFld = rootContainer.querySelector(
-			'.password-input-area input[name="j_password"]'
-		) as HTMLInputElement;
-		this.errorArea = rootContainer.querySelector('td.error-message-area') as HTMLTableCellElement;*/
 		this.loginSpinner = new LoginSpinnerOverlay();
 		/*
 		this.loginButton.addEventListener("click", () => {
