@@ -1,6 +1,7 @@
 import { Config } from '../scripts/config-type';
+import { BaseConfig } from './base-config';
 
-const CONFIG: Config = {
+const CONFIG: Config = {...BaseConfig,
   centralEndpoint: 'https://beta1.qiactive.com/choose-share',
 };
 

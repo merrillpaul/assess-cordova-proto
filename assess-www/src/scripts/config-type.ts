@@ -1,3 +1,5 @@
 export interface Config {
-  centralEndpoint: string;
+  centralEndpoint?: string;
+  config?: string;
+  branch?: string;
 }
