@@ -1,7 +1,6 @@
 import { Container, Inject, Service } from "typedi";
 
 import { startContentDownload } from '@assess/content/actions';
-import { ContentQuerySpinnerOverlay } from '@assess/content/component/content-query-spinner';
 import constants from '@assess/content/constants';
 import { IContentQueryState, QueryVersionStatus } from '@assess/content/dto';
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
@@ -12,6 +11,7 @@ import { apply, call, put } from 'redux-saga/effects';
 
 import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
 import { ContentUtilsService } from '@assess/content/service/content-utils-service';
+import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
 
 
 @Service()
@@ -31,6 +31,9 @@ export class ContentDownloadSaga {
     
     @Inject()
     private provider: ContentStateProvider;
+
+    @Inject()
+    private spinner: LoginSpinnerOverlay;
 
     /**
      * Kick starts our saga. First gets the version hashes
@@ -52,17 +55,16 @@ export class ContentDownloadSaga {
      */
     public *startQueryVersionSaga(action: any): IterableIterator<any> {
         // then call queryVersion
-        const spinner = new ContentQuerySpinnerOverlay();
-        yield apply(spinner, spinner.show);
+        yield call([this.spinner, this.spinner.updateMessage], 'Please wait a moment while Assess gets any new content')
         yield put({type: constants.QUERY_VERSION_PENDING});
         try {
             const queryVersionResult = yield call([this.queryContentService, this.queryContentService.queryVersion], action.payload);
-            yield apply(spinner, spinner.dispose);
+            yield apply(this.spinner, this.spinner.dispose);
             yield put({type: constants.QUERY_VERSION_FULFILLED, queryVersionResult});
 
         } catch(error) {
             yield put({type: constants.QUERY_VERSION_REJECTED, error});
-            yield apply(spinner, spinner.dispose);  
+            yield apply(this.spinner, this.spinner.dispose);  
             yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, error});
                     
         }

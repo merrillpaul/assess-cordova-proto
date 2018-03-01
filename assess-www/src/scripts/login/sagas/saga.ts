@@ -1,15 +1,20 @@
 import { invalidPassword, invalidUsername } from '@assess/login/actions';
 import constants from '@assess/login/constants';
+import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
 import { AuthService } from '@assess/services/auth-service';
 import { Container, Inject, Service } from 'typedi';
 
 import { call, put } from 'redux-saga/effects';
+
 
 @Service()
 export class LoginSaga {
 
     @Inject()
     private authService: AuthService;
+
+    @Inject()
+    private loginSpinner: LoginSpinnerOverlay;
 
     /**
      * Generator that kick starts the login process
@@ -42,6 +47,7 @@ export class LoginSaga {
         yield put.resolve({type: constants.LOGIN_REQUEST, payload: this.authService.login(action.username, action.password)});
         } catch (error) {
             yield put({ type: constants.LOGIN_REQUEST_REJECTED, error});
+            this.loginSpinner.dispose();
         }
         yield put({type: constants.LOGIN_REQUEST_COMPLETED});
     }

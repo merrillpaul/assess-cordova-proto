@@ -36,12 +36,12 @@ export class LoginForm extends BaseComponent {
 
 	@Inject() private provider: LoginStateProvider;
 
+	@Inject()
 	private loginSpinner: LoginSpinnerOverlay;
 
 	protected prepareComponent(rootContainer: HTMLDivElement): void {
 		rootContainer.setAttribute("class", "login-ctr");
-		rootContainer.innerHTML = template;
-		this.loginSpinner = new LoginSpinnerOverlay();
+		rootContainer.innerHTML = template;		
 		/*
 		this.loginButton.addEventListener("click", () => {
 			
@@ -99,9 +99,7 @@ export class LoginForm extends BaseComponent {
 		this.provider.onFetching().subscribe((change) => {			
 			if (change.newVal) {
 				this.loginSpinner.show();
-			} else if (this.loginSpinner) {
-				this.loginSpinner.dispose();					   
-			}
+			} 
 		});
 
 		this.provider.onLoginErrors().subscribe(change => {
