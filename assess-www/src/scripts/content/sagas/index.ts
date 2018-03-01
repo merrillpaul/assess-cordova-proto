@@ -3,7 +3,7 @@ import loginConstants from '@assess/login/constants';
 import constants from '../constants';
 import { ContentDownloadSaga } from './content-download-saga';
 
-import { all, takeEvery } from 'redux-saga/effects';
+import { all, takeLatest } from 'redux-saga/effects';
 import { Container } from 'typedi';
 
 function getDownloadSaga() {
@@ -13,22 +13,27 @@ function getDownloadSaga() {
 function* startSaga() {
     // we listen for successful logins
     const contentDownloadSaga = getDownloadSaga();
-    yield takeEvery(loginConstants.LOGIN_REQUEST_FULFILLED, contentDownloadSaga.startSaga.bind(contentDownloadSaga));   
+    yield takeLatest(loginConstants.LOGIN_REQUEST_FULFILLED, contentDownloadSaga.startSaga.bind(contentDownloadSaga));   
 }
 
 function* startQueryVersionSaga() {
     // we start the query versions once we get the versions
     const contentDownloadSaga = getDownloadSaga();
-    yield takeEvery(constants.GET_HASHES_FULFILLED, contentDownloadSaga.startQueryVersionSaga.bind(contentDownloadSaga));   
+    yield takeLatest(constants.GET_HASHES_FULFILLED, contentDownloadSaga.startQueryVersionSaga.bind(contentDownloadSaga));   
 }
 
 function* startPostQueryVersion() {
     // we start the query versions once we get the versions
     const contentDownloadSaga = getDownloadSaga();
-    yield takeEvery(constants.QUERY_VERSION_COMPLETED, contentDownloadSaga.startPostQueryVersion.bind(contentDownloadSaga));   
+    yield takeLatest(constants.QUERY_VERSION_COMPLETED, contentDownloadSaga.startPostQueryVersion.bind(contentDownloadSaga));   
 }
 
+function* startDownloadTars() {
+     // we start the query versions once we get the versions
+     const contentDownloadSaga = getDownloadSaga();
+     yield takeLatest(constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentDownloadSaga.startDownloadTars.bind(contentDownloadSaga));   
+}
 
 export default function* contentRootSaga() {
-    yield all([startSaga(), startQueryVersionSaga(), startPostQueryVersion()]);
+    yield all([startSaga(), startQueryVersionSaga(), startPostQueryVersion(), startDownloadTars()]);
 } 

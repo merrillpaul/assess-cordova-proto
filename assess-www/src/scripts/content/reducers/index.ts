@@ -1,5 +1,5 @@
 import constants from '../constants';
-import { IContentQueryState, QueryVersionStatus } from '../dto';
+import { IContentQueryState, ITarDownloadState, NewContentVersion, QueryVersionStatus } from '../dto';
 
 const initialState: IContentQueryState = {
     contentQueryStatus: QueryVersionStatus.NONE,
@@ -8,7 +8,7 @@ const initialState: IContentQueryState = {
 
 
 const queryContent = (state: IContentQueryState = initialState, action: any): IContentQueryState => {
-    let newState: any;
+    let newState: IContentQueryState;
     switch(action.type) {  
 
         case constants.GET_HASHES_REJECTED:
@@ -26,6 +26,44 @@ const queryContent = (state: IContentQueryState = initialState, action: any): IC
         case constants.CONTENT_DOWNLOAD_SAGA_STARTED:    
             newState = {...initialState, contentQueryStatus: QueryVersionStatus.STARTED};
             break;
+
+        case constants.CONTENT_DOWNLOAD_TAR_SAGA_FINISHED:
+            newState = {...state, downloadsNeeded: []}
+            // cleanup to reclaim memory
+            break;    
+        default:
+            newState = state;
+            break;
+    }
+    return newState;
+};
+
+
+const tarsDownloadedInitialState: ITarDownloadState = {
+    completedDownloads: [],
+    downloadedSize: '',
+    pendingDownloads: [],    
+    totalSize: '',
+    versionsTotal: 0
+}
+
+
+const tarsDownloaded = (state: ITarDownloadState = tarsDownloadedInitialState, action: any): ITarDownloadState => {
+    let newState: ITarDownloadState;
+    switch(action.type) {
+
+        case constants.CONTENT_DOWNLOAD_TAR_SAGA_START:
+            const downloadsNeeded: NewContentVersion[]  = action.contentQueryResult.downloadsNeeded;
+            newState = {...tarsDownloadedInitialState, completedDownloads: [], pendingDownloads: downloadsNeeded, 
+                downloadedSize: '0KB', totalSize: action.totalSizeInText, versionsTotal: downloadsNeeded.length};
+            break;
+        case constants.CONTENT_DOWNLOAD_TAR_FINISHED:
+            const version = action.currentVersion;
+            const completedDownloads = state.completedDownloads.map (it => it);
+            completedDownloads.push(version);
+            const pendingDownloads = state.pendingDownloads.filter (it => it !== version);
+            newState = {...state, downloadedSize: action.downloadedSize, completedDownloads, pendingDownloads };
+            break;
         default:
             newState = state;
             break;
@@ -34,5 +72,5 @@ const queryContent = (state: IContentQueryState = initialState, action: any): IC
 };
 
 export default {
-    queryContent
+    queryContent, tarsDownloaded
 };

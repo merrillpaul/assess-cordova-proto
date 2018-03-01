@@ -8,3 +8,11 @@ export interface IContentQueryState {
     downloadsNeeded: NewContentVersion[];
     extractedHashes?: any;
 }
+
+export interface ITarDownloadState {
+    pendingDownloads: NewContentVersion[];
+    completedDownloads: NewContentVersion[];
+    totalSize: string;
+    downloadedSize: string;
+    versionsTotal: number;
+}
