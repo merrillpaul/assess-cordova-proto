@@ -5,6 +5,6 @@ import constants from '@assess/content/constants';
 */
 export const startContentDownload = () => {
     return {
-        type: constants.CONTENT_DOWNLOAD_STARTED
+        type: constants.CONTENT_DOWNLOAD_SAGA_STARTED
     };
 };

@@ -23,7 +23,7 @@ const queryContent = (state: IContentQueryState = initialState, action: any): IC
             newState = {...state, ...action.queryVersionResult};
             break;
 
-        case constants.CONTENT_DOWNLOAD_STARTED:    
+        case constants.CONTENT_DOWNLOAD_SAGA_STARTED:    
             newState = {...initialState, contentQueryStatus: QueryVersionStatus.STARTED};
             break;
         default:

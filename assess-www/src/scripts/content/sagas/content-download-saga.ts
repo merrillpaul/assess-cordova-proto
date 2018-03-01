@@ -62,8 +62,9 @@ export class ContentDownloadSaga {
 
         } catch(error) {
             yield put({type: constants.QUERY_VERSION_REJECTED, error});
-            yield apply(spinner, spinner.dispose);
-            // TODO show error
+            yield apply(spinner, spinner.dispose);  
+            yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, error});
+                    
         }
         yield put({type: constants.QUERY_VERSION_COMPLETED});
     }
@@ -78,12 +79,28 @@ export class ContentDownloadSaga {
         switch(contentQueryResult.contentQueryStatus) {
 
             case QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS:
-                // const dialogResult = yield apply(this.versionPrompt, this.versionPrompt.showPrompt, [contentQueryResult.downloadsNeeded]);
-                // console.log('dialog Result', dialogResult);
+                try {
+                    yield call([this.contentUtilService, this.contentUtilService.recreateTarExtractTmpDir]);
+                    const canLaunchAssess = yield apply(this.contentUtilService, this.contentUtilService.canLaunchAssess);
+                    // we ask for prompt
+                    if ( canLaunchAssess ) {
+                        const dialogResult = yield apply(this.versionPrompt, this.versionPrompt.showPrompt, [contentQueryResult.downloadsNeeded]);
+                        if (dialogResult === 'yes') {
+                            yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult});
+                        } else {
+                            yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, contentQueryResult});
+                        }
+                    } else {
+                        yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult});
+                    }
+                } catch(error) {
+                    yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, error});
+                }
+
             break;
 
             default:
-                yield put({type: constants.CONTENT_DOWNLOAD_FINISHED, contentQueryResult});
+                yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, contentQueryResult});
                 break;
         }
     }

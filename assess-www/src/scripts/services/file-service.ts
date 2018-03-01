@@ -175,7 +175,7 @@ export class FileService {
 
     const p = new Promise<string>((res, rej) => {
       // we are mocking the extractedHashes for normal browser
-      if (this.appContext.withinCordova) {
+      if (!this.appContext.withinCordova) {
         res("{}");
         return;
       }

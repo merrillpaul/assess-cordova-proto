@@ -15,10 +15,10 @@ export class NewContentVersionPrompt extends BaseOverlay {
   @Inject()
   private fileService: FileService;
 
-  @El('button.yes')
+  @El('input.yes')
   private yesButton: HTMLButtonElement;
 
-  @El('button.no')
+  @El('input.no')
   private noButton: HTMLButtonElement;
   
   @El('.title')
@@ -55,7 +55,7 @@ export class NewContentVersionPrompt extends BaseOverlay {
         });
     
         this.noButton.addEventListener('click', ()=> {
-            rej('no');
+            res('no');
             this.dispose();
         });
       });

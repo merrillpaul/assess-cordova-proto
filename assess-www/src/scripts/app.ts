@@ -53,7 +53,7 @@ const bootup = (inCordova) => {
 };
 
 if (window.cordova) {
-	document.addEventListener("deviceready", () => bootup(true), false);
+	document.addEventListener("deviceready", () => bootup(true) , false);
 } else {
-	document.addEventListener("DOMContentLoaded", bootup);
+	document.addEventListener("DOMContentLoaded", () => bootup(false));
 }
