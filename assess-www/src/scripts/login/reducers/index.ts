@@ -1,5 +1,5 @@
 import constants from '@assess/login/constants';
-import { LoginFormState, LoginState } from '@assess/login/dto/login-state';
+import { LoginFormState, LoginState } from '@assess/shared/dto/login-state';
 
 /*
  * state shape
@@ -60,10 +60,10 @@ const login = (state: any = initialState, action: any): LoginState => {
             newState = {...state, errors: [], loggedIn: false, userInfo: {}};
             break;
         case constants.LOGIN_REQUEST_REJECTED:
-            newState = {...state, errors: action.errors};
+            newState = {...state, errors: [action.error]};
             break;
         case constants.LOGIN_REQUEST_FULFILLED:
-            newState = {...state, errors: [], loggedIn: true, userInfo: action.payload.data.results[0]};
+            newState = {...state, errors: [], loggedIn: true, userInfo: action.loginResult};
             break;     
         default:
             newState = state;

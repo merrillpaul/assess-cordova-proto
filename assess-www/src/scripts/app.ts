@@ -7,13 +7,13 @@ import config from "@appEnvironment";
 import { Container } from "typedi";
 import { Bootstrapper } from "./bootstrap";
 
-const bootup = () => {
+const bootup = (inCordova) => {
 	// console.log('Target endpoint', config.centralEndpoint, config.branch, config.config);
-	Container.get(Bootstrapper).startup();
+	Container.get(Bootstrapper).startup(inCordova);
 };
 
 if (window.cordova) {
-	document.addEventListener("deviceready", bootup, false);
+	document.addEventListener("deviceready", () => bootup(true), false);
 } else {
 	document.addEventListener("DOMContentLoaded", bootup);
 }

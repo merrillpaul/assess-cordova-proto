@@ -1,11 +1,18 @@
 import { Promise } from 'es6-promise';
 import { Observable, Subject } from 'rxjs';
-import { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
+
+import { AppContext } from '@assess/app-context';
+
+const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
 
 @Service()
 export class FileService {
 
   private rootDir: DirectoryEntry;
+
+  @Inject()
+  private appContext: AppContext;
   
   /**
    * Makde dirs recursively under a parent dir
@@ -160,4 +167,37 @@ export class FileService {
     });
     return p;
   }
+
+  /**
+   * 
+   */
+  public getExtractedHashesFileContent(): Promise<string> {
+
+    const p = new Promise<string>((res, rej) => {
+      // we are mocking the extractedHashes for normal browser
+      if (this.appContext.withinCordova) {
+        res("{}");
+        return;
+      }
+
+      this.getRootPath()
+      .then(rootDir => {
+          rootDir.getFile(EXTRACTED_VERSIONS_FILE, { create: true, exclusive: false}, fileEntry => {
+            fileEntry.file(file => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                res(reader.result || "{}");                
+              };
+              reader.readAsText(file);              
+            });
+            
+          }, e => rej(e));
+      })
+      .catch(e => rej(e));
+
+    });
+    return p;
+  }
+
+
 }

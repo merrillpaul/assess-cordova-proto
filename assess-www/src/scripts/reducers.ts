@@ -1,4 +1,5 @@
 // here is where we compose and collect all reducers for the app
+import contentReducers from "./content/reducers";
 import loginReducers from "./login/reducers";
 
 import { STARTUP_ACTIONS } from "./app-constants";
@@ -26,6 +27,7 @@ const startup = (state: any = initialState, action: any) => {
 
 const appReducers = {
 	...loginReducers,
+	...contentReducers,
 	startup
 };
 

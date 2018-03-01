@@ -14,7 +14,8 @@ export class AuthService {
 
   public login(username: string, password: string): Promise<any> {
     // console.log('AuthService.login', username, password);
-    return this.httpService.getRequest().get('https://randomuser.me/api/');
+    return this.httpService.getCentralRequest()
+      .get('/sync/checkAuth', { auth: { password, username }, timeout: 1000 * 30 });
   }
 }
 

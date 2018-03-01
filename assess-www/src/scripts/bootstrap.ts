@@ -16,10 +16,12 @@ import { rootSaga } from "./sagas";
 
 import promiseMiddleware from "redux-promise-middleware";
 
+import { QueryVersionStatus } from '@assess/content/dto';
 import { BootstrapStateProvider } from "@assess/shared/state/bootstrap-state-provider";
 import { STARTUP_ACTIONS } from "./app-constants";
 import { AppContext } from "./app-context";
 import { LoginForm } from "./login/login-form";
+
 
 @Service()
 export class Bootstrapper {
@@ -36,8 +38,11 @@ export class Bootstrapper {
 		this.appArea = document.getElementById("app-area");
 	}
 
-	public startup(): void {
+	public startup(inCordova: boolean | null): void {
 		this.appArea.innerHTML = "";
+		if ( inCordova ) {
+			Container.get(AppContext).setInCordova();
+		}
 		this.initEvents();
 		this.dispatch({ type: STARTUP_ACTIONS.BOOTSTRAP });
 	}

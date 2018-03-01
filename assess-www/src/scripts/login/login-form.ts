@@ -2,6 +2,7 @@ import template from "./login-form.html";
 import "./login-form.scss";
 
 import { AppContext } from "@assess/app-context";
+import { QueryVersionStatus } from '@assess/content/dto';
 import { ContentProgressState } from "@assess/dto/content-download-status";
 import { ContentTarService } from "@assess/services/content-tar-service";
 import { FileService } from "@assess/services/file-service";

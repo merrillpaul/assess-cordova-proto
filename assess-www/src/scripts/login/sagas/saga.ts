@@ -28,15 +28,21 @@ class LoginSaga {
         }
         /*yield put({ type: constants.LOGIN_REQUEST_PENDING});
         try {
-            const response = yield call([authService, authService.login], action.username, action.password);
-            const loginResult = response.data.results[0];
+            const response = yield call([this.authService, this.authService.login], action.username, action.password);
+            const loginResult = response.data;
             yield put({type: constants.LOGIN_REQUEST_FULFILLED, loginResult});
         } catch(error) {
             yield put({type: constants.LOGIN_REQUEST_REJECTED, error});
-        }*/
+        }
         
+        yield put({type: constants.LOGIN_REQUEST_COMPLETED});*/
+
         // this uses redux-promise-middleware to auto create action types
+        try {
         yield put.resolve({type: constants.LOGIN_REQUEST, payload: this.authService.login(action.username, action.password)});
+        } catch (error) {
+            yield put({ type: constants.LOGIN_REQUEST_REJECTED, error});
+        }
         yield put({type: constants.LOGIN_REQUEST_COMPLETED});
     }
 }

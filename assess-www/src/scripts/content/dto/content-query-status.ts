@@ -1,0 +1,10 @@
+export enum QueryVersionStatus {
+    FAILED,
+    FAILED_HASHES,
+    INVALID_URL,
+    NONE,
+    STARTED,
+    SUCCESS_WITH_NEW_VERSIONS, 
+    SUCCESS_WITH_NO_NEW_VERSION, 
+    UPDATE_NEEDED
+}

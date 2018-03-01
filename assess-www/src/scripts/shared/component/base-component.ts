@@ -23,9 +23,12 @@ export abstract class BaseComponent {
     public createContainer(): HTMLDivElement {
         this.rootContainer = document.createElement("div") as HTMLDivElement;
         this.prepareComponent(this.rootContainer);
-        Reflect.getMetadata(ELEMENT_METADATA, this.constructor).forEach((element: IElementProperty)  => {
-            this[element.propertyName] = this.rootContainer.querySelector(element.selector);
-        });  
+        const elAnnotations = Reflect.getMetadata(ELEMENT_METADATA, this.constructor);
+        if (elAnnotations) {
+            elAnnotations.forEach((element: IElementProperty)  => {
+                this[element.propertyName] = this.rootContainer.querySelector(element.selector);
+            });  
+        }
         this.initEvents(this.rootContainer);        
         return this.rootContainer;
     }

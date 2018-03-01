@@ -1,6 +1,8 @@
 import { all, put, takeEvery } from "redux-saga/effects";
 import { STARTUP_ACTIONS } from "./app-constants";
+import contentRootSaga from "./content/sagas";
 import loginRootSaga from "./login/sagas";
+
 
 function* kickStart(action: any): IterableIterator<any> {
 	// TODO actions to decide which way to go
@@ -16,6 +18,7 @@ export function* rootSaga() {
 	yield all([
 		// enlist all sagas
 		watchBootstrap(),
-		loginRootSaga()
+		loginRootSaga(),
+		contentRootSaga()
 	]);
 }

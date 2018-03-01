@@ -1,7 +1,7 @@
 import { AppContext } from '@assess/app-context';
 import { BaseStateProvider, IStoreObservable } from '@assess/shared/state/base-state-provider';
 
-import { LoginFormState, LoginState, LoginUserInfo } from '@assess/login/dto/login-state';
+import { LoginFormState, LoginState, LoginUserInfo } from '@assess/shared/dto/login-state';
 import { Observable } from 'rxjs';
 
 import { Inject, Service } from 'typedi';
@@ -25,7 +25,13 @@ import { Watchables } from '@assess/shared/state/watchable';
             'passwordInError',
             'fetching'
         ],
-        reducerName: "loginForm"        
+        reducerName: 'loginForm'    
+    },
+    {
+        properties: [
+            'contentQueryStatus'
+        ],
+        reducerName: 'queryContent'
     }
 ])
 export class LoginStateProvider extends BaseStateProvider {  
