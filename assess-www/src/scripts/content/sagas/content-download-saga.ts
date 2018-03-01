@@ -10,16 +10,27 @@ import { FileService } from '@assess/services/file-service';
 
 import { apply, call, put } from 'redux-saga/effects';
 
+import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
+import { ContentUtilsService } from '@assess/content/service/content-utils-service';
 
 
 @Service()
-class ContentDownloadSaga {
+export class ContentDownloadSaga {
 
     @Inject()
     private fileService: FileService
 
     @Inject()
     private queryContentService: QueryContentService;
+
+    @Inject()
+    private versionPrompt: NewContentVersionPrompt;
+
+    @Inject()
+    private contentUtilService: ContentUtilsService;
+    
+    @Inject()
+    private provider: ContentStateProvider;
 
     /**
      * Kick starts our saga. First gets the version hashes
@@ -52,14 +63,28 @@ class ContentDownloadSaga {
         } catch(error) {
             yield put({type: constants.QUERY_VERSION_REJECTED, error});
             yield apply(spinner, spinner.dispose);
+            // TODO show error
+        }
+        yield put({type: constants.QUERY_VERSION_COMPLETED});
+    }
+
+
+    /**
+     * Starts our content download with urls
+     * @param action 
+     */
+    public *startPostQueryVersion(): IterableIterator<any> {
+        const contentQueryResult: IContentQueryState = this.provider.getQueryContentResult();
+        switch(contentQueryResult.contentQueryStatus) {
+
+            case QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS:
+                // const dialogResult = yield apply(this.versionPrompt, this.versionPrompt.showPrompt, [contentQueryResult.downloadsNeeded]);
+                // console.log('dialog Result', dialogResult);
+            break;
+
+            default:
+                yield put({type: constants.CONTENT_DOWNLOAD_FINISHED, contentQueryResult});
+                break;
         }
     }
-
-
-
-    public *startContentTarDownloadSaga(action: any): IterableIterator<any> {
-        const contentQueryResult: IContentQueryState = action.queryVersionResult;
-    }
 }
-
-export const contentDownloadSaga = Container.get(ContentDownloadSaga); 

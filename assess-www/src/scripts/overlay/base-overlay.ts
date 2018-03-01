@@ -24,7 +24,8 @@ export abstract class BaseOverlay {
       elAnnotations.forEach((element: IElementProperty)  => {
           this[element.propertyName] = this.overlayContainer.querySelector(element.selector);
       }); 
-    } 
+    }
+    this.init(); 
     this.initEvents(this.overlayContainer);        
     return this.overlayContainer;
   }  
@@ -37,6 +38,10 @@ export abstract class BaseOverlay {
 
   public dispose(): void {
     this.overlayContainer.remove();
+  }
+
+  protected init(): void {
+    // STUB
   }
 
   protected initEvents(rootContainer: HTMLDivElement): void {

@@ -1,10 +1,12 @@
 
 import constants from '@assess/login/constants';
-import { loginSaga } from '@assess/login/sagas/saga';
+import { LoginSaga } from '@assess/login/sagas/saga';
 
 import { all, takeLatest } from 'redux-saga/effects';
+import { Container } from 'typedi';
 
 function* watchStartLogin() {
+    const loginSaga = Container.get(LoginSaga);
     yield takeLatest(constants.START_LOGIN, loginSaga.startLoginSaga.bind(loginSaga));   
 }
 

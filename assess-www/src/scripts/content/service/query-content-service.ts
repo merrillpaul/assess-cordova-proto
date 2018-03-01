@@ -18,7 +18,7 @@ export class QueryContentService {
         return new Promise<IContentQueryState>((res, rej) => {
             this.httpService.getCentralRequest().post(url)
             .then(response => {
-                const downloadables: NewContentVersion[] = [];
+                /*const downloadables: NewContentVersion[] = [];
                 for (let i = 0, len = response.data.length; i < len; i++ ) {
                     const item = response.data[i];
                     const status = item.status;
@@ -54,8 +54,8 @@ export class QueryContentService {
                     contentQueryStatus: downloadables.length > 0 ? QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS : QueryVersionStatus.SUCCESS_WITH_NO_NEW_VERSION, 
                     downloadsNeeded: downloadables 
                 };
-                res(result);
-
+                res(result);*/
+                rej(QueryVersionStatus.UPDATE_NEEDED);
             })
             .catch(error => rej(QueryVersionStatus.FAILED));
         });

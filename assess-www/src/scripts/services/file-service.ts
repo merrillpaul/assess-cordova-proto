@@ -200,4 +200,22 @@ export class FileService {
   }
 
 
+  public getSizeDescription(bytes: number): string {
+    if (bytes <= 1024) {
+      return "1KB";
+    } else if (bytes < 1024 * 512) {
+      return `${Math.round(bytes/1024.0)}KB`;
+    } else if (bytes < 1048576) {
+      const roundedTenthMB = Math.round((bytes *10 )/ 1048576.0);
+      if (roundedTenthMB % 10 === 0) {
+        return `${roundedTenthMB/10}MB`;
+      } else {
+        return `${roundedTenthMB/10.0}MB`;
+      }
+    } else {
+      return `${Math.round(bytes/1048576.0)}MB`;
+    }
+  }
+
+
 }

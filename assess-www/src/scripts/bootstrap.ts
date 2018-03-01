@@ -1,20 +1,6 @@
 import { Container, Inject, Service } from "typedi";
 
-import {
-	applyMiddleware,
-	combineReducers,
-	compose,
-	createStore,
-	Dispatch,
-	Store
-} from "redux";
-import { default as createSagaMiddleware, SagaIterator } from "redux-saga";
-
-import logger from "redux-logger";
-import reducers from "./reducers";
-import { rootSaga } from "./sagas";
-
-import promiseMiddleware from "redux-promise-middleware";
+import { Dispatch, Store } from "redux";
 
 import { QueryVersionStatus } from '@assess/content/dto';
 import { BootstrapStateProvider } from "@assess/shared/state/bootstrap-state-provider";
@@ -31,10 +17,10 @@ export class Bootstrapper {
 
 	@Inject() private stateProvider: BootstrapStateProvider;
 
-	private dispatch: Dispatch<any>;
+	@Inject()
+	private appContext: AppContext;
 
-	constructor() {
-		this.setupRedux();
+	constructor() {		
 		this.appArea = document.getElementById("app-area");
 	}
 
@@ -44,29 +30,8 @@ export class Bootstrapper {
 			Container.get(AppContext).setInCordova();
 		}
 		this.initEvents();
-		this.dispatch({ type: STARTUP_ACTIONS.BOOTSTRAP });
-	}
-
-	private setupRedux() {
-		const composeEnhancers =
-			process.env.NODE_ENV !== "production" &&
-			typeof window === "object" &&
-			window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-				? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-						// Specify extension’s options like here name, actionsBlacklist, actionsCreators or immutablejs support
-					})
-				: compose;
-
-		const combinedReducers = combineReducers(reducers as any);
-		const sagaMiddleware = createSagaMiddleware();
-		const enhancer = composeEnhancers(
-			applyMiddleware(sagaMiddleware, promiseMiddleware(), logger)
-		);
-		const store: Store<any> = createStore(combinedReducers, enhancer);
-		sagaMiddleware.run(rootSaga);
-		Container.get(AppContext).setStore(store);
-		this.dispatch = store.dispatch;
-	}
+		this.appContext.getStore().dispatch({ type: STARTUP_ACTIONS.BOOTSTRAP });
+	}	
 
 	private initEvents() {
 		this.stateProvider.onTargetPage().subscribe(change => {

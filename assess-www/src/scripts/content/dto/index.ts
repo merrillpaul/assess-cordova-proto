@@ -6,5 +6,5 @@ export * from './content-query-status';
 export interface IContentQueryState {
     contentQueryStatus: QueryVersionStatus;
     downloadsNeeded: NewContentVersion[];
-    extractedHashes?: any
+    extractedHashes?: any;
 }

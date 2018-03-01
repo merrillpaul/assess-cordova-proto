@@ -1,0 +1,38 @@
+@import 'palette';
+@import 'mixins';
+@import 'variables';
+
+.new-content-version-ctr {
+    .new-version-prompt {
+        .title {
+            font-size: 1.2em;
+            margin-bottom: .5em;
+        }
+        .prompt-content {
+            max-height: 500px;
+            overflow-y: auto;
+            .content-display {
+                margin-left: 30%;
+                .content-version {
+                    margin-bottom: 2px;
+                    text-align: left;
+                }
+            }
+        }
+        .button-panel {
+            margin-top: 5px;
+            button {
+                border-radius: 5px;
+                border: none;
+                width: auto;
+                line-height: 30px;
+                height: 30px;
+                min-width: 50px;
+                -webkit-box-shadow: 2px 1px 5px rgba(0, 0, 0, 0.2);
+                filter: none;
+                margin: 10px;
+                font-size: 1em;                
+            }
+        }
+    }
+}

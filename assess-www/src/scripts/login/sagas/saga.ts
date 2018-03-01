@@ -6,7 +6,7 @@ import { Container, Inject, Service } from 'typedi';
 import { call, put } from 'redux-saga/effects';
 
 @Service()
-class LoginSaga {
+export class LoginSaga {
 
     @Inject()
     private authService: AuthService;
@@ -46,5 +46,3 @@ class LoginSaga {
         yield put({type: constants.LOGIN_REQUEST_COMPLETED});
     }
 }
-
-export const loginSaga = Container.get(LoginSaga);

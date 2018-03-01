@@ -3,7 +3,7 @@ import { IContentQueryState, QueryVersionStatus } from '../dto';
 
 const initialState: IContentQueryState = {
     contentQueryStatus: QueryVersionStatus.NONE,
-    downloadsNeeded: []    
+    downloadsNeeded: []   
 };
 
 
@@ -27,7 +27,7 @@ const queryContent = (state: IContentQueryState = initialState, action: any): IC
             newState = {...initialState, contentQueryStatus: QueryVersionStatus.STARTED};
             break;
         default:
-            newState = initialState;
+            newState = state;
             break;
     }
     return newState;
