@@ -1,5 +1,7 @@
+import { AxiosResponse } from 'axios';
 import { Container, Inject, Service } from "typedi";
 
+import { AppContext } from '@assess/app-context';
 import { startContentDownload } from '@assess/content/actions';
 import constants from '@assess/content/constants';
 import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
@@ -21,6 +23,9 @@ export class ContentDownloadSaga {
 
     @Inject()
     private fileService: FileService
+
+    @Inject()
+    private appContext: AppContext;
 
     @Inject()
     private queryContentService: QueryContentService;
@@ -90,7 +95,7 @@ export class ContentDownloadSaga {
 
             case QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS:
                 try {
-                    // yield call([this.contentUtilService, this.contentUtilService.recreateTarExtractTmpDir]);
+                    yield call([this.contentUtilService, this.contentUtilService.recreateTarExtractTmpDir]);
                     const canLaunchAssess = yield apply(this.contentUtilService, this.contentUtilService.canLaunchAssess);
                     // we ask for prompt
                     const totalSizeInBytes = contentQueryResult.downloadsNeeded.map(it => it.size || 0).reduce((prev, el) => prev + el);
@@ -133,7 +138,21 @@ export class ContentDownloadSaga {
 
             try {
                 downloadedSize += newVersion.size;
-                const downloadTarResult = yield apply (this.contentUtilService, this.contentUtilService.downloadTarToArchiveDir, [newVersion]);
+                /*let downloadTarResult: AxiosResponse = yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);
+                let blob: Blob = downloadTarResult.data;
+
+                if (this.appContext.withinCordova) {
+                    yield apply (this.contentUtilService, this.contentUtilService.writeToContentArchive, [newVersion, blob]);
+                    blob = null;
+                    downloadTarResult = null;
+                }*/
+
+                if (this.appContext.withinCordova) {
+                    yield apply (this.contentUtilService, this.contentUtilService.downloadTar, [newVersion]);
+                } else {
+                    yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);
+                }
+
                 yield put({type: constants.CONTENT_DOWNLOAD_TAR_FINISHED, currentVersion: newVersion, downloadedSize: this.fileService.getSizeDescription(downloadedSize)});
             } catch (error) {
                 this.logger.error(`Error in downloading tar for`, newVersion);

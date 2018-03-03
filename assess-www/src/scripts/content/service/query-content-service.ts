@@ -56,7 +56,6 @@ export class QueryContentService {
                     downloadsNeeded: downloadables
                 };
                 res(result);
-                // rej(QueryVersionStatus.UPDATE_NEEDED);
             })
             .catch(error => rej(QueryVersionStatus.FAILED));
         });

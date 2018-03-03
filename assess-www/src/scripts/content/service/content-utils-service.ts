@@ -7,6 +7,7 @@ import { HttpService } from '@assess/shared/http/http-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 import config from '@appEnvironment';
+import { AxiosResponse } from 'axios';
 
 
 @Service()
@@ -37,13 +38,26 @@ export class ContentUtilsService {
         return Promise.resolve(true);
     }
 
-    public downloadTarToArchiveDir(contentVersion: NewContentVersion): Promise<boolean> {
+
+    public downloadTar(contentVersion: NewContentVersion): Promise<boolean> {
+        const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
+        return this.fileService.getZipExtractTmpDir()
+        .then(tmpDir => {
+            this.logger.debug("Downloading ", contentVersion);
+            return this.fileService.downloadUrlToDir(url, `${contentVersion.versionWithType}.tar`, tmpDir);
+        }).then(tmptarFile => {
+            this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
+            return this.fileService.copyToContentArchiveDir(tmptarFile);
+        }).then(() => true);
+    }
+
+    public downloadTarUrl(contentVersion: NewContentVersion): Promise<AxiosResponse> {
 
         const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
         this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
         return this.httpService.getRequest().get(url , {
             responseType: 'blob'
-        }).then(response => {
+        }); /*.then(response => {
             this.logger.info(`Downloaded  ${url} ${ response.data.size } for ${contentVersion.displayName}`, contentVersion.versionWithType);
             if (!this.appContext.withinCordova) {
                 return Promise.all([response.data, null]);
@@ -54,12 +68,18 @@ export class ContentUtilsService {
             const blob = results[0];
             if (!results[1]) {
                 return null;
-            } /*else {
+            } else {
                 const tmpDir: DirectoryEntry = results[1] as DirectoryEntry;
                 return this.fileService.writeFile(tmpDir, `${contentVersion.versionWithType}.tar`, blob); 
-            }   */       
+            }         
         }).then((file) => {
            return true;
+        });*/
+    }
+
+    public writeToContentArchive(contentVersion: NewContentVersion, blob: Blob) {
+        return  this.fileService.getContentArchiveDir().then(contentDir => {
+            return this.fileService.writeFile(contentDir, `${contentVersion.versionWithType}.tar`, blob);
         });
     }
 

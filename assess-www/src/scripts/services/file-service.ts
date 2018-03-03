@@ -5,6 +5,7 @@ import { Inject, Service } from 'typedi';
 import { AppContext } from '@assess/app-context';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
+
 const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
 const CONTENT_ARCHIVE_DIR: string = "/contentArchive";
 const TMP_EXTRACT_DIR:string = "/zipExtractTemp";
@@ -194,8 +195,9 @@ export class FileService {
       return Promise.resolve(this.zipExtractTmpDir);
     } else {
       return this.mkDirsInRoot(TMP_EXTRACT_DIR).then( cDir => {
-        this.contentArchiveDir = cDir;
-        return this.contentArchiveDir;
+        this.zipExtractTmpDir = cDir;
+        this.logger.debug(`Created zip extract tmp archive dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
+        return this.zipExtractTmpDir;
       });
     }
   }
@@ -278,6 +280,33 @@ export class FileService {
         fileEntry.remove(() => res(true), () => res(false));
       }, e => res(false))
     });
+  }
+
+  /**
+   * Downloads a file with name to a folder 
+   * @param url 
+   * @param filename 
+   * @param targetDir 
+   */
+  public downloadUrlToDir(url: string, filename: string, targetDir: DirectoryEntry): Promise<FileEntry> {
+    return new Promise((res, rej) => {
+      const transfer = new FileTransfer();
+      const uri = encodeURI(url);
+      transfer.download(uri, `${targetDir.toInternalURL()}/${filename}`, entry => {
+        this.logger.debug(`Downloaded ${url} to ${entry.toInternalURL()}`);
+        res(entry);
+      }, e => rej(e), true, {
+        headers: { withCredentials: true }
+      });
+    });
+  }
+
+  public copyToContentArchiveDir(tarFile: FileEntry): Promise<FileEntry> {
+    return this.getContentArchiveDir().then(contentArchDir => {
+      return new Promise<FileEntry>((res, rej) => {
+        tarFile.copyTo(contentArchDir, null, entry => res(entry as FileEntry), e => rej(e));
+      });      
+    })
   }
 
 
