@@ -1,9 +1,13 @@
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
+import { NewContentVersion } from '@assess/content/dto';
 import { FileService } from '@assess/services/file-service';
+import { HttpService } from '@assess/shared/http/http-service';
+import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
-const TMP_EXTRACT_DIR ="/zipExtractTemp";
+import config from '@appEnvironment';
+
 
 @Service()
 export class ContentUtilsService {
@@ -14,29 +18,14 @@ export class ContentUtilsService {
     @Inject()
     private fileService: FileService;
 
-    public recreateTarExtractTmpDir(): Promise<boolean> {
-        // for local browser we just mock it
-        if (!this.appContext.withinCordova) {
-            return Promise.resolve(true);
-        } else {
-        
-            const createTmpDir = (rootDir, res, rej) => {
-                rootDir.getDirectory(TMP_EXTRACT_DIR, {create: true}, (dir) => res(true), (e) => rej(e));
-            };
+    @Inject()
+    private httpService: HttpService
 
-            return new Promise((res, rej) => {
-            this.fileService.getRootPath().then(rootDir => {
-                console.log( 'rootDir ', rootDir.nativeURL);
-                rootDir.getDirectory(TMP_EXTRACT_DIR, {}, dir => {
-                    // dir exists we need to remove and recreate
-                    dir.removeRecursively(() => createTmpDir(rootDir, res, rej), e => rej(e));                   
-                }, () => {
-                    // path doesnt exist, we create it then
-                    createTmpDir(rootDir, res, rej);
-                });
-            }).catch(e => rej(e));
-            });
-        }
+    @Logger()
+    private logger: LoggingService
+
+    public recreateTarExtractTmpDir(): Promise<boolean> {
+       return this.fileService.recreateZipExractTmpDir();
     }
 
     /**
@@ -46,6 +35,32 @@ export class ContentUtilsService {
     public canLaunchAssess(): Promise<boolean> {
         // this should always res with true or false
         return Promise.resolve(true);
+    }
+
+    public downloadTarToArchiveDir(contentVersion: NewContentVersion): Promise<boolean> {
+
+        const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
+        this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
+        return this.httpService.getRequest().get(url , {
+            responseType: 'blob'
+        }).then(response => {
+            this.logger.info(`Downloaded  ${url} ${ response.data.size } for ${contentVersion.displayName}`, contentVersion.versionWithType);
+            if (!this.appContext.withinCordova) {
+                return Promise.all([response.data, null]);
+            } else {
+                return Promise.all([response.data, this.fileService.getContentArchiveDir()])
+            }
+        }).then(results => {
+            const blob = results[0];
+            if (!results[1]) {
+                return null;
+            } /*else {
+                const tmpDir: DirectoryEntry = results[1] as DirectoryEntry;
+                return this.fileService.writeFile(tmpDir, `${contentVersion.versionWithType}.tar`, blob); 
+            }   */       
+        }).then((file) => {
+           return true;
+        });
     }
 
 }

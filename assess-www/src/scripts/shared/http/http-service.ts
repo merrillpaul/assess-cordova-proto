@@ -14,7 +14,7 @@ export class HttpService {
 
     constructor() {
         this.centralRequest = axios.create({
-          baseURL: config.centralEndpoint,
+          baseURL: config.centralEndpoint + config.centralContext,
           headers: HEADERS,
           withCredentials: true
         });
@@ -25,6 +25,6 @@ export class HttpService {
     }
 
     public getRequest(): AxiosInstance {
-        return axios.create({headers: HEADERS});
+        return axios.create({headers: HEADERS, withCredentials: true});
     }
 }

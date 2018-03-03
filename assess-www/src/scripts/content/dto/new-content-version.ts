@@ -4,4 +4,5 @@ export interface NewContentVersion {
     hash: string;
     url: string;
     size: number;
+    path: string;
 }

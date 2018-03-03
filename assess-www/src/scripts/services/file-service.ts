@@ -3,16 +3,26 @@ import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
+import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
+const CONTENT_ARCHIVE_DIR: string = "/contentArchive";
+const TMP_EXTRACT_DIR:string = "/zipExtractTemp";
 
 @Service()
 export class FileService {
 
   private rootDir: DirectoryEntry;
 
+  private contentArchiveDir: DirectoryEntry;
+
+  private zipExtractTmpDir: DirectoryEntry;
+
   @Inject()
   private appContext: AppContext;
+
+  @Logger()
+  private logger: LoggingService;
   
   /**
    * Makde dirs recursively under a parent dir
@@ -72,7 +82,7 @@ export class FileService {
     const subject = new Subject<FileEntry>();
     const parentPath: string = path.substr(0, path.lastIndexOf('/'));
     const fileName: string = path.substr(path.lastIndexOf('/') + 1);
-    // console.log('parentPath', parentPath, 'fileName', fileName);
+    
 
     
     setTimeout(() => {
@@ -106,14 +116,10 @@ export class FileService {
    * @param fileName 
    * @param data 
    */
-  public writeFile(
-    dir: DirectoryEntry,
-    fileName: string,
-    data: Blob
-  ): Promise<FileEntry> {
+  public writeFile(dir: DirectoryEntry, fileName: string, data: Blob): Promise<FileEntry> {
+
     return new Promise<FileEntry>((res, rej) => {
-      dir.getFile(
-        fileName,
+      dir.getFile(fileName,
         { create: true },
         fileEntry => {
           fileEntry.createWriter(writer => {
@@ -132,12 +138,11 @@ export class FileService {
    * Returns a promise which evaluates the root path where we save the project/app files
    */
   public getRootPath(): Promise<DirectoryEntry> {
-    const p = new Promise<DirectoryEntry>((res, rej) => {
+    if (this.rootDir != null) {
+      return Promise.resolve(this.rootDir);
+    }
 
-      if (this.rootDir != null) {
-        res(this.rootDir);
-        return;
-      }
+    const p = new Promise<DirectoryEntry>((res, rej) => {    
 
       if (window.cordova) {
           window.resolveLocalFileSystemURL(
@@ -166,6 +171,56 @@ export class FileService {
       }
     });
     return p;
+  }
+
+  public getContentArchiveDir(): Promise<DirectoryEntry> {
+    if (this.contentArchiveDir) {
+      return Promise.resolve(this.contentArchiveDir);
+    } else {
+      return this.mkDirsInRoot(CONTENT_ARCHIVE_DIR).then( cDir => {
+        this.contentArchiveDir = cDir;
+        this.logger.debug(`Created content archive dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
+        return this.contentArchiveDir;
+      });
+    }
+  }
+
+  public getZipExtractTmpDir(): Promise<DirectoryEntry> {
+    if (!this.appContext.withinCordova) { // mock when opened in browser
+      return Promise.resolve(null);
+    }
+
+    if (this.zipExtractTmpDir) {
+      return Promise.resolve(this.zipExtractTmpDir);
+    } else {
+      return this.mkDirsInRoot(TMP_EXTRACT_DIR).then( cDir => {
+        this.contentArchiveDir = cDir;
+        return this.contentArchiveDir;
+      });
+    }
+  }
+
+
+  public recreateZipExractTmpDir(): Promise<boolean> {
+    if (!this.appContext.withinCordova) { // mock when opened in browser
+      return Promise.resolve(true);
+    }
+    const createTmpDir = (rootDir: DirectoryEntry, res, rej) => {
+      rootDir.getDirectory(TMP_EXTRACT_DIR, {create: true}, (dir) => res(true), (e) => rej(e));
+    };
+
+    return new Promise((res, rej) => {
+      this.getRootPath().then(rootDir => {
+          this.logger.debug( 'rootDir ', rootDir.nativeURL);
+          rootDir.getDirectory(TMP_EXTRACT_DIR, {}, dir => {
+              // dir exists we need to remove and recreate
+              dir.removeRecursively(() => createTmpDir(rootDir, res, rej), e => rej(e));                   
+          }, () => {
+              // path doesnt exist, we create it then
+              createTmpDir(rootDir, res, rej);
+          });
+      }).catch(e => rej(e));
+    });
   }
 
   /**
@@ -215,6 +270,14 @@ export class FileService {
     } else {
       return `${Math.round(bytes/1048576.0)}MB`;
     }
+  }
+
+  public deleteFileSilently(parentDir: DirectoryEntry, filename: string): Promise<boolean> {
+    return new Promise((res, rej) => {
+      parentDir.getFile(filename, { create: false }, fileEntry => {
+        fileEntry.remove(() => res(true), () => res(false));
+      }, e => res(false))
+    });
   }
 
 

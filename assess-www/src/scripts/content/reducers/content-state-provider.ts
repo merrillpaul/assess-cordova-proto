@@ -13,7 +13,7 @@ import { Service } from "typedi";
 		reducerName: "queryContent"
 	},
 	{
-		properties: ["downloadedSize"],
+		properties: ["pendingDownloads"],
 		reducerName: "tarsDownloaded"
 	}
 ])
@@ -31,7 +31,7 @@ export class ContentStateProvider extends BaseStateProvider {
 		return this.onChange("queryContent", "contentQueryStatus");
 	}
 
-	public onDownloadedSizeChange(): Observable<IStoreObservable> {
-		return this.onChange("tarsDownloaded", "downloadedSize");
+	public onPendingDownloadsChange(): Observable<IStoreObservable> {
+		return this.onChange("tarsDownloaded", "pendingDownloads");
 	}
 }

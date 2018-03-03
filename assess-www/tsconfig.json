@@ -9,7 +9,8 @@
       "es5",
       "dom.iterable",
       "es2015.iterable",
-      "scripthost"
+      "scripthost",
+      "webworker"
     ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

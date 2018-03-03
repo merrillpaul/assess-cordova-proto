@@ -10,6 +10,7 @@ export interface IContentQueryState {
 }
 
 export interface ITarDownloadState {
+    downloadsInError: NewContentVersion[];
     pendingDownloads: NewContentVersion[];
     completedDownloads: NewContentVersion[];
     totalSize: string;

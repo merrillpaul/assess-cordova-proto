@@ -7,12 +7,14 @@ import { ContentStateProvider } from '@assess/content/reducers/content-state-pro
 import { QueryContentService } from '@assess/content/service/query-content-service';
 import { FileService } from '@assess/services/file-service';
 
+import { delay } from 'redux-saga'
 import { apply, call, put } from 'redux-saga/effects';
 
 import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
 import { ContentProgressOverlay } from '@assess/content/component/progress/progress-overlay';
 import { ContentUtilsService } from '@assess/content/service/content-utils-service';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
+import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 @Service()
 export class ContentDownloadSaga {
@@ -37,6 +39,9 @@ export class ContentDownloadSaga {
 
     @Inject()
     private progress: ContentProgressOverlay;
+
+    @Logger()
+    private logger: LoggingService;
 
     /**
      * Kick starts our saga. First gets the version hashes
@@ -85,7 +90,7 @@ export class ContentDownloadSaga {
 
             case QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS:
                 try {
-                    yield call([this.contentUtilService, this.contentUtilService.recreateTarExtractTmpDir]);
+                    // yield call([this.contentUtilService, this.contentUtilService.recreateTarExtractTmpDir]);
                     const canLaunchAssess = yield apply(this.contentUtilService, this.contentUtilService.canLaunchAssess);
                     // we ask for prompt
                     const totalSizeInBytes = contentQueryResult.downloadsNeeded.map(it => it.size || 0).reduce((prev, el) => prev + el);
@@ -94,6 +99,7 @@ export class ContentDownloadSaga {
                         const dialogResult = yield apply(this.versionPrompt, this.versionPrompt.showPrompt, [contentQueryResult.downloadsNeeded]);
                         if (dialogResult === 'yes') {
                             yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
+                            this.logger.success("Query versions received. Will download tars");
                         } else {
                             yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, contentQueryResult});
                         }
@@ -101,6 +107,7 @@ export class ContentDownloadSaga {
                         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
                     }
                 } catch(error) {
+                    this.logger.error("Error in start post query", error);
                     yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, error});
                 }
 
@@ -118,20 +125,24 @@ export class ContentDownloadSaga {
         const totalSizeInText = action.totalSizeInText;  
         yield call([this.progress, this.progress.show]);
         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_START, contentQueryResult, totalSizeInText});
-        let downloadedSize: number = 0;        
+        let downloadedSize: number = 0;      
+        
         for (let i = 0, len = contentQueryResult.downloadsNeeded.length; i < len; i++) {
             const newVersion: NewContentVersion = contentQueryResult.downloadsNeeded[i];
             yield put({type: constants.CONTENT_DOWNLOAD_TAR_STARTED, index: i});
 
-            // TODO real tar download to tmp extract folder
-            downloadedSize += newVersion.size;
-            yield put.resolve ({payload: () => {
-                return new Promise((res, rej) => {
-                    setTimeout(() => res(true), 100);
-                });
-            }, type:'dummy'})
-            yield put({type: constants.CONTENT_DOWNLOAD_TAR_FINISHED, currentVersion: newVersion, downloadedSize: this.fileService.getSizeDescription(downloadedSize)});
+            try {
+                downloadedSize += newVersion.size;
+                const downloadTarResult = yield apply (this.contentUtilService, this.contentUtilService.downloadTarToArchiveDir, [newVersion]);
+                yield put({type: constants.CONTENT_DOWNLOAD_TAR_FINISHED, currentVersion: newVersion, downloadedSize: this.fileService.getSizeDescription(downloadedSize)});
+            } catch (error) {
+                this.logger.error(`Error in downloading tar for`, newVersion);
+                yield put({type: constants.CONTENT_DOWNLOAD_TAR_REJECTED, currentVersion: newVersion});
+            }        
+            yield delay(100);
         }
+
+        this.logger.success("Download tars to content archive done");
         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_FINISHED});        
     }
 }

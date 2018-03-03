@@ -31,9 +31,10 @@ export class QueryContentService {
                             downloadables.push ({
                                 displayName: item.displayName,
                                 hash: item.hash,
+                                path: item.path,      
                                 size: parseInt(item.size, 10),
                                 url: item.url,
-                                versionWithType: item.filetype                                
+                                versionWithType: item.filetype                                                           
                             });
                         } else {
                             rej(QueryVersionStatus.INVALID_URL);
@@ -52,7 +53,7 @@ export class QueryContentService {
                 }
                 const result: IContentQueryState = { 
                     contentQueryStatus: downloadables.length > 0 ? QueryVersionStatus.SUCCESS_WITH_NEW_VERSIONS : QueryVersionStatus.SUCCESS_WITH_NO_NEW_VERSION, 
-                    downloadsNeeded: downloadables 
+                    downloadsNeeded: downloadables
                 };
                 res(result);
                 // rej(QueryVersionStatus.UPDATE_NEEDED);

@@ -34,11 +34,11 @@ export class ContentProgressOverlay extends BaseOverlay {
   }
 
   protected init(): void {
-        this.provider.onDownloadedSizeChange().subscribe(change => {
+        this.provider.onPendingDownloadsChange().subscribe(change => {
             const tarDownloadResult = this.provider.getTarDownloadResult();
             this.progressText.innerHTML = `Downloaded ${tarDownloadResult.downloadedSize} of ${tarDownloadResult.totalSize}`;
             this.progressBar.max = tarDownloadResult.versionsTotal;
-            this.progressBar.value = tarDownloadResult.completedDownloads.length;
+            this.progressBar.value = tarDownloadResult.versionsTotal - tarDownloadResult.pendingDownloads.length;
         });
   }
   
