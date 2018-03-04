@@ -299,27 +299,68 @@ export class FileService {
     });
   }
 
+  /**
+   * Copying from the tmp zip to content archive, Dont ask why, thats how Assess does now.
+   * HTML5 File API does not have a way to overwrite while copying . Hence doing this delete and copy
+   * @param tarFile 
+   */
   public copyToContentArchiveDir(tarFile: FileEntry): Promise<FileEntry> {
     return this.getContentArchiveDir().then(contentArchDir => {
+      return Promise.all([contentArchDir, this.deleteFileSilently(contentArchDir, tarFile.name)])
+    }).then(results => {
+      const contentArchDir: DirectoryEntry = results[0];
+      return contentArchDir;
+    }).then(contentArchDir => {
       return new Promise<FileEntry>((res, rej) => {
         tarFile.copyTo(contentArchDir, null, entry => res(entry as FileEntry), e => rej(e));
-      });      
+      }); 
     });
   }
 
-
+  /**
+   * Gets names of tar files inside the content archive dir
+   */
   public getContentDirTarFileNames(): Promise<string[]> {
     return this.getContentArchiveDir().then(contentArchDir => {
       return new Promise<string[]>((res, rej) => {
         this.logger.debug(`Getting list of tar file names in ${contentArchDir.toInternalURL()}`);
-        const reader = contentArchDir.createReader();
-        reader.readEntries(entries => {
-            this.logger.debug(`Got tar files `, entries.map(it => it.name));
-            res(entries.map(it => it.name));
-          }, e => rej(e));        
+        const reader = contentArchDir.createReader();  
+        let tarEntries: string[] = [];
+        const readEntries = () => {
+            reader.readEntries(entries => {
+              if (!entries.length) {
+                this.logger.debug(`Got tars  ${tarEntries.length}`);
+                res(tarEntries);
+              } else {
+                tarEntries = tarEntries.concat(entries.map(it => it.name).filter(it => (/\.tar$/i).test(it)));
+                readEntries();
+              }
+            }, e => rej(e));
+        };
+        readEntries();
       });      
     });
   }
 
+  /**
+   * Writes the hashes so that next content query gets only stuff that has changed.
+   * @param hashes 
+   */
+  public writeExtractedHashes(hashes: any) : Promise<boolean> {
+    const hashString: string = JSON.stringify(hashes);
+    this.logger.info(`Writing the hashes json with ${hashString}`);
+    if (!this.appContext.withinCordova) {
+      return Promise.resolve(true); // mock for browser
+    }
+
+    return this.getRootPath()
+    .then(rootDir => {
+      return this.writeFile(rootDir, EXTRACTED_VERSIONS_FILE, new Blob([
+        hashString
+      ], {
+        type: 'application/json'
+      }));
+    }).then (() => true);
+  }
 
 }

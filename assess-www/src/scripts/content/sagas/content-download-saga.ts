@@ -10,7 +10,7 @@ import { QueryContentService } from '@assess/content/service/query-content-servi
 import { FileService } from '@assess/services/file-service';
 
 import { delay } from 'redux-saga'
-import { apply, call, put } from 'redux-saga/effects';
+import { all, apply, call, put } from 'redux-saga/effects';
 
 import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
 import { ContentProgressOverlay } from '@assess/content/component/progress/progress-overlay';
@@ -146,7 +146,7 @@ export class ContentDownloadSaga {
 
                 yield put({type: constants.CONTENT_DOWNLOAD_TAR_FINISHED, currentVersion: newVersion, downloadedSize: this.fileService.getSizeDescription(downloadedSize)});
             } catch (error) {
-                this.logger.error(`Error in downloading tar for`, newVersion);
+                this.logger.error(`Error in downloading tar for ${newVersion}, ${JSON.stringify(error, null, 4)}`);
                 yield put({type: constants.CONTENT_DOWNLOAD_TAR_REJECTED, currentVersion: newVersion});
             }
         }
@@ -178,13 +178,14 @@ export class ContentDownloadSaga {
         for (let i = 0, len = tarsToExtract.length; i < len; i++) {
             const tarfileName: string = tarsToExtract[i];
             yield put({type: constants.CONTENT_EXTRACT_TAR_STARTED, index: i});
-
+            this.logger.debug(`Tar to extract ${tarfileName}`);
             try {
                 if (this.appContext.withinCordova) {
                     // TODO
+                    yield delay(200);
                 } else {
                     // simulate extract
-                    yield delay(200);
+                    yield delay(50);
                 }
 
                 yield put({currentTar: tarfileName, type: constants.CONTENT_EXTRACT_TAR_FINISHED});
@@ -195,8 +196,18 @@ export class ContentDownloadSaga {
         }
 
         this.logger.success("Extract/Installing content tars done");
-        yield put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED});  
-        yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});  
+
+        // to run these effects parallely
+        yield all([
+            put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED}),
+            put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED})
+        ]);
+        
+    }
+
+    public *afterTarExtraction(): IterableIterator<any> {
+        const hashes: any = this.provider.getTarExtractionResult().extractedHashes;
+        yield put({ type: constants.WRITE_HASHES, payload: this.fileService.writeExtractedHashes(hashes)});
     }
 
     /**

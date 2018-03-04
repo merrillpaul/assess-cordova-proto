@@ -32,8 +32,8 @@ const setupRedux = () => {
 		typeof window === "object" &&
 		window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
 			? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-					// Specify extension’s options like here name, actionsBlacklist, actionsCreators or immutablejs support
-				})
+				maxAge: 300		
+			})
 			: compose;
 
 	const combinedReducers = combineReducers(reducers as any);

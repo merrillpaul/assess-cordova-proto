@@ -116,7 +116,7 @@ const tarsExtracted = (state: ITarExtractionState = tarsExtractionInitialState, 
 
         case constants.CONTENT_EXTRACT_TAR_FINISHED:
             currentTar = action.currentTar;
-            currentTarVersion = state.downloadedVersions.filter(it => it.versionWithType === currentTar)[0];
+            currentTarVersion = state.downloadedVersions.filter(it => it.versionWithType === currentTar.split('.tar')[0])[0];
             completedTarFiles = state.completedTarFiles.map (it => it);
             completedTarFiles.push(currentTar);
             pendingTarFiles = state.pendingTarFiles.filter (it => it !== currentTar);
@@ -129,7 +129,7 @@ const tarsExtracted = (state: ITarExtractionState = tarsExtractionInitialState, 
 
         case constants.CONTENT_EXTRACT_TAR_REJECTED:
             currentTar = action.currentTar;
-            currentTarVersion = state.downloadedVersions.filter(it => it.versionWithType === currentTar)[0];
+            currentTarVersion = state.downloadedVersions.filter(it => it.versionWithType === currentTar.split('.tar')[0])[0];
             const extractionsWithError = state.extractionsWithError.map (it => it);
             extractionsWithError.push(currentTar);
             pendingTarFiles = state.pendingTarFiles.filter (it => it !== currentTar);

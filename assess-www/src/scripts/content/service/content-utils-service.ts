@@ -43,7 +43,7 @@ export class ContentUtilsService {
         const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
         return this.fileService.getZipExtractTmpDir()
         .then(tmpDir => {
-            this.logger.debug("Downloading ", contentVersion);
+            this.logger.debug(`Downloading  ${contentVersion}`);
             return this.fileService.downloadUrlToDir(url, `${contentVersion.versionWithType}.tar`, tmpDir);
         }).then(tmptarFile => {
             this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);

@@ -23,5 +23,6 @@ export default keyMirror({
     QUERY_VERSION_COMPLETED: null,
     QUERY_VERSION_FULFILLED: null,
     QUERY_VERSION_PENDING: null,
-    QUERY_VERSION_REJECTED: null
+    QUERY_VERSION_REJECTED: null,
+    WRITE_HASHES: null
 });
