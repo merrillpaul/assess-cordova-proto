@@ -1,7 +1,7 @@
 import { invalidPassword, invalidUsername } from '@assess/login/actions';
 import constants from '@assess/login/constants';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
-import { AuthService } from '@assess/services/auth-service';
+import { AuthService } from '@assess/shared/security/auth-service';
 import { Container, Inject, Service } from 'typedi';
 
 import { call, put } from 'redux-saga/effects';

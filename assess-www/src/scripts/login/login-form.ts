@@ -4,10 +4,9 @@ import "./login-form.scss";
 import { AppContext } from "@assess/app-context";
 import { QueryVersionStatus } from '@assess/content/dto';
 import { ContentProgressState } from "@assess/dto/content-download-status";
-import { ContentTarService } from "@assess/services/content-tar-service";
-import { FileService } from "@assess/services/file-service";
 import { BaseComponent } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
+import { FileService } from "@assess/shared/file/file-service";
 import { LoginStateProvider } from "./reducers/state-provider";
 import { LoginSpinnerOverlay } from "./spinner/login-spinner";
 
@@ -29,8 +28,6 @@ export class LoginForm extends BaseComponent {
 	
 	@El('td.error-message-area')
 	private errorArea: HTMLTableCellElement;
-
-	@Inject() private contentTarService: ContentTarService;
 
 	@Inject() private fileService: FileService;
 

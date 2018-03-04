@@ -7,7 +7,7 @@ import constants from '@assess/content/constants';
 import { IContentQueryState, ITarDownloadState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { QueryContentService } from '@assess/content/service/query-content-service';
-import { FileService } from '@assess/services/file-service';
+import { FileService } from '@assess/shared/file/file-service';
 
 import { delay } from 'redux-saga'
 import { all, apply, call, put } from 'redux-saga/effects';

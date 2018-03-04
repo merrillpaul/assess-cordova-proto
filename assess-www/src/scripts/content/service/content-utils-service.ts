@@ -2,7 +2,7 @@ import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
 import { NewContentVersion } from '@assess/content/dto';
-import { FileService } from '@assess/services/file-service';
+import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 

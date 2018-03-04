@@ -1,7 +1,7 @@
 import { NewContentVersion } from '@assess/content/dto';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
-import { FileService } from '@assess/services/file-service';
 import { El } from '@assess/shared/component/element';
+import { FileService } from '@assess/shared/file/file-service';
 
 import promptTemplate from './new-version-prompt.html';
 import './new-version-prompt.scss';
