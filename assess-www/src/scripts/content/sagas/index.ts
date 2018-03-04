@@ -34,6 +34,19 @@ function* startDownloadTars() {
      yield takeLatest(constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentDownloadSaga.startDownloadTars.bind(contentDownloadSaga));   
 }
 
+function* startTarExtraction() {
+    const contentDownloadSaga = getDownloadSaga();
+    yield takeLatest(constants.CONTENT_DOWNLOAD_TAR_SAGA_FINISHED, 
+        contentDownloadSaga.startExtraction.bind(contentDownloadSaga));
+}
+
+/** This is our root content download Epic */
 export default function* contentRootSaga() {
-    yield all([startSaga(), startQueryVersionSaga(), startPostQueryVersion(), startDownloadTars()]);
+    yield all([
+        startSaga(), 
+        startQueryVersionSaga(), 
+        startPostQueryVersion(), 
+        startDownloadTars(),
+        startTarExtraction()
+    ]);
 } 

@@ -29,6 +29,11 @@ export class ContentProgressOverlay extends BaseOverlay {
     this.message.innerHTML = message;
   }
 
+  public startInstall(): void {
+    this.message.innerHTML = 'Installing the latest Assess content. Please wait.';
+    this.progressText.innerHTML = 'Finding tars to extract...';     
+  }
+
   protected addOverlayContent(content: HTMLElement): void {
     content.innerHTML = progressTemplate;
   }
@@ -39,6 +44,19 @@ export class ContentProgressOverlay extends BaseOverlay {
             this.progressText.innerHTML = `Downloaded ${tarDownloadResult.downloadedSize} of ${tarDownloadResult.totalSize}`;
             this.progressBar.max = tarDownloadResult.versionsTotal;
             this.progressBar.value = tarDownloadResult.versionsTotal - tarDownloadResult.pendingDownloads.length;
+        });
+
+        this.provider.onTarsCount().subscribe(change => {
+          this.progressBar.max = change.newVal;
+          this.progressBar.value = 0;
+          this.progressBar.innerHTML = `Installed 0 out of ${change.newVal}`;
+        });
+
+        this.provider.onPendingTarsChange().subscribe(change => {
+          const tarState = this.provider.getTarExtractionResult();
+          this.progressText.innerHTML = `Installed ${tarState.completedTarFiles.length} out of ${tarState.totalTarFiles}`;
+          this.progressBar.max = tarState.totalTarFiles;
+          this.progressBar.value = tarState.totalTarFiles - tarState.pendingTarFiles.length;
         });
   }
   

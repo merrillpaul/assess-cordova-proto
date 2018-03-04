@@ -37,7 +37,9 @@ export abstract class BaseOverlay {
   }
 
   public dispose(): void {
-    this.overlayContainer.remove();
+    if ( this.overlayContainer ) {
+      this.overlayContainer.remove();
+    }
   }
 
   protected init(): void {

@@ -229,14 +229,12 @@ export class FileService {
    * 
    */
   public getExtractedHashesFileContent(): Promise<string> {
+    // we are mocking the extractedHashes for normal browser
+    if (!this.appContext.withinCordova) {
+      return Promise.resolve("{}");
+    }
 
     const p = new Promise<string>((res, rej) => {
-      // we are mocking the extractedHashes for normal browser
-      if (!this.appContext.withinCordova) {
-        res("{}");
-        return;
-      }
-
       this.getRootPath()
       .then(rootDir => {
           rootDir.getFile(EXTRACTED_VERSIONS_FILE, { create: true, exclusive: false}, fileEntry => {
@@ -306,7 +304,21 @@ export class FileService {
       return new Promise<FileEntry>((res, rej) => {
         tarFile.copyTo(contentArchDir, null, entry => res(entry as FileEntry), e => rej(e));
       });      
-    })
+    });
+  }
+
+
+  public getContentDirTarFileNames(): Promise<string[]> {
+    return this.getContentArchiveDir().then(contentArchDir => {
+      return new Promise<string[]>((res, rej) => {
+        this.logger.debug(`Getting list of tar file names in ${contentArchDir.toInternalURL()}`);
+        const reader = contentArchDir.createReader();
+        reader.readEntries(entries => {
+            this.logger.debug(`Got tar files `, entries.map(it => it.name));
+            res(entries.map(it => it.name));
+          }, e => rej(e));        
+      });      
+    });
   }
 
 

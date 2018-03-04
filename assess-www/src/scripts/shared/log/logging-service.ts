@@ -19,24 +19,24 @@ export class LoggingService {
     }
 
 	public info(msg?: string, ...data: any[]): void {       
-        console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}'`, 'color: blue']);
+        console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}`, 'color: blue']);
 	}
 
 	public error(msg?: string, ...data: any[]): void {
-        console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}'`, 'color: red; font-weight: bold']);
+        console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}`, 'color: red; font-weight: bold']);
         console.trace.apply(console);
 	}
 
 	public warn(msg?: string, ...data: any[]): void {
-		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}'`, 'color: orange']);
+		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}`, 'color: orange']);
 	}
 
 	public debug(msg?: string, ...data: any[]): void {
-		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}'`, 'color: black']);
+		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}`, 'color: black']);
 	}
 
 	public success(msg?: string, ...data: any[]): void {
-		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}'`, 'color: green; font-weight: bold']);
+		console.log.apply(console, [`%c ${this.buildLogArray(msg, data)}`, 'color: green; font-weight: bold']);
 	}
 
 	private buildLogArray(msg?: string, data?): string {

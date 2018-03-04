@@ -37,6 +37,11 @@ export abstract class BaseStateProvider {
             throw new Error(`No reducer with name ${reducerName} setup for store watches. 
             Look at providers that have @Watchable decorators to check the config`);
         }
+
+        if (!reducerObs[property]) {
+            throw new Error(`No reducer property for ${reducerName} with property ${property} setup for store watches. 
+            Look at providers that have @Watchable decorators to check the config`);
+        }
         return reducerObs[property];
     }
 

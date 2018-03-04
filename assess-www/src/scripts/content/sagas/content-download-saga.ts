@@ -4,7 +4,7 @@ import { Container, Inject, Service } from "typedi";
 import { AppContext } from '@assess/app-context';
 import { startContentDownload } from '@assess/content/actions';
 import constants from '@assess/content/constants';
-import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
+import { IContentQueryState, ITarDownloadState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { QueryContentService } from '@assess/content/service/query-content-service';
 import { FileService } from '@assess/services/file-service';
@@ -106,7 +106,7 @@ export class ContentDownloadSaga {
                             yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
                             this.logger.success("Query versions received. Will download tars");
                         } else {
-                            yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, contentQueryResult});
+                            yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
                         }
                     } else {
                         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
@@ -119,7 +119,7 @@ export class ContentDownloadSaga {
             break;
 
             default:
-                yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, contentQueryResult});
+                yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
                 break;
         }
     }
@@ -138,15 +138,6 @@ export class ContentDownloadSaga {
 
             try {
                 downloadedSize += newVersion.size;
-                /*let downloadTarResult: AxiosResponse = yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);
-                let blob: Blob = downloadTarResult.data;
-
-                if (this.appContext.withinCordova) {
-                    yield apply (this.contentUtilService, this.contentUtilService.writeToContentArchive, [newVersion, blob]);
-                    blob = null;
-                    downloadTarResult = null;
-                }*/
-
                 if (this.appContext.withinCordova) {
                     yield apply (this.contentUtilService, this.contentUtilService.downloadTar, [newVersion]);
                 } else {
@@ -157,11 +148,62 @@ export class ContentDownloadSaga {
             } catch (error) {
                 this.logger.error(`Error in downloading tar for`, newVersion);
                 yield put({type: constants.CONTENT_DOWNLOAD_TAR_REJECTED, currentVersion: newVersion});
-            }        
-            yield delay(100);
+            }
         }
 
         this.logger.success("Download tars to content archive done");
         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_FINISHED});        
+    }
+
+
+    public *startExtraction(action: any): IterableIterator<any> {
+        const tarDownloadResult: ITarDownloadState = this.provider.getTarDownloadResult();
+        const extractedHashes: any = this.provider.getQueryContentResult().extractedHashes;
+        // check if there are any errors in download and ask user to continue
+
+        // if no errors
+        
+        // start CONTENT_EXTRACT_SAGA_TAR_STARTED
+        yield put({downloadedVersions: tarDownloadResult.completedDownloads, extractedHashes, 
+            type: constants.CONTENT_EXTRACT_SAGA_TAR_STARTED});
+        yield apply(this.progress, this.progress.startInstall);
+
+        const tarsToExtract: string[] = this.appContext.withinCordova ? 
+            yield apply(this.fileService, this.fileService.getContentDirTarFileNames) :
+            // mock for browser
+            tarDownloadResult.completedDownloads.map(it => `${it.versionWithType}.tar`);
+        
+        yield put({tarsToExtract, type: constants.CONTENT_EXTRACT_TAR_LIST_FULFILLED});
+
+        for (let i = 0, len = tarsToExtract.length; i < len; i++) {
+            const tarfileName: string = tarsToExtract[i];
+            yield put({type: constants.CONTENT_EXTRACT_TAR_STARTED, index: i});
+
+            try {
+                if (this.appContext.withinCordova) {
+                    // TODO
+                } else {
+                    // simulate extract
+                    yield delay(200);
+                }
+
+                yield put({currentTar: tarfileName, type: constants.CONTENT_EXTRACT_TAR_FINISHED});
+            } catch (error) {
+                this.logger.error(`Error in extracting tar for`, tarfileName);
+                yield put({type: constants.CONTENT_EXTRACT_TAR_REJECTED, currentTar: tarfileName});
+            }
+        }
+
+        this.logger.success("Extract/Installing content tars done");
+        yield put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED});  
+        yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});  
+    }
+
+    /**
+     * Pre checks any error in the entire content download saga before we show homeUI
+     * @param action 
+     */
+    public *preAssessChecks(action: any) : IterableIterator<any> { 
+        // TODO
     }
 }

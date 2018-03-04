@@ -17,3 +17,12 @@ export interface ITarDownloadState {
     downloadedSize: string;
     versionsTotal: number;
 }
+
+export interface ITarExtractionState {
+    completedTarFiles: string[];
+    downloadedVersions: NewContentVersion[];
+    extractionsWithError: string[];
+    extractedHashes: any; 
+    pendingTarFiles: string[];
+    totalTarFiles: number;     
+}
