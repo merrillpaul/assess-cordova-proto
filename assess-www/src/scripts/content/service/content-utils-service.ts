@@ -1,14 +1,12 @@
+import { AxiosResponse } from 'axios';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
 import { NewContentVersion } from '@assess/content/dto';
+import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
-
-import config from '@appEnvironment';
-import { AxiosResponse } from 'axios';
-
 
 @Service()
 export class ContentUtilsService {
@@ -21,6 +19,9 @@ export class ContentUtilsService {
 
     @Inject()
     private httpService: HttpService
+
+    @Inject()
+    private configService: ConfigService;
 
     @Logger()
     private logger: LoggingService
@@ -40,7 +41,8 @@ export class ContentUtilsService {
 
 
     public downloadTar(contentVersion: NewContentVersion): Promise<boolean> {
-        const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
+        const url = contentVersion.path ? this.configService.getConfig().centralEndpoint + 
+            contentVersion.path : contentVersion.url;
         return this.fileService.getZipExtractTmpDir()
         .then(tmpDir => {
             this.logger.debug(`Downloading  ${contentVersion}`);
@@ -53,28 +55,12 @@ export class ContentUtilsService {
 
     public downloadTarUrl(contentVersion: NewContentVersion): Promise<AxiosResponse> {
 
-        const url = contentVersion.path ? config.centralEndpoint +  contentVersion.path : contentVersion.url;
+        const url = contentVersion.path ? this.configService.getConfig().centralEndpoint +  
+            contentVersion.path : contentVersion.url;
         this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
         return this.httpService.getRequest().get(url , {
             responseType: 'blob'
-        }); /*.then(response => {
-            this.logger.info(`Downloaded  ${url} ${ response.data.size } for ${contentVersion.displayName}`, contentVersion.versionWithType);
-            if (!this.appContext.withinCordova) {
-                return Promise.all([response.data, null]);
-            } else {
-                return Promise.all([response.data, this.fileService.getContentArchiveDir()])
-            }
-        }).then(results => {
-            const blob = results[0];
-            if (!results[1]) {
-                return null;
-            } else {
-                const tmpDir: DirectoryEntry = results[1] as DirectoryEntry;
-                return this.fileService.writeFile(tmpDir, `${contentVersion.versionWithType}.tar`, blob); 
-            }         
-        }).then((file) => {
-           return true;
-        });*/
+        });
     }
 
     public writeToContentArchive(contentVersion: NewContentVersion, blob: Blob) {

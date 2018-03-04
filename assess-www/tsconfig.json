@@ -16,7 +16,6 @@
     "experimentalDecorators": true,
     "baseUrl":  "./",
     "paths": {
-      "@appEnvironment": ["src/config/localdev.ts"],
       "@assess/*": ["src/scripts/*"],
       "typedi": ["node_modules/typedi-no-dynamic-require"]
     }

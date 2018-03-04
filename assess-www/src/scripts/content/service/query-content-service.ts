@@ -1,7 +1,7 @@
-import config from '@appEnvironment';
 import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
+import { ConfigService } from '@assess/shared/config/config-service';
 import { HttpService } from '@assess/shared/http/http-service';
-import { Inject, Service } from 'typedi-no-dynamic-require';
+import { Inject, Service } from 'typedi';
 import * as interfaceManifest from '../../../public/data/interface-manifest.json';
 
 /** 
@@ -13,8 +13,11 @@ export class QueryContentService {
     @Inject()
     private httpService: HttpService;
 
+    @Inject()
+    private configService: ConfigService;
+
     public queryVersion(query: string): Promise<IContentQueryState> {
-        const url = `/content/queryVersion?branch=${config.branch}&config=${config.config}&query=${query}&interfaceManifest=${JSON.stringify(interfaceManifest)}`;
+        const url = `/content/queryVersion?branch=${this.configService.getConfig().branch}&config=${this.configService.getConfig().config}&query=${query}&interfaceManifest=${JSON.stringify(interfaceManifest)}`;
         return new Promise<IContentQueryState>((res, rej) => {
             this.httpService.getCentralRequest().post(url)
             .then(response => {

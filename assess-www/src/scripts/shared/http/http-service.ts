@@ -1,8 +1,8 @@
 
 import { AxiosInstance, default as axios } from 'axios';
+import { Inject,Service } from 'typedi';
 
-import config from '@appEnvironment';
-import { Service } from 'typedi';
+import { ConfigService } from '@assess/shared/config/config-service';
 
 const HEADERS:any = {
     'X-Requested-With': 'Assess',
@@ -12,9 +12,10 @@ const HEADERS:any = {
 export class HttpService {
     private centralRequest: AxiosInstance;
 
-    constructor() {
+    
+    constructor(@Inject(type => ConfigService) configService: ConfigService) {
         this.centralRequest = axios.create({
-          baseURL: config.centralEndpoint + config.centralContext,
+          baseURL: configService.getConfig().centralEndpoint + configService.getConfig().centralContext,
           headers: HEADERS,
           withCredentials: true
         });

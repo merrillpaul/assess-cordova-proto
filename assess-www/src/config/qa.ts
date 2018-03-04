@@ -1,8 +1,6 @@
-import { Config } from '../scripts/config-type';
+import { IConfig } from '../scripts/config-type';
 import { BaseConfig } from './base-config';
-
-const CONFIG: Config = {...BaseConfig,
-  centralContext: '/choose-share',
+const CONFIG: IConfig = {...BaseConfig,
   centralEndpoint: 'https://qa.qiactive.com'
 };
-export default CONFIG;
+export default CONFIG; 

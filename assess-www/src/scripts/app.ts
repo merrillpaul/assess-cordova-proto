@@ -2,7 +2,6 @@ import "reflect-metadata";
 
 import "../styles/base.scss";
 
-import config from "@appEnvironment";
 import { AppContext } from '@assess/app-context';
 
 import { Container } from "typedi";

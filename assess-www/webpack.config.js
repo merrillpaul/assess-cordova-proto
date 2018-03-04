@@ -96,16 +96,18 @@ const baseConfig = (env) => {
       new CopyWebpackPlugin([
         { from: "public" },
         { from: "images", to: "images" }
-      ])
-
-     
+      ]),
+      new webpack.EnvironmentPlugin({
+        NODE_ENV: 'localdev',
+        DEBUG: false
+      })     
     ],
   
     resolve: {
       modules: ["node_modules", path.resolve(process.cwd(), "src")],
       extensions: [".ts", ".js", "scss"],
       alias: {
-        '@appEnvironment': path.resolve(__dirname, `src/config/${env}.ts`),
+        // '@appEnvironment': path.resolve(__dirname, `src/config/${env}.ts`),
         '@assess': path.resolve(__dirname, 'src/scripts'),
         'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require')
       },
