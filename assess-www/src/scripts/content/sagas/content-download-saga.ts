@@ -168,11 +168,20 @@ export class ContentDownloadSaga {
             type: constants.CONTENT_EXTRACT_SAGA_TAR_STARTED});
         yield apply(this.progress, this.progress.startInstall);
 
-        const tarsToExtract: string[] = this.appContext.withinCordova ? 
+        let tarsToExtract: string[] = this.appContext.withinCordova ? 
             yield apply(this.fileService, this.fileService.getContentDirTarFileNames) :
             // mock for browser
             tarDownloadResult.completedDownloads.map(it => `${it.versionWithType}.tar`);
         
+        // optimization to only extract tars that we got updates for
+        if (this.appContext.withinCordova) {
+            const updatedTypes = tarDownloadResult.completedDownloads.map(it => it.versionWithType);
+            tarsToExtract = tarsToExtract.filter(tar => {
+                const type = tar.split('.tar')[0];
+                return updatedTypes.indexOf(type) !== -1;
+            });
+        }
+
         yield put({tarsToExtract, type: constants.CONTENT_EXTRACT_TAR_LIST_FULFILLED});
 
         for (let i = 0, len = tarsToExtract.length; i < len; i++) {
@@ -181,13 +190,10 @@ export class ContentDownloadSaga {
             this.logger.debug(`Tar to extract ${tarfileName}`);
             try {
                 if (this.appContext.withinCordova) {
-                    // TODO
-                    yield delay(200);
-                } else {
-                    // simulate extract
-                    yield delay(50);
+                    yield apply (this.contentUtilService, this.contentUtilService.extractTar, [tarfileName]);
+                } else { // mock for browser
+                    yield delay(100);
                 }
-
                 yield put({currentTar: tarfileName, type: constants.CONTENT_EXTRACT_TAR_FINISHED});
             } catch (error) {
                 this.logger.error(`Error in extracting tar for`, tarfileName);

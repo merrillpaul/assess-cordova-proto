@@ -9,6 +9,7 @@ import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
 const CONTENT_ARCHIVE_DIR: string = "/contentArchive";
 const TMP_EXTRACT_DIR:string = "/zipExtractTemp";
+const CONTENT_WWW_FOLDER = "/contentWww/";
 
 @Service()
 export class FileService {
@@ -18,6 +19,8 @@ export class FileService {
   private contentArchiveDir: DirectoryEntry;
 
   private zipExtractTmpDir: DirectoryEntry;
+
+  private contentWwwDir: DirectoryEntry;
 
   @Inject()
   private appContext: AppContext;
@@ -176,6 +179,7 @@ export class FileService {
 
   public getContentArchiveDir(): Promise<DirectoryEntry> {
     if (this.contentArchiveDir) {
+      this.logger.debug(`Got content archive dir ${this.contentArchiveDir.nativeURL} ${this.contentArchiveDir.toInternalURL()}  ${this.contentArchiveDir.fullPath}`);        
       return Promise.resolve(this.contentArchiveDir);
     } else {
       return this.mkDirsInRoot(CONTENT_ARCHIVE_DIR).then( cDir => {
@@ -361,6 +365,22 @@ export class FileService {
         type: 'application/json'
       }));
     }).then (() => true);
+  }
+
+  /**
+   * Gets/Creates the assess www folder
+   */
+  public getContentWwwDir(): Promise<DirectoryEntry> {
+    if (this.contentWwwDir) {
+      this.logger.debug(`Got content WWW dir ${this.contentWwwDir.nativeURL} ${this.contentWwwDir.toInternalURL()}  ${this.contentWwwDir.fullPath}`);        
+      return Promise.resolve(this.contentWwwDir);
+    } else {
+      return this.mkDirsInRoot(CONTENT_WWW_FOLDER).then( cDir => {
+        this.contentWwwDir = cDir;
+        this.logger.debug(`Created content WWW dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
+        return this.contentWwwDir;
+      });
+    }
   }
 
 }

@@ -132,12 +132,8 @@ const tarsExtracted = (state: ITarExtractionState = tarsExtractionInitialState, 
             currentTarVersion = state.downloadedVersions.filter(it => it.versionWithType === currentTar.split('.tar')[0])[0];
             const extractionsWithError = state.extractionsWithError.map (it => it);
             extractionsWithError.push(currentTar);
-            pendingTarFiles = state.pendingTarFiles.filter (it => it !== currentTar);
-            extractedHashes = state.extractedHashes;
-            if (currentTarVersion) {
-                delete extractedHashes[currentTarVersion.versionWithType];
-            }
-            newState = {...state, extractedHashes, extractionsWithError, pendingTarFiles };
+            pendingTarFiles = state.pendingTarFiles.filter (it => it !== currentTar);            
+            newState = {...state, extractionsWithError, pendingTarFiles };
             break;
         default:
             newState = state;
