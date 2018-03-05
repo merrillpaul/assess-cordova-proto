@@ -3,7 +3,6 @@ import "./login-form.scss";
 
 import { AppContext } from "@assess/app-context";
 import { QueryVersionStatus } from '@assess/content/dto';
-import { ContentProgressState } from "@assess/dto/content-download-status";
 import { BaseComponent } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
 import { FileService } from "@assess/shared/file/file-service";
