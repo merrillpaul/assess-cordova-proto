@@ -13,8 +13,8 @@ export interface ITarDownloadState {
     downloadsInError: NewContentVersion[];
     pendingDownloads: NewContentVersion[];
     completedDownloads: NewContentVersion[];
-    totalSize: string;
-    downloadedSize: string;
+    totalSize: number;
+    downloadedSize: number;
     versionsTotal: number;
 }
 

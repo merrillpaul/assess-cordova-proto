@@ -46,12 +46,23 @@ const queryContent = (state: IContentQueryState = initialState, action: any): IC
 
 const tarsDownloadedInitialState: ITarDownloadState = {
     completedDownloads: [],
-    downloadedSize: '',
+    downloadedSize: 0,
     downloadsInError: [],
     pendingDownloads: [],    
-    totalSize: '',
+    totalSize: 0,
     versionsTotal: 0
 }
+
+const calculateDownloadSize =(downloadState: ITarDownloadState): number => {
+        let total = 0;
+        total = downloadState.pendingDownloads.length > 0 ? 
+            downloadState.pendingDownloads.map(it => it.downloadedSize || 0).reduce((prev, el) => prev + el) : 0;
+        total += downloadState.completedDownloads.length > 0 ? 
+            downloadState.completedDownloads.map(it => it.downloadedSize || 0).reduce((prev, el) => prev + el) : 0;
+        total -=  downloadState.downloadsInError.length > 0 ? 
+            downloadState.downloadsInError.map(it => it.downloadedSize || 0).reduce((prev, el) => prev + el) : 0;
+        return total;
+};
 
 
 const tarsDownloaded = (state: ITarDownloadState = tarsDownloadedInitialState, action: any): ITarDownloadState => {
@@ -63,23 +74,35 @@ const tarsDownloaded = (state: ITarDownloadState = tarsDownloadedInitialState, a
 
         case constants.CONTENT_DOWNLOAD_TAR_SAGA_START:
             const downloadsNeeded: NewContentVersion[]  = action.contentQueryResult.downloadsNeeded;
-            newState = {...tarsDownloadedInitialState, completedDownloads: [], downloadedSize: '0KB', pendingDownloads: downloadsNeeded, 
-                totalSize: action.totalSizeInText, versionsTotal: downloadsNeeded.length};
+            newState = {...tarsDownloadedInitialState, completedDownloads: [], downloadedSize: 0, pendingDownloads: downloadsNeeded, 
+                totalSize: action.totalSizeInBytes, versionsTotal: downloadsNeeded.length};
             break;
         case constants.CONTENT_DOWNLOAD_TAR_FINISHED:
-            version = action.currentVersion;
+            version = {...action.currentVersion, downloadedSize: action.currentVersion.size};
             completedDownloads = state.completedDownloads.map (it => it);
             completedDownloads.push(version);
-            pendingDownloads = state.pendingDownloads.filter (it => it !== version);
-            newState = {...state, downloadedSize: action.downloadedSize, completedDownloads, pendingDownloads };
+            pendingDownloads = state.pendingDownloads.filter (it => it.versionWithType !== version.versionWithType);
+            newState = {...state, completedDownloads, pendingDownloads };
+            newState.downloadedSize = calculateDownloadSize(newState);
+            break;
+
+        case constants.CONTENT_DOWNLOAD_TAR_PROGRESS:
+            version = {...action.currentVersion, downloadedSize: action.downloadedSize};
+            pendingDownloads = state.pendingDownloads.map (it => { 
+                return it.versionWithType ===  version.versionWithType ? version : it;
+            });
+            
+            newState = {...state, pendingDownloads };
+            newState.downloadedSize = calculateDownloadSize(newState);
             break;
 
         case constants.CONTENT_DOWNLOAD_TAR_REJECTED:
-            version = action.currentVersion;
+            version = {...action.currentVersion};
             const downloadsInError = state.downloadsInError.map (it => it);
             downloadsInError.push(version);
-            pendingDownloads = state.pendingDownloads.filter (it => it !== version);
+            pendingDownloads = state.pendingDownloads.filter (it => it.versionWithType !== version.versionWithType);
             newState = {...state, downloadsInError, pendingDownloads };
+            newState.downloadedSize = calculateDownloadSize(newState);
             break;
         default:
             newState = state;

@@ -10,7 +10,7 @@ import { QueryContentService } from '@assess/content/service/query-content-servi
 import { FileService } from '@assess/shared/file/file-service';
 
 import { delay } from 'redux-saga'
-import { all, apply, call, put } from 'redux-saga/effects';
+import { all, apply, call, put, take } from 'redux-saga/effects';
 
 import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
 import { ContentProgressOverlay } from '@assess/content/component/progress/progress-overlay';
@@ -99,17 +99,16 @@ export class ContentDownloadSaga {
                     const canLaunchAssess = yield apply(this.contentUtilService, this.contentUtilService.canLaunchAssess);
                     // we ask for prompt
                     const totalSizeInBytes = contentQueryResult.downloadsNeeded.map(it => it.size || 0).reduce((prev, el) => prev + el);
-                    const totalSizeInText: string = this.fileService.getSizeDescription(totalSizeInBytes);
                     if ( canLaunchAssess ) {
                         const dialogResult = yield apply(this.versionPrompt, this.versionPrompt.showPrompt, [contentQueryResult.downloadsNeeded]);
                         if (dialogResult === 'yes') {
-                            yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
+                            yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInBytes});
                             this.logger.success("Query versions received. Will download tars");
                         } else {
                             yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
                         }
                     } else {
-                        yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInText});
+                        yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_STARTED, contentQueryResult, totalSizeInBytes});
                     }
                 } catch(error) {
                     this.logger.error("Error in start post query", error);
@@ -127,9 +126,9 @@ export class ContentDownloadSaga {
 
     public *startDownloadTars(action: any): IterableIterator<any> {
         const contentQueryResult: IContentQueryState = action.contentQueryResult; 
-        const totalSizeInText = action.totalSizeInText;  
+        const totalSizeInBytes = action.totalSizeInBytes;  
         yield call([this.progress, this.progress.show]);
-        yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_START, contentQueryResult, totalSizeInText});
+        yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_START, contentQueryResult, totalSizeInBytes});
         let downloadedSize: number = 0;      
         
         for (let i = 0, len = contentQueryResult.downloadsNeeded.length; i < len; i++) {
@@ -138,13 +137,7 @@ export class ContentDownloadSaga {
 
             try {
                 downloadedSize += newVersion.size;
-                if (this.appContext.withinCordova) {
-                    yield apply (this.contentUtilService, this.contentUtilService.downloadTar, [newVersion]);
-                } else {
-                    yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);
-                }
-
-                yield put({type: constants.CONTENT_DOWNLOAD_TAR_FINISHED, currentVersion: newVersion, downloadedSize: this.fileService.getSizeDescription(downloadedSize)});
+                yield call([this, this.download], newVersion);                
             } catch (error) {
                 this.logger.error(`Error in downloading tar for ${newVersion}, ${JSON.stringify(error, null, 4)}`);
                 yield put({type: constants.CONTENT_DOWNLOAD_TAR_REJECTED, currentVersion: newVersion});
@@ -155,7 +148,7 @@ export class ContentDownloadSaga {
         yield put({type: constants.CONTENT_DOWNLOAD_TAR_SAGA_FINISHED});        
     }
 
-
+    
     public *startExtraction(action: any): IterableIterator<any> {
         const tarDownloadResult: ITarDownloadState = this.provider.getTarDownloadResult();
         const extractedHashes: any = this.provider.getQueryContentResult().extractedHashes;
@@ -222,5 +215,16 @@ export class ContentDownloadSaga {
      */
     public *preAssessChecks(action: any) : IterableIterator<any> { 
         // TODO
+    }
+
+
+    private *download(newVersion: NewContentVersion) {
+        const channel = this.appContext.withinCordova ?
+            yield apply (this.contentUtilService, this.contentUtilService.downloadTar, [newVersion]) :
+            yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);             
+        
+        while(true) {
+            yield put(yield take(channel));
+        }
     }
 }

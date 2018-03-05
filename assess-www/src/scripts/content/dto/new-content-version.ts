@@ -5,4 +5,5 @@ export interface NewContentVersion {
     url: string;
     size: number;
     path: string;
+    downloadedSize?: number;
 }

@@ -1,6 +1,7 @@
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
 import { El } from '@assess/shared/component/element';
+import { FileService } from '@assess/shared/file/file-service';
 import progressTemplate from './progress-overlay.html';
 import './progress-overlay.scss';
 
@@ -20,6 +21,9 @@ export class ContentProgressOverlay extends BaseOverlay {
 
   @Inject()
   private provider: ContentStateProvider;
+
+  @Inject()
+  private fileService: FileService;
 
   constructor() {
     super('progress-overlay-ctr');
@@ -41,7 +45,7 @@ export class ContentProgressOverlay extends BaseOverlay {
   protected init(): void {
         this.provider.onPendingDownloadsChange().subscribe(change => {
             const tarDownloadResult = this.provider.getTarDownloadResult();
-            this.progressText.innerHTML = `Downloaded ${tarDownloadResult.downloadedSize} of ${tarDownloadResult.totalSize}`;
+            this.progressText.innerHTML = `Downloaded ${this.fileService.getSizeDescription(tarDownloadResult.downloadedSize)} of ${this.fileService.getSizeDescription(tarDownloadResult.totalSize)}`;
             this.progressBar.max = tarDownloadResult.versionsTotal;
             this.progressBar.value = tarDownloadResult.versionsTotal - tarDownloadResult.pendingDownloads.length;
         });

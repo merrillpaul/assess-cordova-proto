@@ -1,8 +1,10 @@
 import { AxiosResponse } from 'axios';
 import * as untar from 'js-untar';
+import { Channel, END, eventChannel } from 'redux-saga';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
+import constants from '@assess/content/constants';
 import { NewContentVersion } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
@@ -41,27 +43,70 @@ export class ContentUtilsService {
     }
 
 
-    public downloadTar(contentVersion: NewContentVersion): Promise<boolean> {
+    public downloadTar(contentVersion: NewContentVersion): Channel<any> {
         const url = contentVersion.path ? this.configService.getConfig().centralEndpoint + 
             contentVersion.path : contentVersion.url;
-        return this.fileService.getZipExtractTmpDir()
-        .then(tmpDir => {
-            this.logger.debug(`Downloading  ${contentVersion}`);
-            return this.fileService.downloadUrlToDir(url, `${contentVersion.versionWithType}.tar`, tmpDir);
-        }).then(tmptarFile => {
-            this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
-            return this.fileService.copyToContentArchiveDir(tmptarFile);
-        }).then(() => true);
+        return eventChannel(emitter => {
+            this.fileService.getZipExtractTmpDir()
+                .then(tmpDir => {
+                    this.logger.debug(`Downloading  ${contentVersion}`);
+                    return this.fileService.downloadUrlToDir(contentVersion, url, `${contentVersion.versionWithType}.tar`, tmpDir, 
+                    (progressEvent: ProgressEvent) => {
+                        emitter({
+                            currentVersion: contentVersion,
+                            downloadedSize: progressEvent.loaded,
+                            type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
+                        });
+                    });
+                }).then(tmptarFile => {
+                    this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
+                    return this.fileService.copyToContentArchiveDir(tmptarFile);
+                }).then(() => {
+                    emitter({
+                        currentVersion: contentVersion,
+                        type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                    });
+                    emitter(END);
+                }).catch(e => { throw e});
+
+            return () => {                
+                this.logger.warn(`Download progress monitor`);
+            }
+        });        
     }
 
-    public downloadTarUrl(contentVersion: NewContentVersion): Promise<AxiosResponse> {
-
+    /**
+     * Plain download for mock in browser to showcase progress
+     * @param contentVersion 
+     */
+    public downloadTarUrl(contentVersion: NewContentVersion): Channel<any> {
+        
         const url = contentVersion.path ? this.configService.getConfig().centralEndpoint +  
             contentVersion.path : contentVersion.url;
         this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
-        return this.httpService.getRequest().get(url , {
-            responseType: 'blob'
-        });
+        
+        return eventChannel(emitter => {
+            const request = this.httpService.getRequest().get(url, {
+                onDownloadProgress: (progressEvent: ProgressEvent) => {
+                    emitter({
+                        currentVersion: contentVersion,
+                        downloadedSize: progressEvent.loaded,
+                        type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
+                    });
+                },
+                responseType: 'blob'                
+            }).then (res => {
+                emitter({
+                    currentVersion: contentVersion,
+                    type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                });
+                emitter(END);
+            }).catch(e =>  { throw e; });
+
+            return () => {
+                this.logger.warn(`Download progress monitor`);
+            }
+        });        
     }
 
     public writeToContentArchive(contentVersion: NewContentVersion, blob: Blob) {

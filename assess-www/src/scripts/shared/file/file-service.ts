@@ -3,6 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
+import { NewContentVersion } from '@assess/content/dto';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 
@@ -179,7 +180,6 @@ export class FileService {
 
   public getContentArchiveDir(): Promise<DirectoryEntry> {
     if (this.contentArchiveDir) {
-      this.logger.debug(`Got content archive dir ${this.contentArchiveDir.nativeURL} ${this.contentArchiveDir.toInternalURL()}  ${this.contentArchiveDir.fullPath}`);        
       return Promise.resolve(this.contentArchiveDir);
     } else {
       return this.mkDirsInRoot(CONTENT_ARCHIVE_DIR).then( cDir => {
@@ -260,7 +260,9 @@ export class FileService {
 
 
   public getSizeDescription(bytes: number): string {
-    if (bytes <= 1024) {
+    if (bytes === 0) {
+      return "0KB";
+    } else if (bytes <= 1024) {
       return "1KB";
     } else if (bytes < 1024 * 512) {
       return `${Math.round(bytes/1024.0)}KB`;
@@ -290,10 +292,13 @@ export class FileService {
    * @param filename 
    * @param targetDir 
    */
-  public downloadUrlToDir(url: string, filename: string, targetDir: DirectoryEntry): Promise<FileEntry> {
+  public downloadUrlToDir(contentVersion: NewContentVersion, url: string, filename: string, targetDir: DirectoryEntry, progressCb): Promise<FileEntry> {
     return new Promise((res, rej) => {
       const transfer = new FileTransfer();
       const uri = encodeURI(url);
+      transfer.onprogress = (progressEvent: ProgressEvent) => {
+        progressCb(progressEvent);
+      };
       transfer.download(uri, `${targetDir.toInternalURL()}/${filename}`, entry => {
         this.logger.debug(`Downloaded ${url} to ${entry.toInternalURL()}`);
         res(entry);
@@ -372,7 +377,6 @@ export class FileService {
    */
   public getContentWwwDir(): Promise<DirectoryEntry> {
     if (this.contentWwwDir) {
-      this.logger.debug(`Got content WWW dir ${this.contentWwwDir.nativeURL} ${this.contentWwwDir.toInternalURL()}  ${this.contentWwwDir.fullPath}`);        
       return Promise.resolve(this.contentWwwDir);
     } else {
       return this.mkDirsInRoot(CONTENT_WWW_FOLDER).then( cDir => {
