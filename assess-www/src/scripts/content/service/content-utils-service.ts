@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios';
 import * as untar from 'js-untar';
 import { Channel, END, eventChannel } from 'redux-saga';
+import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
@@ -47,27 +48,34 @@ export class ContentUtilsService {
         const url = contentVersion.path ? this.configService.getConfig().centralEndpoint + 
             contentVersion.path : contentVersion.url;
         return eventChannel(emitter => {
+            const progressSubject = new Subject<ProgressEvent>();
+            progressSubject
+            .debounceTime(1000)
+            .subscribe(progressEvent => {
+                emitter({
+                    currentVersion: contentVersion,
+                    downloadedSize: progressEvent.loaded,
+                    type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
+                });
+            });
             this.fileService.getZipExtractTmpDir()
                 .then(tmpDir => {
                     this.logger.debug(`Downloading  ${contentVersion}`);
                     return this.fileService.downloadUrlToDir(contentVersion, url, `${contentVersion.versionWithType}.tar`, tmpDir, 
                     (progressEvent: ProgressEvent) => {
-                        emitter({
-                            currentVersion: contentVersion,
-                            downloadedSize: progressEvent.loaded,
-                            type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
-                        });
+                        progressSubject.next(progressEvent);
                     });
                 }).then(tmptarFile => {
                     this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
                     return this.fileService.copyToContentArchiveDir(tmptarFile);
                 }).then(() => {
+                    progressSubject.complete();
                     emitter({
                         currentVersion: contentVersion,
                         type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
                     });
                     emitter(END);
-                }).catch(e => { throw e});
+                }).catch(e =>  { progressSubject.complete(); throw e; });
 
             return () => {                
                 this.logger.warn(`Download progress monitor`);
@@ -84,24 +92,30 @@ export class ContentUtilsService {
         const url = contentVersion.path ? this.configService.getConfig().centralEndpoint +  
             contentVersion.path : contentVersion.url;
         this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
-        
         return eventChannel(emitter => {
+            const progressSubject = new Subject<ProgressEvent>();
+            progressSubject
+            .debounceTime(1000)
+            .subscribe(progressEvent => {
+                emitter({
+                    currentVersion: contentVersion,
+                    downloadedSize: progressEvent.loaded,
+                    type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
+                });
+            });
             const request = this.httpService.getRequest().get(url, {
                 onDownloadProgress: (progressEvent: ProgressEvent) => {
-                    emitter({
-                        currentVersion: contentVersion,
-                        downloadedSize: progressEvent.loaded,
-                        type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
-                    });
+                    progressSubject.next(progressEvent);
                 },
                 responseType: 'blob'                
             }).then (res => {
+                progressSubject.complete();
                 emitter({
                     currentVersion: contentVersion,
                     type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
                 });
                 emitter(END);
-            }).catch(e =>  { throw e; });
+            }).catch(e =>  { progressSubject.complete(); throw e; });
 
             return () => {
                 this.logger.warn(`Download progress monitor`);
