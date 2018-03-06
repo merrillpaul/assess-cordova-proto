@@ -1,8 +1,11 @@
 import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { HttpService } from '@assess/shared/http/http-service';
+import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 import { Inject, Service } from 'typedi';
 import * as interfaceManifest from '../../../public/data/interface-manifest.json';
+
+import * as qs from 'qs';
 
 /** 
  * Most of the logic from QueryContentVersion.m 
@@ -16,10 +19,22 @@ export class QueryContentService {
     @Inject()
     private configService: ConfigService;
 
+    @Logger()
+    private logger: LoggingService;
+
     public queryVersion(query: string): Promise<IContentQueryState> {
-        const url = `/content/queryVersion?branch=${this.configService.getConfig().branch}&config=${this.configService.getConfig().config}&query=${query}&interfaceManifest=${JSON.stringify(interfaceManifest)}`;
+        const url = '/content/queryVersion';
         return new Promise<IContentQueryState>((res, rej) => {
-            this.httpService.getCentralRequest().post(url)
+            const bodyFormData: any = {};
+            const config = this.configService.getConfig();
+            bodyFormData.branch = config.branch;
+            bodyFormData.config = config.config;
+            bodyFormData.interfaceManifest = JSON.stringify(interfaceManifest);
+            bodyFormData.query = query;
+
+            this.logger.info(`Querying version with ${query}`);
+
+            this.httpService.getCentralRequest().post(url, qs.stringify(bodyFormData))
             .then(response => {
                 const downloadables: NewContentVersion[] = [];
                 for (let i = 0, len = response.data.length; i < len; i++ ) {

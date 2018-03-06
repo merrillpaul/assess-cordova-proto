@@ -286,6 +286,20 @@ export class FileService {
     });
   }
 
+  public deleteFolderSilently(parentDir: DirectoryEntry, subDir: string): Promise<boolean> {
+    return new Promise((res, rej) => {
+      parentDir.getDirectory(subDir, { create: false }, dirEntry => {
+        dirEntry.removeRecursively(() => res(true), () => res(false));
+      }, e => res(false))
+    });
+  }
+
+  public deleteFolder(dir: DirectoryEntry): Promise<boolean> {
+    return new Promise<boolean>((res, rej) => {
+      dir.removeRecursively(() => res(true), e => rej(e));
+    });
+  }
+
   /**
    * Downloads a file with name to a folder 
    * @param url 
@@ -385,6 +399,17 @@ export class FileService {
         return this.contentWwwDir;
       });
     }
+  }
+
+  /**
+   * Moves content of sourcePath to target
+   * @param sourcePath 
+   * @param targetDir 
+   */
+  public move(sourceDir: DirectoryEntry, targetDir: DirectoryEntry): Promise<boolean> {
+    return new Promise<boolean>((res, rej) => {
+      sourceDir.moveTo(targetDir, null, () => res(true), e => rej(e));
+    });    
   }
 
 }

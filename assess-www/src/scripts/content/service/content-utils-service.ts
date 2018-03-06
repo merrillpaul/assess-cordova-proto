@@ -1,5 +1,4 @@
 import { AxiosResponse } from 'axios';
-import * as untar from 'js-untar';
 import { Channel, END, eventChannel } from 'redux-saga';
 import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
@@ -11,6 +10,8 @@ import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+
+const ASSESS_GIVE_WWW: string = 'give-www';
 
 @Service()
 export class ContentUtilsService {
@@ -130,7 +131,7 @@ export class ContentUtilsService {
     }
 
     /**
-     * Extracts tar from content archive dir to content www folder
+     * Extracts tar from content archive dir to tmp zip arch folder
      * @param tarfileName 
      */
     public extractTar(tarfileName: string): Promise<boolean> {          
@@ -139,13 +140,54 @@ export class ContentUtilsService {
         .then(archiveDir => {
             return `${archiveDir.toInternalURL()}${tarfileName}`;
         }).then(tarFilePath => {
-            return Promise.all([tarFilePath, this.fileService.getContentWwwDir()]);
+            return Promise.all([tarFilePath, this.fileService.getZipExtractTmpDir()]);
         }).then(results => {
             const tarFilePath: string = results[0];
-            const contentWwwDir: DirectoryEntry = results[1];
-            return this.untar(tarFilePath, contentWwwDir);
+            const tmpZipDir: DirectoryEntry = results[1];
+            return this.untar(tarFilePath, tmpZipDir);
         });
 
+    }
+
+    /**
+     * Moves give-www folder from the tmpZip folder onto the content-www folder.
+     * We first remove the give-www folder in content-www and then make the move, cause 
+     */
+    public updateContentWwwDir(): Promise<boolean> {
+        if (!this.appContext.withinCordova) {
+            return Promise.resolve(true);
+        }
+
+        this.fileService.getContentWwwDir()
+        .then(contentWwwDir => {
+            return Promise.all([contentWwwDir, this.fileService.getZipExtractTmpDir()]);
+        })
+        .then(dirs => {
+            const contentWwwDir: DirectoryEntry = dirs[0];
+            const zipExtractTmpDir: DirectoryEntry = dirs[1];
+            return Promise.all([
+                contentWwwDir,
+                new Promise<DirectoryEntry>((res, rej) => {
+                    zipExtractTmpDir.getDirectory(ASSESS_GIVE_WWW, {}, giveWwwDir => res(giveWwwDir), e => rej(e));
+                })
+            ]);
+        })
+        .then(dirs => {
+            const contentWwwDir: DirectoryEntry = dirs[0];
+            const giveWWWFolder: DirectoryEntry = dirs[1];
+            return Promise.all([contentWwwDir, giveWWWFolder, this.fileService.deleteFolderSilently(contentWwwDir, ASSESS_GIVE_WWW)]);
+        }).
+        then(results => {
+            const contentWwwDir: DirectoryEntry = results[0];
+            const giveWWWFolder: DirectoryEntry = results[1];
+            return this.fileService.move(giveWWWFolder, contentWwwDir);
+        })        
+        .then(result => {
+            if(result === false) {
+                throw new Error("Error while moving tmp givewww to contentwww folder");
+            }
+            return true;
+        });
     }
 
     private untar(tarfilePath: string, targetDir: DirectoryEntry): Promise<boolean> {
@@ -156,7 +198,7 @@ export class ContentUtilsService {
                 if (status) {
                     res(true);
                 } else {
-                    throw `Error in untarring ${tarfilePath} `;
+                    throw new Error(`Error in untarring ${tarfilePath} `);
                 }
             });
         });        

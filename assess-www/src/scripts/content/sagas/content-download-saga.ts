@@ -161,20 +161,11 @@ export class ContentDownloadSaga {
             type: constants.CONTENT_EXTRACT_SAGA_TAR_STARTED});
         yield apply(this.progress, this.progress.startInstall);
 
-        let tarsToExtract: string[] = this.appContext.withinCordova ? 
+        const tarsToExtract: string[] = this.appContext.withinCordova ? 
             yield apply(this.fileService, this.fileService.getContentDirTarFileNames) :
             // mock for browser
             tarDownloadResult.completedDownloads.map(it => `${it.versionWithType}.tar`);
         
-        // optimization to only extract tars that we got updates for
-        if (this.appContext.withinCordova) {
-            const updatedTypes = tarDownloadResult.completedDownloads.map(it => it.versionWithType);
-            tarsToExtract = tarsToExtract.filter(tar => {
-                const type = tar.split('.tar')[0];
-                return updatedTypes.indexOf(type) !== -1;
-            });
-        }
-
         yield put({tarsToExtract, type: constants.CONTENT_EXTRACT_TAR_LIST_FULFILLED});
 
         for (let i = 0, len = tarsToExtract.length; i < len; i++) {
@@ -196,17 +187,15 @@ export class ContentDownloadSaga {
 
         this.logger.success("Extract/Installing content tars done");
 
-        // to run these effects parallely
-        yield all([
-            put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED}),
-            put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED})
-        ]);
+        yield put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED});
+        yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});      
         
     }
 
     public *afterTarExtraction(): IterableIterator<any> {
         const hashes: any = this.provider.getTarExtractionResult().extractedHashes;
-        yield put({ type: constants.WRITE_HASHES, payload: this.fileService.writeExtractedHashes(hashes)});
+        yield apply(this.contentUtilService, this.contentUtilService.updateContentWwwDir);
+        yield apply(this.fileService, this.fileService.writeExtractedHashes, [hashes]);
     }
 
     /**

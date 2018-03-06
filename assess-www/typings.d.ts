@@ -13,15 +13,6 @@ declare module "*.json" {
 	export default value;
 }
 
-declare module 'js-untar';
-
-interface UntarredFile {
-	name: string;
-	buffer: ArrayBuffer;
-	blob: Blob;
-}
-
-
 interface Window {
 	/**
      * Requests a filesystem in which to store application data.

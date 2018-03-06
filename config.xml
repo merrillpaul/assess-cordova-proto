@@ -27,6 +27,12 @@
     <preference name="BackgroundColor" value="0xff0000ff" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="Orientation" value="landscape" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="SplashShowOnlyFirstTime" value="false" />
+    <preference name="ShowSplashScreenSpinner" value="false" />
+    <preference name="SplashScreenDelay" value="2000" />
+    <splash src="res/screen/ios/screen-ipad-landscape.png" />
     <platform name="ios">
         <icon height="76" src="res/icon/ios/icon-76.png" width="76" />
         <icon height="152" src="res/icon/ios/icon-76-2x.png" width="152" />
