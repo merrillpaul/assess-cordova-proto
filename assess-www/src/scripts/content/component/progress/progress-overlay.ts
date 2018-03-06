@@ -1,5 +1,6 @@
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
+import { ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
 import { FileService } from '@assess/shared/file/file-service';
 import progressTemplate from './progress-overlay.html';
@@ -8,6 +9,7 @@ import './progress-overlay.scss';
 import { Inject, Service } from 'typedi';
 
 @Service()
+@ComponentTemplate(progressTemplate)
 export class ContentProgressOverlay extends BaseOverlay {
 
   @El('.message')
@@ -36,10 +38,6 @@ export class ContentProgressOverlay extends BaseOverlay {
   public startInstall(): void {
     this.message.innerHTML = 'Installing the latest Assess content. Please wait.';
     this.progressText.innerHTML = 'Finding tars to extract...';     
-  }
-
-  protected addOverlayContent(content: HTMLElement): void {
-    content.innerHTML = progressTemplate;
   }
 
   protected init(): void {

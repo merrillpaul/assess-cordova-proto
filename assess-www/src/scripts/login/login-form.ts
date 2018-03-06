@@ -3,7 +3,7 @@ import "./login-form.scss";
 
 import { AppContext } from "@assess/app-context";
 import { QueryVersionStatus } from '@assess/content/dto';
-import { BaseComponent } from '@assess/shared/component/base-component';
+import { BaseComponent, ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
 import { FileService } from "@assess/shared/file/file-service";
 import { LoginStateProvider } from "./reducers/state-provider";
@@ -14,6 +14,7 @@ import { Inject, Service } from "typedi";
 import { startLogin } from "./actions";
 
 @Service()
+@ComponentTemplate(template)
 export class LoginForm extends BaseComponent {
 
 	@El('.login-name-input-area input[name="j_username"]')
@@ -35,9 +36,11 @@ export class LoginForm extends BaseComponent {
 	@Inject()
 	private loginSpinner: LoginSpinnerOverlay;
 
-	protected prepareComponent(rootContainer: HTMLDivElement): void {
+	protected prepareComponent(rootContainer: HTMLDivElement): IComponentModel<any> {
 		rootContainer.setAttribute("class", "login-ctr");
-		rootContainer.innerHTML = template;			
+		return {
+			data: {}
+		};	
 	}
 
 	protected initEvents(rootContainer: HTMLDivElement) {

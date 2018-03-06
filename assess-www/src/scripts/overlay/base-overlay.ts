@@ -1,6 +1,7 @@
 import template from './base-overlay.html';
 import './base-overlay.scss';
 
+import { COMPILE_TEMPLATE_METADATA, IComponentModel } from '@assess/shared/component/base-component';
 import { ELEMENT_METADATA, IElementProperty } from '@assess/shared/component/element';
 
 export abstract class BaseOverlay {
@@ -8,17 +9,19 @@ export abstract class BaseOverlay {
   
   private overlayContainer: HTMLDivElement;
 
+  private componentTemplate: string;
+
   constructor(className: string) {
     this.className = className;
   }
 
-  public createContainer(): HTMLDivElement {
+  public createContainer<T>(): HTMLDivElement {
     this.overlayContainer = document.createElement("div") as HTMLDivElement;
     this.overlayContainer.setAttribute('class', `overlay ${this.className}`);
     this.overlayContainer.innerHTML = template;
-    this.addOverlayContent(this.overlayContainer.querySelector(
-      '.overlay-content'
-    ) as HTMLElement);
+    const model: IComponentModel<T> = this.prepareOverlayContent(this.overlayContainer);
+    this.componentTemplate = Reflect.getMetadata(COMPILE_TEMPLATE_METADATA, this.constructor);
+    this.updateTemplate(model);    
     const elAnnotations = Reflect.getMetadata(ELEMENT_METADATA, this.constructor);
     if (elAnnotations) {
       elAnnotations.forEach((element: IElementProperty)  => {
@@ -50,5 +53,14 @@ export abstract class BaseOverlay {
     // STUB
   }  
 
-  protected abstract addOverlayContent(content: HTMLElement): void;
+  protected updateTemplate<T>(model: IComponentModel<T>) {
+    const overlayContent = this.overlayContainer.querySelector(
+      '.overlay-content'
+    ) as HTMLElement;
+    overlayContent.innerHTML = this.componentTemplate;
+  }
+
+  protected prepareOverlayContent<T>(content: HTMLElement): IComponentModel<T> {
+    return null;
+  }
 }

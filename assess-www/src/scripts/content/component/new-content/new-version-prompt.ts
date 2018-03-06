@@ -1,5 +1,6 @@
 import { NewContentVersion } from '@assess/content/dto';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
+import { ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
 import { FileService } from '@assess/shared/file/file-service';
 
@@ -9,6 +10,7 @@ import './new-version-prompt.scss';
 import { Inject, Service } from 'typedi';
 
 @Service()
+@ComponentTemplate(promptTemplate)
 export class NewContentVersionPrompt extends BaseOverlay {
   
 
@@ -42,8 +44,7 @@ export class NewContentVersionPrompt extends BaseOverlay {
     }).join("\n");
     this.contentDisplay.innerHTML = displayText;
      
-  }
-  
+  }  
 
   public showPrompt(newContentVersions: NewContentVersion[]) : Promise<string> {
       super.show();
@@ -60,10 +61,6 @@ export class NewContentVersionPrompt extends BaseOverlay {
         });
       });
       return this.promise;
-  }
-
-  protected addOverlayContent(content: HTMLElement): void {
-    content.innerHTML = promptTemplate;
-  }  
+  } 
 
 }

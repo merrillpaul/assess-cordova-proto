@@ -1,12 +1,13 @@
 import { BaseOverlay } from '@assess/overlay/base-overlay';
+import { ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
 import spinnerTemplate from './login-spinner.html';
 import './login-spinner.scss';
 
 import { Service } from 'typedi';
 
-
 @Service()
+@ComponentTemplate(spinnerTemplate)
 export class LoginSpinnerOverlay extends BaseOverlay {
 
   @El('.message')
@@ -20,8 +21,10 @@ export class LoginSpinnerOverlay extends BaseOverlay {
     this.message.innerHTML = message;
   }
 
-  protected addOverlayContent(content: HTMLElement): void {
-    content.innerHTML = spinnerTemplate;
+  protected prepareOverlayContent(content: HTMLElement): IComponentModel<any> {
+    return {
+      data: {}
+    };
   }
   
 }
