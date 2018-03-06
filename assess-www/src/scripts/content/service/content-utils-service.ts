@@ -133,67 +133,33 @@ export class ContentUtilsService {
      * Extracts tar from content archive dir to content www folder
      * @param tarfileName 
      */
-    public extractTar(tarfileName: string): Promise<boolean> {        
+    public extractTar(tarfileName: string): Promise<boolean> {          
 
-        return this.fileService.getContentArchiveDir().then(archiveDir => {
-            return new Promise<ArrayBuffer>((res, rej) => {
-                archiveDir.getFile(tarfileName, {}, tarFileEntry => {
-
-                    this.logger.debug(`Reading tar file from ${tarFileEntry.toInternalURL()}`);
-                    tarFileEntry.file(file => {
-                        const reader: FileReader = new FileReader();
-                        reader.onloadend = () => {
-                            this.logger.success(`Got tar file contents from ${tarFileEntry.toInternalURL()}`);
-                            res(reader.result);
-                        };
-                        reader.readAsArrayBuffer(file);
-                    }, e => rej(e));                    
-                }, e => rej(e));
-            }); 
-        }).then (arrayBuffer => {
-            return Promise.all([arrayBuffer, this.fileService.getContentWwwDir()]);
+        return this.fileService.getContentArchiveDir()
+        .then(archiveDir => {
+            return `${archiveDir.toInternalURL()}${tarfileName}`;
+        }).then(tarFilePath => {
+            return Promise.all([tarFilePath, this.fileService.getContentWwwDir()]);
         }).then(results => {
-            const arrayBuffer: ArrayBuffer = results[0];
+            const tarFilePath: string = results[0];
             const contentWwwDir: DirectoryEntry = results[1];
-            return this.untar(arrayBuffer, contentWwwDir, tarfileName);
+            return this.untar(tarFilePath, contentWwwDir);
         });
+
     }
 
-    private untar(data: ArrayBuffer, targetDir: DirectoryEntry, tarfilename: string): Promise<boolean> {
-        this.logger.debug(`Starting to untar ${tarfilename}`);
+    private untar(tarfilePath: string, targetDir: DirectoryEntry): Promise<boolean> {
+        this.logger.debug(`Starting to untar ${tarfilePath}`);
+        const tarService: TarService = new TarService();
         return new Promise<boolean>((res, rej) => {
-            untar(data).then(
-                (allFiles: UntarredFile[]) => {
-                    const files = allFiles.filter (file => file.blob.size > 0).reverse();
-                    // this nextfile mechanism is to make the file writing sequentially
-                    // cause otherwise filewriting with html5 plugin complains if too many file calls
-                    // are done parallelly. So we kind of twist the asynchronous to synchronous file writing, one by one.
-                    const nextFile = () => {
-                        // if we have more files to process
-                        if (files.length > 0) {
-                          writeFiles(files.pop() as UntarredFile);
-                        } else {
-                          this.logger.success(`Extracted tar ${tarfilename}`);
-                          res(true);
-                        }
-                    };
-
-                    const writeFiles = (file: UntarredFile) => {  
-                        if (file) {
-                          const filename = file.name.split('/').pop() as string;
-                          this.fileService.createFileWithPath(targetDir, file.name, file.blob).subscribe(fileEntry => {                            
-                            nextFile();
-                          }, e => nextFile());   
-                        }          
-                    };
-                    writeFiles(files.pop() as UntarredFile); 
-
-                },
-                e => {
-                    rej(e);
+            tarService.untar(tarfilePath, targetDir.toInternalURL(), status => {
+                if (status) {
+                    res(true);
+                } else {
+                    throw `Error in untarring ${tarfilePath} `;
                 }
-            );
-        });
+            });
+        });        
     }
 
 }

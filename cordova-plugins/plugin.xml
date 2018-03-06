@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<plugin xmlns="http://phonegap.com/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="assess-cordova-plugins"
+    version="0.0.1">
+  <engines>
+    <engine name="cordova" version=">=3.3.0" />
+  </engines>
+  <dependency id="cordova-plugin-file" version=">=2.0.0" />
+
+  <name>assess-cordova-plugins</name>
+  <description>Assess cordova plugins</description>
+
+  <js-module src="www/tar/TarService.js" name="TarService">
+    <clobbers target="window.TarService" />
+  </js-module>
+
+  <platform name="android">
+    <source-file src="src/android/Tar.java" target-dir="src/com/pearson/assess/cordova" />
+
+    <config-file target="res/xml/config.xml" parent="/widget">
+      <feature name="Tar">
+        <param name="android-package" value="com.pearson.assess.cordova.Tar"/>
+      </feature>
+    </config-file>
+    <lib-file src="src/android/libs/jtar-2.3.jar"/>
+  </platform>
+
+  <platform name="ios">
+    <header-file src="src/ios/utils/NSError+Give.h" target-dir="Plugins/utils" />
+    <source-file src="src/ios/utils/NSError+Give.m" target-dir="Plugins/utils"/>
+
+    <source-file src="src/ios/tar/TarPlugin.m" />
+    <header-file src="src/ios/tar/TarPlugin.h" />
+    <source-file src="src/ios/tar/TarArchive.m" target-dir="Plugins/tar"/>
+    <header-file src="src/ios/tar/TarArchive.h" target-dir="Plugins/tar"/>
+    <header-file src="src/ios/tar/helpers/TarEntryHandler.h" target-dir="Plugins/tar" />
+    <header-file src="src/ios/tar/helpers/TarGnuLongLinkHandler.h" target-dir="Plugins/tar" />
+    <source-file src="src/ios/tar/helpers/TarGnuLongLinkHandler.m" target-dir="Plugins/tar"/>
+    <header-file src="src/ios/tar/helpers/TarPaxHeaderHandler.h" target-dir="Plugins/tar" />
+    <source-file src="src/ios/tar/helpers/TarPaxHeaderHandler.m" target-dir="Plugins/tar"/>
+    <header-file src="src/ios/tar/helpers/TarRegularFileHandler.h" target-dir="Plugins/tar" />
+    <source-file src="src/ios/tar/helpers/TarRegularFileHandler.m" target-dir="Plugins/tar"/>
+
+    <config-file target="config.xml" parent="/widget">
+
+      <feature name="Tar">
+        <param name="ios-package" value="TarPlugin"/>
+      </feature>
+
+    </config-file> 
+    <framework src="libz.dylib" />  
+  </platform>
+</plugin>

@@ -10,6 +10,7 @@
     "author": "Q-interactive Team",
     "license": "Apache-2.0",
     "dependencies": {
+        "assess-cordova-plugins": "file:cordova-plugins",
         "cordova-browser": "^5.0.3",
         "cordova-ios": "^4.5.4",
         "cordova-plugin-console": "^1.1.0",
@@ -26,7 +27,8 @@
             "cordova-plugin-splashscreen": {},
             "cordova-plugin-file": {},
             "cordova-plugin-console": {},
-            "cordova-plugin-file-transfer": {}
+            "cordova-plugin-file-transfer": {},
+            "assess-cordova-plugins": {}
         },
         "platforms": [
             "browser",

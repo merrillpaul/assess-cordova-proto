@@ -299,7 +299,7 @@ export class FileService {
       transfer.onprogress = (progressEvent: ProgressEvent) => {
         progressCb(progressEvent);
       };
-      transfer.download(uri, `${targetDir.toInternalURL()}/${filename}`, entry => {
+      transfer.download(uri, `${targetDir.toInternalURL()}${filename}`, entry => {
         this.logger.debug(`Downloaded ${url} to ${entry.toInternalURL()}`);
         res(entry);
       }, e => rej(e), true, {

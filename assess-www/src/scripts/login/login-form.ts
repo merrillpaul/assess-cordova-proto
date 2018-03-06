@@ -37,45 +37,7 @@ export class LoginForm extends BaseComponent {
 
 	protected prepareComponent(rootContainer: HTMLDivElement): void {
 		rootContainer.setAttribute("class", "login-ctr");
-		rootContainer.innerHTML = template;		
-		/*
-		this.loginButton.addEventListener("click", () => {
-			
-			// spinnerOverlay = new LoginSpinnerOverlay();
-			// spinnerOverlay.show();
-
-			this.contentTarService
-          .downloadAndExtract(
-            //'https://s3.amazonaws.com/qi-qa-tars/lite.tar'
-            //'https://s3.amazonaws.com/qi-qa-tars/js.tar'
-            // the correction here is to a hacked isDesktopBrowser call for the moment
-            // cause if its false, then all those Assess 'phonegap' plugins will kick in.
-            // We wuld need to update all those bridge code to avoid this hack
-            'https://s3.amazonaws.com/qi-qa-tars/non-stim-all-corrected.tar'
-            )
-          .subscribe(
-            status => {
-              console.log('new status', JSON.stringify(status, null, 5));
-              if (status.progress === ContentProgressState.EXTRACTED) {
-                console.log('@@@ Done extracting tar');
-              }
-            },
-            error => {
-              console.log('error', JSON.stringify(error, null, 5));
-              spinnerOverlay.dispose();
-            },
-            () => {
-              spinnerOverlay.dispose();
-              console.log('@@FInAL DONE');
-              this.contentTarService.getContentRoot().subscribe(contentDir => {
-                 console.log('content root', contentDir.fullPath, contentDir.toURL(), contentDir.nativeURL,  contentDir.toInternalURL ? contentDir.toInternalURL(): '');
-                 window.location.href = contentDir.toInternalURL() + 'give-www/homeUI_en.html';
-              });
-            }
-          ); 
-
-			// this.contentTarService.testAjax();
-    	});*/
+		rootContainer.innerHTML = template;			
 	}
 
 	protected initEvents(rootContainer: HTMLDivElement) {
