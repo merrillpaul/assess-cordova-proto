@@ -3,10 +3,12 @@ import { ELEMENT_METADATA, IElementProperty } from '@assess/shared/component/ele
 import { Store } from 'redux';
 import { Inject } from 'typedi';
 
+import * as handlebars from 'handlebars';
+
 export const COMPILE_TEMPLATE_METADATA = "design:comp_template";
 export const ComponentTemplate = (rawTemplate: string) => {
     return target => {
-        Reflect.defineMetadata(COMPILE_TEMPLATE_METADATA, rawTemplate, target);
+        Reflect.defineMetadata(COMPILE_TEMPLATE_METADATA, handlebars.compile(rawTemplate), target);
     };
 }
 
@@ -19,7 +21,7 @@ export abstract class BaseComponent {
 
     private rootContainer: HTMLDivElement;    
 
-    private componentTemplate: string;
+    private componentTemplate: (model, options?) => string;
 
     public dispatchAction(action: any): void {
         this.appContext.dispatchAction(action);
@@ -48,8 +50,8 @@ export abstract class BaseComponent {
         return this.rootContainer;
     }
 
-    protected updateTemplate<T>(model: IComponentModel<T>) {
-        this.rootContainer.innerHTML = this.componentTemplate;
+    public updateTemplate<T>(model: IComponentModel<T>) {
+        this.rootContainer.innerHTML = this.componentTemplate(model ? model.data : {});
     }
 
     protected abstract prepareComponent<T>(rootContainer: HTMLDivElement): IComponentModel<T>;

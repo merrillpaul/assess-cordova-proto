@@ -15,16 +15,5 @@ export class LoginSpinnerOverlay extends BaseOverlay {
 
   constructor() {
     super('login-spinner-ctr');
-  }
-
-  public updateMessage(message: string): void {
-    this.message.innerHTML = message;
-  }
-
-  protected prepareOverlayContent(content: HTMLElement): IComponentModel<any> {
-    return {
-      data: {}
-    };
-  }
-  
+  }  
 }

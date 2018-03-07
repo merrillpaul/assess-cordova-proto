@@ -34,5 +34,6 @@
             "browser",
             "ios"
         ]
-    }
+    },
+    "devDependencies": {}
 }

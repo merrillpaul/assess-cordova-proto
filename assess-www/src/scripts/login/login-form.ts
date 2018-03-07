@@ -39,7 +39,9 @@ export class LoginForm extends BaseComponent {
 	protected prepareComponent(rootContainer: HTMLDivElement): IComponentModel<any> {
 		rootContainer.setAttribute("class", "login-ctr");
 		return {
-			data: {}
+			data: {
+				name: 'Merrill'
+			}
 		};	
 	}
 

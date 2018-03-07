@@ -15,8 +15,10 @@ import { all, apply, call, put, take } from 'redux-saga/effects';
 import { NewContentVersionPrompt } from '@assess/content/component/new-content/new-version-prompt';
 import { ContentProgressOverlay } from '@assess/content/component/progress/progress-overlay';
 import { ContentUtilsService } from '@assess/content/service/content-utils-service';
+import { I18n } from '@assess/i18n/i18n';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+
 
 @Service()
 export class ContentDownloadSaga {
@@ -45,6 +47,9 @@ export class ContentDownloadSaga {
     @Inject()
     private progress: ContentProgressOverlay;
 
+    @Inject()
+    private i18n: I18n;
+
     @Logger()
     private logger: LoggingService;
 
@@ -68,7 +73,7 @@ export class ContentDownloadSaga {
      */
     public *startQueryVersionSaga(action: any): IterableIterator<any> {
         // then call queryVersion
-        yield call([this.spinner, this.spinner.updateMessage], 'Please wait a moment while Assess gets any new content')
+        yield call([this.spinner, this.spinner.updateTemplate], { data: {message: this.i18n.getMessage('give.content.query')}});
         yield put({type: constants.QUERY_VERSION_PENDING});
         try {
             const queryVersionResult = yield call([this.queryContentService, this.queryContentService.queryVersion], action.payload);

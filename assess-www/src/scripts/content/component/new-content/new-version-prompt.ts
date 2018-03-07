@@ -1,4 +1,5 @@
 import { NewContentVersion } from '@assess/content/dto';
+import { I18n } from '@assess/i18n/i18n';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
 import { ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
 import { El } from '@assess/shared/component/element';
@@ -16,6 +17,9 @@ export class NewContentVersionPrompt extends BaseOverlay {
 
   @Inject()
   private fileService: FileService;
+
+  @Inject()
+  private i18n: I18n;
 
   @El('input.yes')
   private yesButton: HTMLButtonElement;
@@ -37,7 +41,7 @@ export class NewContentVersionPrompt extends BaseOverlay {
 
   public updateContentVersions(newContentVersions: NewContentVersion[]) {
     const totalSizeInBytes = newContentVersions.map(it => it.size || 0).reduce((prev, el) => prev + el);
-    this.title.innerHTML = `There is ${this.fileService.getSizeDescription(totalSizeInBytes)} of new content available`;
+    this.title.innerHTML = this.i18n.getMessage('give.content.new.available', { size: this.fileService.getSizeDescription(totalSizeInBytes)});
 
     const displayText = newContentVersions.map(it => {
         return `<div class="content-version">${it.displayName || it.versionWithType}</div>`

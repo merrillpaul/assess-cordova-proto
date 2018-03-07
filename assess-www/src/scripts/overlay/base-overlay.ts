@@ -4,12 +4,14 @@ import './base-overlay.scss';
 import { COMPILE_TEMPLATE_METADATA, IComponentModel } from '@assess/shared/component/base-component';
 import { ELEMENT_METADATA, IElementProperty } from '@assess/shared/component/element';
 
+import * as handlebars from 'handlebars';
+
 export abstract class BaseOverlay {
   private className: string = '';
   
   private overlayContainer: HTMLDivElement;
 
-  private componentTemplate: string;
+  private componentTemplate: (model, options?) => string;
 
   constructor(className: string) {
     this.className = className;
@@ -45,6 +47,13 @@ export abstract class BaseOverlay {
     }
   }
 
+  public updateTemplate<T>(model: IComponentModel<T>) {
+    const overlayContent = this.overlayContainer.querySelector(
+      '.overlay-content'
+    ) as HTMLElement;
+    overlayContent.innerHTML = this.componentTemplate(model ? model.data : {});
+  }
+
   protected init(): void {
     // STUB
   }
@@ -52,14 +61,6 @@ export abstract class BaseOverlay {
   protected initEvents(rootContainer: HTMLDivElement): void {
     // STUB
   }  
-
-  protected updateTemplate<T>(model: IComponentModel<T>) {
-    const overlayContent = this.overlayContainer.querySelector(
-      '.overlay-content'
-    ) as HTMLElement;
-    overlayContent.innerHTML = this.componentTemplate;
-  }
-
   protected prepareOverlayContent<T>(content: HTMLElement): IComponentModel<T> {
     return null;
   }

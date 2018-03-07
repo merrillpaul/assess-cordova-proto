@@ -107,9 +107,9 @@ const baseConfig = (env) => {
       modules: ["node_modules", path.resolve(process.cwd(), "src")],
       extensions: [".ts", ".js", "scss"],
       alias: {
-        // '@appEnvironment': path.resolve(__dirname, `src/config/${env}.ts`),
         '@assess': path.resolve(__dirname, 'src/scripts'),
-        'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require')
+        'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require'),
+        'handlebars' : path.resolve(__dirname, 'node_modules/handlebars/dist/handlebars.js')
       },
     },
   

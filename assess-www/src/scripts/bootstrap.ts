@@ -1,8 +1,9 @@
+import * as Handlebars from 'handlebars';
+import { Dispatch, Store } from "redux";
 import { Container, Inject, Service } from "typedi";
 
-import { Dispatch, Store } from "redux";
-
 import { QueryVersionStatus } from '@assess/content/dto';
+import { I18n } from '@assess/i18n/i18n';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 import { BootstrapStateProvider } from "@assess/shared/state/bootstrap-state-provider";
@@ -27,11 +28,27 @@ export class Bootstrapper {
 	@Inject()
 	private configService: ConfigService;
 
+	@Inject()
+	private i18n: I18n;
+
 	constructor() {		
 		this.appArea = document.getElementById("app-area");
 	}
 
 	public startup(inCordova: boolean | null): void {
+
+		// setting up our i18n function into templates
+		Handlebars.registerHelper('i18n', (options: any) => {
+			const key = options.hash.key;
+			const data = {};
+			Object.keys(options.hash).forEach(k => {
+				if ( k !== 'key') {
+					data[k] = options.hash[k];
+				}
+			});
+			return new Handlebars.SafeString(this.i18n.getMessage(key, data));
+		});
+
 		this.appArea.innerHTML = "";
 		if ( inCordova ) {
 			Container.get(AppContext).setInCordova();
