@@ -1,0 +1,31 @@
+@import 'palette';
+@import 'mixins';
+@import 'variables';
+
+.dialog-ctr {
+    .dialog {
+        .title {
+            font-size: 1.2em;
+            margin-bottom: .5em;
+        }
+        .dialog-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .button-panel {
+            margin-top: 5px;
+            input[type=button] {
+                border-radius: 5px;
+                border: none;
+                width: auto;
+                line-height: 30px;
+                height: 30px;
+                min-width: 50px;
+                -webkit-box-shadow: 2px 1px 5px rgba(0, 0, 0, 0.2);
+                filter: none;
+                margin: 10px;
+                font-size: 1em;                
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@ import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
 import { AuthService } from '@assess/shared/security/auth-service';
 import { Container, Inject, Service } from 'typedi';
 
-import { call, put } from 'redux-saga/effects';
+import { apply, call, put } from 'redux-saga/effects';
 
 
 @Service()
@@ -31,24 +31,20 @@ export class LoginSaga {
             }
             return;
         }
-        /*yield put({ type: constants.LOGIN_REQUEST_PENDING});
+        yield put({ type: constants.LOGIN_REQUEST_PENDING});
         try {
             const response = yield call([this.authService, this.authService.login], action.username, action.password);
             const loginResult = response.data;
-            yield put({type: constants.LOGIN_REQUEST_FULFILLED, loginResult});
+            if (loginResult.mfaDetails) {
+                yield apply (this.loginSpinner, this.loginSpinner.dispose);
+                yield put({type: constants.LOGIN_REQUEST_NEED_MFA, loginResult});                
+            } else {
+                yield put({type: constants.LOGIN_REQUEST_FULFILLED, loginResult});
+                yield put({type: constants.LOGIN_REQUEST_COMPLETED});
+            }
         } catch(error) {
+            yield apply (this.loginSpinner, this.loginSpinner.dispose);
             yield put({type: constants.LOGIN_REQUEST_REJECTED, error});
         }
-        
-        yield put({type: constants.LOGIN_REQUEST_COMPLETED});*/
-
-        // this uses redux-promise-middleware to auto create action types
-        try {
-        yield put.resolve({type: constants.LOGIN_REQUEST, payload: this.authService.login(action.username, action.password)});
-        } catch (error) {
-            yield put({ type: constants.LOGIN_REQUEST_REJECTED, error});
-            this.loginSpinner.dispose();
-        }
-        yield put({type: constants.LOGIN_REQUEST_COMPLETED});
     }
 }

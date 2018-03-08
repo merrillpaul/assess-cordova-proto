@@ -13,7 +13,7 @@ function getDownloadSaga() {
 function* startSaga() {
     // we listen for successful logins
     const contentDownloadSaga = getDownloadSaga();
-    yield takeLatest(loginConstants.LOGIN_REQUEST_FULFILLED, contentDownloadSaga.startSaga.bind(contentDownloadSaga));   
+    yield takeLatest(loginConstants.LOGIN_REQUEST_COMPLETED, contentDownloadSaga.startSaga.bind(contentDownloadSaga));   
 }
 
 function* startQueryVersionSaga() {

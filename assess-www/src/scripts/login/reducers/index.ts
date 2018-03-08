@@ -64,7 +64,10 @@ const login = (state: any = initialState, action: any): LoginState => {
             break;
         case constants.LOGIN_REQUEST_FULFILLED:
             newState = {...state, errors: [], loggedIn: true, userInfo: action.loginResult};
-            break;     
+            break; 
+        case constants.LOGIN_REQUEST_NEED_MFA:
+            newState = {...state, errors: [], userInfo: action.loginResult};
+            break;
         default:
             newState = state;
             break;
@@ -91,6 +94,7 @@ const loginForm = (state: LoginFormState = {
             break;
         case constants.LOGIN_REQUEST_FULFILLED:                   
         case constants.LOGIN_REQUEST_REJECTED:
+        case constants.LOGIN_REQUEST_NEED_MFA:
             newState = {...state, fetching: false };    
             break; 
         default:

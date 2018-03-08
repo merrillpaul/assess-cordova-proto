@@ -1,10 +1,27 @@
+export interface IMfaType {
+    communicatorAddress?: string;
+    expirationTimeInMillis?: number;
+    mfaTypeKey: string;
+    orderOfPreference: number;
+}
+
+export interface IMfaDetails {
+    mfaVerified: boolean;
+    codeEntryFldName?: string;
+    mfaTypes?: IMfaType[];    
+    postUrl?: string;
+    rememberMeFldName?: string;
+    typeFldName?: string;
+    reAuthTimeout?: number;
+}
+
 export interface LoginUserInfo {
     userName: string;
     userId: string;
     eligibleSubtestGUIDs: string[];
     timeZoneOffset: string;
     timeZoneLabel: string;
-    mfaDetails?: any;
+    mfaDetails?: IMfaDetails;
 };
 
 export interface LoginState {

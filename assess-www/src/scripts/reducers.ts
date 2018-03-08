@@ -18,6 +18,9 @@ const startup = (state: any = initialState, action: any) => {
 		case STARTUP_ACTIONS.SHOW_LOGIN:
 			newState = { ...state, targetPage: STARTUP_ACTIONS.SHOW_LOGIN };
 			break;
+		case STARTUP_ACTIONS.SHOW_MFA:
+			newState = { ...state, targetPage: STARTUP_ACTIONS.SHOW_MFA };
+			break;
 		default:
 			newState = state;
 			break;

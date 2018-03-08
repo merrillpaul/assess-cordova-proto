@@ -4,6 +4,8 @@ import { Container, Inject, Service } from "typedi";
 
 import { QueryVersionStatus } from '@assess/content/dto';
 import { I18n } from '@assess/i18n/i18n';
+import { MfaForm } from '@assess/mfa/component/mfa-form';
+import { BaseComponent } from '@assess/shared/component/base-component';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 import { BootstrapStateProvider } from "@assess/shared/state/bootstrap-state-provider";
@@ -16,6 +18,8 @@ export class Bootstrapper {
 	private appArea: HTMLElement;
 
 	@Inject() private loginForm: LoginForm;
+
+	@Inject() private mfaForm: MfaForm;
 
 	@Inject() private stateProvider: BootstrapStateProvider;
 
@@ -30,6 +34,8 @@ export class Bootstrapper {
 
 	@Inject()
 	private i18n: I18n;
+
+	private prevComponentName: string;
 
 	constructor() {		
 		this.appArea = document.getElementById("app-area");
@@ -65,7 +71,10 @@ export class Bootstrapper {
 					this.appArea.innerHTML = "";
 					break;
 				case STARTUP_ACTIONS.SHOW_LOGIN:
-					this.addComponent(this.loginForm.createContainer());
+					this.addComponent(this.loginForm);
+					break;
+				case STARTUP_ACTIONS.SHOW_MFA:
+					this.addComponent(this.mfaForm);
 					break;
 				default:
 					break;
@@ -73,8 +82,14 @@ export class Bootstrapper {
 		});
 	}
 
-	private addComponent(component: HTMLElement): void {
+	private addComponent(component: BaseComponent): void {
 		this.appArea.innerHTML = "";
-		this.appArea.appendChild(component);
+		if ( this.prevComponentName ) {
+			document.body.classList.remove(`page_${this.prevComponentName}`);
+		}
+		this.appArea.appendChild(component.createContainer());
+		const componentConst: any = component.constructor;
+		this.prevComponentName = componentConst.name;
+		document.body.classList.add(`page_${this.prevComponentName}`);
 	}
 }

@@ -93,3 +93,134 @@
 	zoom: 1;
     *display: inline;
 } 
+
+@mixin opacity($value) {
+    opacity: $value/100;
+    /*IE 7*/
+    filter: alpha(opacity=$value);
+    /*IE 8*/
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=#{$value})";
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=#{$value});
+}
+
+@mixin simpleTabBorderRadius($radius) {
+	border-top-left-radius: #{$radius}px;
+	border-top-right-radius: #{$radius}px;
+    -moz-border-radius-topleft: #{$radius}px;
+    -moz-border-radius-topright: #{$radius}px;
+    -webkit-border-top-right-radius: #{$radius}px;
+    -webkit-border-top-left-radius: #{$radius}px;
+}
+
+@mixin fourCornerBorderRadius($radius) {
+	border-radius: #{$radius}px;
+	-webkit-border-radius: #{$radius}px;
+	-moz-border-radius: #{$radius}px;
+}
+
+@mixin fourCornerBorderRadius2($topLeft:5, $topRight:5, $bottomLeft:5, $bottomRight:5) {
+	border-radius: #{$topLeft}px #{$topRight}px #{$bottomLeft}px #{$bottomRight}px;
+	-webkit-border-radius: #{$topLeft}px #{$topRight}px #{$bottomLeft}px #{$bottomRight}px;
+	-moz-border-radius: #{$topLeft}px #{$topRight}px #{$bottomLeft}px #{$bottomRight}px;
+}
+
+@mixin topDropShadow($blur, $color)  {
+    -moz-box-shadow: 0 0 #{$blur}px #{$blur}px #{$color};
+	-webkit-box-shadow: 0 0  #{$blur}px #{$blur}px #{$color};
+	box-shadow: 0 0 #{$blur}px #{$blur}px #{$color};
+    /*Removed IE8 and below drop shadows*/
+}
+
+@mixin lowerRightDropShadow($offset, $blur, $color)  {
+    -moz-box-shadow: #{$offset}px #{$offset}px #{$blur}px #{$color};
+	-webkit-box-shadow: #{$offset}px #{$offset}px #{$blur}px #{$color};
+	box-shadow: #{$offset}px #{$offset}px #{$blur}px #{$color};
+    /*Removed IE8 and below drop shadows*/
+}
+
+@mixin bottomDropShadow($offset, $blur, $color) {
+    -moz-box-shadow: 0px #{$offset}px #{$blur}px #{$color};
+    -webkit-box-shadow: 0px #{$offset}px #{$blur}px #{$color};
+    box-shadow: 0px #{$offset}px #{$blur}px #{$color};
+    /*Removed IE8 and below drop shadows*/
+}
+
+@mixin multipleDropShadow($shadows...) {
+    -moz-box-shadow: $shadows;
+    -webkit-box-shadow: $shadows;
+    box-shadow: $shadows;
+    /*Removed IE8 and below drop shadows*/
+}
+
+@mixin buttonShadows() {
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.5), 0 1px 0px rgba(255,255,255,.4);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.5), 0 1px 0px rgba(255,255,255,.4);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.5), 0 1px 0px rgba(255,255,255,.4);
+	/* For IE 8 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=0, Direction=135, Color='rgba(255,255,255,.4)')";
+	/* For IE 5.5 - 7 */
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=0, Direction=135, Color='rgba(255,255,255,.4)');
+}
+
+@mixin formElementShadows() {
+   -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
+   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
+   box-shadow: inset 0 1px 1px rgba(0,0,0,.5);
+}
+
+
+@mixin gradientBtnGenerator ($start, $end, $hoverStart, $hoverEnd, $activeStart, $activeEnd) {
+	@include simpleGradient($start, $end);
+	&:hover {
+		@include simpleGradient($hoverStart, $hoverEnd);
+	}
+	&:active {
+		@include simpleGradient($activeStart, $activeEnd);
+	}
+	&[disabled] {
+		cursor: default;
+		@include simpleGradient($hoverStart, $hoverEnd);
+	}
+}
+
+
+@mixin gradientAltThemeBg() {
+	@include simpleGradient($bgGradientAltClr, $bgAltClr);
+}
+
+@mixin sizingBorderBox() {
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+@mixin browser($browser, $style, $value, $version:'') {
+	@if ($browser == 'ff') {
+		body:-moz-last-node & {
+			#{$style}: $value;
+		}
+	}
+	@if ($browser == 'wk') {
+		@media screen and (-webkit-min-device-pixel-ratio:0) {
+			#{$style}: $value;
+		}
+	}
+	@if ($browser == 'ie') {
+		@if ($version == '') {
+			#{$style}: $value \9;
+		}
+		@if ($version == '7') {
+			*#{$style}: $value;
+		}
+		@if ($version == '8') {
+			#{$style}: #{$value} \0/\9;
+		}
+		@if ($version == '9') {
+			:root & {
+				#{$style}: #{$value}\9;
+			}
+		}
+		@if ($version == '<9') {
+			*#{$style}: $value;
+			#{$style}: #{$value} \0/\9;
+		}
+	}
+}

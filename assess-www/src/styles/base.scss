@@ -24,4 +24,50 @@ body {
 	background-image: url("../images/login-pearson_bottom_bar.png");
 	background-repeat: no-repeat; 
 	background-position: center 0px;
+	color: $btnColor;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}
+
+.hidden {
+	display: none;
+}
+
+select {
+	@include sizingBorderBox();
+	@include formElementShadows();
+	@include fourCornerBorderRadius(5);
+	padding:3px 2px;
+	height: 29px;
+	margin:0;
+	width:100%;
+	background-color: $pageBgClr;
+	border-top-color: #96958f;
+	border-left-color: #96958f;
+	border-right-color: #96958f;
+	border-bottom-color: #cdcdc5;
+	@include browser('ie', 'padding', 0px, '7');
+	@include browser('ie', 'height', 25px, '7');
+
+	&.subtest-select-value {
+		margin-left: 5px;
+		/*IE7 Fix*/
+		*width: 722px;
+	}
+
+	&.subtest-select-currency {
+		width: 72px;
+		margin-left: 5px
+	}
+
+	&.test-select-currency {
+		width: 72px;
+		margin-left: 5px
+	}
 }

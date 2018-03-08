@@ -139,9 +139,9 @@ KEYS["give.mfa.instructions"] = "Send the Two-Factor Authentication code to your
 KEYS["give.mfa.select.method.label"] = "Method";
 
 /* MFA type selector options */
-KEYS["give.mfa.option.label.email"] = "Send code to email: %@";
-KEYS["give.mfa.option.label.sms"] = "Send code to phone: %@";
-KEYS["give.mfa.option.label.googleAuthenticator"] = "Use Google Authenticator app%@";
+KEYS["mfa.type.email"] = "Send code to email: {{ communicatorAddress }}";
+KEYS["mfa.type.sms"] = "Send code to phone: {{ communicatorAddress }}";
+KEYS["mfa.type.google.authenticator"] = "Use Google Authenticator app";
 
 /* Send code button */
 KEYS["give.mfa.button.send"] = "Send";

@@ -1,0 +1,62 @@
+<div class="q-interactive-login-area">
+	<div class="hello-label">
+		{{ i18n key='give.mfa.screen.title' }}
+	</div>
+
+	<div class="login-area">
+		<form autocomplete="off" class="cssform" id="mfaForm" >
+			<table class="login-area-table">
+				
+				<tr>
+					<td class="username-label">
+						{{ i18n key='give.mfa.select.method.label' }}
+					</td>
+				</tr>
+				<tr>
+					<td class="login-name-input-area">
+                        <div>
+						<select id="method" name="{{typeFldName}}" tabindex="1">
+                                {{#each mfaTypes}}
+                                    <option
+                                     value="{{ mfaTypeKey }}">{{i18n key = mfaTypeKey communicatorAddress = communicatorAddress}}</option>
+                                {{/each}}
+                        </select>
+                        <button type="button" class="send" id="send-button">
+									<span class="btn-text">
+										{{ i18n key = 'give.mfa.button.send' }}
+									</span>
+
+									<div class="hidden loading"></div>
+                        </button>
+                        </div>
+
+					</td>
+				</tr>
+				
+				<tr>
+					<td class="password-label">
+						{{ i18n key='give.mfa.code.entry.label' }}
+					</td>
+				</tr>
+				<tr>
+					<td class="password-input-area">
+						<input  id="code" name="{{codeEntryFldName}}"
+							   type="text" tabindex="2" disabled/>
+					</td>
+				</tr>
+				
+				<tr>
+					<td class="login-button-area">
+                        <button id="login-button" type="button" tabindex="3" >
+                            {{ i18n key='give.mfa.button.login' }}</button>
+					</td>
+				</tr>
+				<tr>
+					<td class="error-message-area">
+						
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>

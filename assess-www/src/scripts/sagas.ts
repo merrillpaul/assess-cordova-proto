@@ -2,6 +2,7 @@ import { all, put, takeEvery } from "redux-saga/effects";
 import { STARTUP_ACTIONS } from "./app-constants";
 import contentRootSaga from "./content/sagas";
 import loginRootSaga from "./login/sagas";
+import mfaRootSaga from "./mfa/sagas";
 
 
 function* kickStart(action: any): IterableIterator<any> {
@@ -19,6 +20,7 @@ export function* rootSaga() {
 		// enlist all sagas
 		watchBootstrap(),
 		loginRootSaga(),
+		mfaRootSaga(),
 		contentRootSaga()
 	]);
 }
