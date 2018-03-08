@@ -10,8 +10,8 @@ body {
   }
 }
 
-
-.q-interactive-login-area {
+.mfa-ctr {
+  .q-interactive-login-area {
     height: 630px;
     width: $content-width;
     margin: 0;
@@ -33,61 +33,8 @@ body {
       font-size: 40px;
       padding-bottom: 20px;
       font-weight: lighter;
-    }
+    }  
   
-    .logo-for-login-recovery a img {
-      border: none;
-    }
-  
-    .login-info-retrieval {
-      .header {
-        color: $login-qinteractive-label-color;
-        font-weight: lighter;
-        padding-bottom: 20px;
-      }
-  
-      .primary {
-        font-size: 26px;
-        padding-bottom: 7px;
-      }
-  
-      .secondary {
-        font-size: 19px;
-        padding-right: 20px;
-      }
-  
-      .login-recovery-field-label {
-        text-align: left;
-        color: white;
-        height: 22px;
-        padding-top: 10px;
-      }
-  
-      .login-button-area {
-        vertical-align: bottom;
-        padding-left: 0px;
-        padding-top: 10px;
-      }
-  
-      .login-area {
-        padding-top: 20px;
-      }
-  
-      .login-recovery-input-area input[type='text'] {
-        width: 240px;
-        height: 30px;
-        line-height: 30px;
-      }
-  
-      .login-recovery-input-area input[type='password'] {
-        width: 240px;
-        height: 30px;
-        line-height: 30px;
-      }
-  
-      padding-top: 40px;
-      padding-left: 80px;
-    }
   
     .login-label {
       color: $login-field-label-color;
@@ -99,17 +46,6 @@ body {
     .login-area {
       width: 600px;
       *height: 65px; /* IE7 Only */
-    }
-  
-    .loggedout-area {
-      display: inline;
-      color: $login-field-label-color;
-      background: $login-area-backgorund-color;
-      width: 600px;
-      border: 1px solid $login-area-border;
-      border-radius: 10px;
-      -webkit-box-shadow: 2px 1px 5px rgba(0, 0, 0, 0.2);
-      *height: 100px; /* IE7 Only */
     }
   
     .login-name-label {
@@ -285,34 +221,7 @@ body {
       vertical-align: middle;
       padding-bottom: 20px;
     }
-  
-    .errors {
-      color: $alrtHighlight;
-      font-size: 18px;
-      max-width: 300px;
-      margin-top: 15px;
-      line-height: 1.1em;
-    }
-  
-    .errors-large {
-      @extend .errors;
-      font-size: 19px;
-    }
-  
-    .errors-medium {
-      @extend .errors;
-      font-size: 17px;
-    }
-  
-    .errors-small {
-      @extend .errors;
-      font-size: 15px;
-    }
-  
-    .errors-extrasmall {
-      @extend .errors;
-      font-size: 14px;
-    }
+    
     
     .lock {
       margin-top: 5px;
@@ -343,3 +252,4 @@ body {
       line-height: 18px;
     }
   }
+}

@@ -224,3 +224,33 @@
 		}
 	}
 }
+
+
+
+.errors {
+	color: $alrtHighlight;
+	font-size: 18px;
+	max-width: 100%;
+	margin-top: 15px;
+	line-height: 1.1em;
+  }
+
+  .errors-large {
+	@extend .errors;
+	font-size: 19px;
+  }
+
+  .errors-medium {
+	@extend .errors;
+	font-size: 17px;
+  }
+
+  .errors-small {
+	@extend .errors;
+	font-size: 15px;
+  }
+
+  .errors-extrasmall {
+	@extend .errors;
+	font-size: 14px;
+  }
