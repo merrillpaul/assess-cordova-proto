@@ -2,4 +2,5 @@ node_modules
 plugins
 build
 platforms
-www
+www/*
+!cordova-plugins/www/*
