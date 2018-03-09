@@ -118,9 +118,5 @@ export class MfaForm extends BaseComponent {
 			const mfaState: IMfaState = this.provider.getMfaState();
 			this.errorArea.innerHTML = mfaState.errors.join("");
 		});
-
-
-		
-
 	}
 }
