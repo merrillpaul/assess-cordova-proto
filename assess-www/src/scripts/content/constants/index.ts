@@ -1,7 +1,7 @@
 import keyMirror = require('keymirror');
 
 export default keyMirror({    
-    CONTENT_DOWNLOAD_SAGA_FINISHED: null,
+    CONTENT_DOWNLOAD_SAGA_FINISHED: null, // this is our final saga, error or not
     CONTENT_DOWNLOAD_SAGA_STARTED: null,    
     CONTENT_DOWNLOAD_TAR_FINISHED: null, 
     CONTENT_DOWNLOAD_TAR_PROGRESS: null, 

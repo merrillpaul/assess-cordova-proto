@@ -48,7 +48,7 @@
         <preference name="SplashScreenHeight" value="50%" />
         <preference name="SplashScreenDelay" value="3000" />
     </platform>
-    <hook src="hooks/beforePrepare.js" type="before_prepare" />
+    <hook src="hooks/beforeBuild.js" type="before_build" />
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <plugin name="cordova-plugin-console" spec="^1.1.0" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />

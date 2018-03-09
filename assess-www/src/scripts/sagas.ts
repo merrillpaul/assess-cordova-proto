@@ -1,6 +1,7 @@
 import { all, put, takeEvery } from "redux-saga/effects";
 import { STARTUP_ACTIONS } from "./app-constants";
 import contentRootSaga from "./content/sagas";
+import homeRootSaga from "./home/sagas";
 import loginRootSaga from "./login/sagas";
 import mfaRootSaga from "./mfa/sagas";
 
@@ -21,6 +22,7 @@ export function* rootSaga() {
 		watchBootstrap(),
 		loginRootSaga(),
 		mfaRootSaga(),
-		contentRootSaga()
+		contentRootSaga(),
+		homeRootSaga()
 	]);
 }

@@ -47,11 +47,7 @@ function* afterTarExtraction() {
     );
 }
 
-function* postContentUpdate() {
-    const contentDownloadSaga = getDownloadSaga();
-    yield takeLatest(constants.CONTENT_DOWNLOAD_SAGA_FINISHED, 
-        contentDownloadSaga.preAssessChecks.bind(contentDownloadSaga));
-}
+
 
 /** This is our root content download Epic */
 export default function* contentRootSaga() {
@@ -61,7 +57,6 @@ export default function* contentRootSaga() {
         startPostQueryVersion(), 
         startDownloadTars(),
         startTarExtraction(),
-        afterTarExtraction(),
-        postContentUpdate()
+        afterTarExtraction()
     ]);
 } 

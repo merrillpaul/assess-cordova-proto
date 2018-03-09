@@ -9,6 +9,7 @@ import { NewContentVersion } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
+import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 const ASSESS_GIVE_WWW: string = 'give-www';
@@ -28,6 +29,9 @@ export class ContentUtilsService {
     @Inject()
     private configService: ConfigService;
 
+    @Inject()
+    private localeHelper: LocaleHelperService;
+
     @Logger()
     private logger: LoggingService
 
@@ -41,7 +45,13 @@ export class ContentUtilsService {
      */
     public canLaunchAssess(): Promise<boolean> {
         // this should always res with true or false
-        return Promise.resolve(true);
+        if (!this.appContext.withinCordova) {
+            return Promise.resolve(true);
+        }
+        
+        return new Promise<boolean>((res, rej) => {
+            this.localeHelper.getHomeLocalized().then(() => res(true), e => res(false));
+        });
     }
 
 

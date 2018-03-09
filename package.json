@@ -7,7 +7,8 @@
     "scripts": {
         "start": "cordova run ios --browserify --target=\"iPad-Retina, 10.2\" ",
         "build": "cordova build --browserify",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "reset_platform": "npm install && cordova platform remove browser ios && cordova platform add browser ios --browserify && cordova prepare --browserify"
     },
     "author": "Q-interactive Team",
     "license": "Apache-2.0",

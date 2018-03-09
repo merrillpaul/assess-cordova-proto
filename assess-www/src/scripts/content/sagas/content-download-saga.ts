@@ -120,7 +120,11 @@ export class ContentDownloadSaga {
                     yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED, error});
                 }
 
-            break;
+                break;
+
+            case QueryVersionStatus.SUCCESS_WITH_NO_NEW_VERSION:
+                yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
+                break;
 
             default:
                 yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
