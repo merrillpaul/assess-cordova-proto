@@ -5,7 +5,9 @@
 * `cordova platform add ios`
 
 # Build
-`cordova run build`
+`npm run build` ( this one is  a wrapper which browserifies all plugins and cordova js to a single js) 
+This single cordova will be used inside give-www
+or `cordova run build`. 
 
 # Run in Browser
 `cordova run browser`
@@ -15,7 +17,7 @@
 Then open the platforms/ios/<Name>.xcode project and run it on an ipad simulator.
 
 # Run in iOs Simulator
-`cordova run ios --target="iPad-Retina, 10.2"` . Choose your targets appropriately. Look in cordova docs to see how to list the targets on your machine
+`npm start` or `cordova run ios --target="iPad-Retina, 10.2"` . Choose your targets appropriately. Look in cordova docs to see how to list the targets on your machine
 
 # Run just the assess-www
 `cd assess-www && npm start`
