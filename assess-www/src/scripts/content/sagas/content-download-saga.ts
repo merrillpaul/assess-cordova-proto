@@ -195,9 +195,7 @@ export class ContentDownloadSaga {
         }
 
         this.logger.success("Extract/Installing content tars done");
-
         yield put({type: constants.CONTENT_EXTRACT_SAGA_TAR_FINISHED});
-        yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});      
         
     }
 
@@ -205,6 +203,7 @@ export class ContentDownloadSaga {
         const hashes: any = this.provider.getTarExtractionResult().extractedHashes;
         yield apply(this.contentUtilService, this.contentUtilService.updateContentWwwDir);
         yield apply(this.fileService, this.fileService.writeExtractedHashes, [hashes]);
+        yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED}); 
     }
 
     /**

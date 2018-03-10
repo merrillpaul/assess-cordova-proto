@@ -22,7 +22,7 @@ export class HttpService {
     }
 
     public getCentralRequest(): AxiosInstance {
-        return this.centralRequest;
+        return this.centralRequest
     }
 
     public getRequest(): AxiosInstance {

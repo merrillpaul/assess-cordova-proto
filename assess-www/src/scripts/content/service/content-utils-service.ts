@@ -41,7 +41,7 @@ export class ContentUtilsService {
 
     /**
      * This should actually check whether there is any content in our Content root.
-     * So that it will cause the prompt. FOr the moment always true
+     * So that it will cause the prompt.
      */
     public canLaunchAssess(): Promise<boolean> {
         // this should always res with true or false
@@ -167,8 +167,7 @@ export class ContentUtilsService {
         if (!this.appContext.withinCordova) {
             return Promise.resolve(true);
         }
-
-        this.fileService.getContentWwwDir()
+        return this.fileService.getContentWwwDir()
         .then(contentWwwDir => {
             return Promise.all([contentWwwDir, this.fileService.getZipExtractTmpDir()]);
         })

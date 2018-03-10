@@ -2,6 +2,7 @@ import contentConstants from '@assess/content/constants';
 import { IContentQueryState, ITarDownloadState, QueryVersionStatus } from '@assess/content/dto';
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { ContentUtilsService } from '@assess/content/service/content-utils-service';
+import constants from '@assess/home/constants';
 import { ILaunchState } from '@assess/home/dto';
 import { HomeSaga } from '@assess/home/sagas/saga';
 import loginConstants  from '@assess/login/constants';
@@ -29,6 +30,10 @@ class HomeSagaWatcher {
     
     public *watchForContentDone() {
         yield takeLatest(contentConstants.CONTENT_DOWNLOAD_SAGA_FINISHED, this.preAssessChecks.bind(this));
+    }
+
+    public *watchForAssessInterfaceCheck() {
+        yield takeLatest(constants.CHECK_INTERFACES, this.homeSaga.performInterfaceCheckAndLaunchGive.bind(this.homeSaga))
     }
 
     private *preAssessChecks(action: any) {
@@ -61,6 +66,7 @@ class HomeSagaWatcher {
 export default function* homeRootSaga() {
     const watcher: HomeSagaWatcher = Container.get(HomeSagaWatcher);
     yield all([
-        watcher.watchForContentDone.bind(watcher)()
+        watcher.watchForContentDone.bind(watcher)(),
+        watcher.watchForAssessInterfaceCheck.bind(watcher)()
     ]);
 } 

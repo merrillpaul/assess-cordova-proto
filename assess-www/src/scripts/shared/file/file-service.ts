@@ -8,20 +8,17 @@ import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 
 
 const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
-const CONTENT_ARCHIVE_DIR: string = "/contentArchive";
-const TMP_EXTRACT_DIR:string = "/zipExtractTemp";
-const CONTENT_WWW_FOLDER = "/contentWww/";
+const CONTENT_ARCHIVE_DIR: string = "contentArchive";
+const TMP_EXTRACT_DIR:string = "zipExtractTemp";
+const CONTENT_WWW_FOLDER = "contentWww";
+const WWW_FOLDER = "give-www"
 
 @Service()
 export class FileService {
 
   private rootDir: DirectoryEntry;
 
-  private contentArchiveDir: DirectoryEntry;
-
-  private zipExtractTmpDir: DirectoryEntry;
-
-  private contentWwwDir: DirectoryEntry;
+  private wwwDir: DirectoryEntry;
 
   @Inject()
   private appContext: AppContext;
@@ -179,31 +176,24 @@ export class FileService {
   }
 
   public getContentArchiveDir(): Promise<DirectoryEntry> {
-    if (this.contentArchiveDir) {
-      return Promise.resolve(this.contentArchiveDir);
-    } else {
-      return this.mkDirsInRoot(CONTENT_ARCHIVE_DIR).then( cDir => {
-        this.contentArchiveDir = cDir;
-        this.logger.debug(`Created content archive dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
-        return this.contentArchiveDir;
-      });
-    }
+   return this.getRootPath()
+      .then(root => {
+        return new Promise<DirectoryEntry>((res, rej) => {
+          root.getDirectory(CONTENT_ARCHIVE_DIR, { create: true, exclusive: false}, dir => res(dir), e => rej(e));
+        });
+    });
   }
 
   public getZipExtractTmpDir(): Promise<DirectoryEntry> {
     if (!this.appContext.withinCordova) { // mock when opened in browser
       return Promise.resolve(null);
     }
-
-    if (this.zipExtractTmpDir) {
-      return Promise.resolve(this.zipExtractTmpDir);
-    } else {
-      return this.mkDirsInRoot(TMP_EXTRACT_DIR).then( cDir => {
-        this.zipExtractTmpDir = cDir;
-        this.logger.debug(`Created zip extract tmp archive dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
-        return this.zipExtractTmpDir;
-      });
-    }
+    return this.getRootPath()
+      .then(root => {
+        return new Promise<DirectoryEntry>((res, rej) => {
+          root.getDirectory(TMP_EXTRACT_DIR, { create: true, exclusive: false}, dir => res(dir), e => rej(e));
+        });
+    });
   }
 
 
@@ -371,7 +361,7 @@ export class FileService {
    */
   public writeExtractedHashes(hashes: any) : Promise<boolean> {
     const hashString: string = JSON.stringify(hashes);
-    this.logger.info(`Writing the hashes json with ${hashString}`);
+    // this.logger.info(`Writing the hashes json with ${hashString}`);
     if (!this.appContext.withinCordova) {
       return Promise.resolve(true); // mock for browser
     }
@@ -389,16 +379,36 @@ export class FileService {
   /**
    * Gets/Creates the assess www folder
    */
-  public getContentWwwDir(): Promise<DirectoryEntry> {
-    if (this.contentWwwDir) {
-      return Promise.resolve(this.contentWwwDir);
-    } else {
-      return this.mkDirsInRoot(CONTENT_WWW_FOLDER).then( cDir => {
-        this.contentWwwDir = cDir;
-        this.logger.debug(`Created content WWW dir ${cDir.nativeURL} ${cDir.toInternalURL()}  ${cDir.fullPath}`);
-        return this.contentWwwDir;
-      });
+  public getContentWwwDir(): Promise<DirectoryEntry> {      
+    return this.getRootPath()
+      .then(root => {
+        return new Promise<DirectoryEntry>((res, rej) => {
+          root.getDirectory(CONTENT_WWW_FOLDER, { create: true, exclusive: false}, dir => res(dir), e => rej(e));
+        });
+    });
+  }
+
+  /**
+   * Gets/Creates the assess www folder
+   */
+  public getWwwDir(): Promise<DirectoryEntry> {
+
+    if (this.wwwDir != null) {
+      return Promise.resolve(this.rootDir);
     }
+
+    return new Promise<DirectoryEntry>((res, rej) => {
+        window.resolveLocalFileSystemURL(
+          cordova.file.applicationDirectory + 'www',
+          dirEntry => {  
+            this.wwwDir = dirEntry as DirectoryEntry;                    
+            res(dirEntry as DirectoryEntry);
+          },
+          e => {
+            rej(e);
+          }
+        ); 
+      });    
   }
 
   /**
@@ -410,6 +420,46 @@ export class FileService {
     return new Promise<boolean>((res, rej) => {
       sourceDir.moveTo(targetDir, null, () => res(true), e => rej(e));
     });    
+  }
+
+
+  /**
+   * Copies cordova.js from www to our give-www/bower_components/cordova.
+   * Relying on this because we are browserifying so all plugins and core go
+   * to a single file.
+   */
+  public copyCordovaJs(): Promise<boolean> {
+    if (!this.appContext.withinCordova) {
+      // mock in browser
+      return Promise.resolve(true);
+    }
+
+    return this.getWwwDir().then(wwwDir => {
+      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toInternalURL());
+      return new Promise<FileEntry>((res, rej) => {
+        wwwDir.getFile('cordova.js', {}, fileEntry => res(fileEntry), e => rej(e));
+      });      
+    })
+    .then(cordovaJsFile => {
+      return Promise.all([cordovaJsFile, 
+        new Promise<DirectoryEntry>((res, rej) => {
+          this.getContentWwwDir().then(wwwDir => {
+            wwwDir.getDirectory(`${WWW_FOLDER}/bower_components/cordova`, {}, dir => res(dir), e => rej(e));
+          }).catch((e) => rej(e));
+        })
+      ]);
+    })
+    .then(results => {
+        const cordovaJSFile: FileEntry = results[0];
+        const targetDir: DirectoryEntry = results[1];
+        this.logger.debug(`Deleting the cordova indexjs from ${targetDir.toInternalURL()}`);
+        return this.deleteFileSilently(targetDir, 'index.js').then(() => 
+          new Promise<boolean> ((res, rej) => {
+            this.logger.debug(`Copying ${cordovaJSFile.toInternalURL()}`);
+            cordovaJSFile.copyTo(targetDir, 'index.js', () => res(true), e => rej(e));
+          })
+        );        
+    });
   }
 
 }

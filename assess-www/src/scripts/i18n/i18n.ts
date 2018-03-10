@@ -24,7 +24,7 @@ export class I18n {
 
     public getMessage(key: string, data?: any): string {
         const lang = window.navigator.language;
-        const langKeys = this.i18nProperties[lang] || this.i18nProperties[DEFAULT_KEY];
+        const langKeys = this.i18nProperties[lang.toLowerCase()] || this.i18nProperties[DEFAULT_KEY];
         const val = langKeys[key];
         if (!val) {
             return `?? ${key} ??`;
@@ -42,7 +42,7 @@ export class I18n {
                 langKeys[k1] = Handlebars.compile(originalKeys[k1]);
             });
 
-            this.i18nProperties[k] = langKeys;
+            this.i18nProperties[k.toLowerCase()] = langKeys;
         });
     }
 }
