@@ -46,4 +46,9 @@ export class HomeSaga {
             yield put({type: constants.CHECK_INTERFACES});
         }
     }
+
+
+    public *performInterfaceCheckAndLaunchGive(): IterableIterator<any> {
+        
+    }
 }

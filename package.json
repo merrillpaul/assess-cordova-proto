@@ -16,7 +16,6 @@
         "assess-cordova-plugins": "file:cordova-plugins",
         "cordova-browser": "^5.0.3",
         "cordova-ios": "^4.5.4",
-        "cordova-plugin-console": "^1.1.0",
         "cordova-plugin-file": "^6.0.1",
         "cordova-plugin-file-transfer": "^1.7.1",
         "cordova-plugin-splashscreen": "^5.0.2",
@@ -29,7 +28,6 @@
             "cordova-plugin-whitelist": {},
             "cordova-plugin-splashscreen": {},
             "cordova-plugin-file": {},
-            "cordova-plugin-console": {},
             "cordova-plugin-file-transfer": {},
             "assess-cordova-plugins": {}
         },
