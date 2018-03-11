@@ -123,6 +123,7 @@ export class ContentDownloadSaga {
                 break;
 
             case QueryVersionStatus.SUCCESS_WITH_NO_NEW_VERSION:
+                this.logger.warn('Content query with no new versions');
                 yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED});
                 break;
 

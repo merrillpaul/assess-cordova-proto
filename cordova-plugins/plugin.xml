@@ -14,7 +14,7 @@
   <js-module src="www/tar/TarService.js" name="TarService">
     <clobbers target="window.TarService" />
   </js-module>
-
+  
   <platform name="android">
     <source-file src="src/android/Tar.java" target-dir="src/com/pearson/assess/cordova" />
 

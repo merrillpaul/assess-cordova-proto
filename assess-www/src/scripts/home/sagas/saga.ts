@@ -1,3 +1,4 @@
+import { AppContext } from '@assess/app-context';
 import { ContentProgressOverlay } from '@assess/content/component/progress/progress-overlay';
 import constants from '@assess/home/constants';
 import { ILaunchState } from '@assess/home/dto';
@@ -8,6 +9,8 @@ import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
 import { Logger, LoggingService } from '@assess/shared/log/logging-service';
 import { call, put } from 'redux-saga/effects';
 import { Inject, Service } from 'typedi';
+
+const GIVE_WWW = 'give-www';
 
 @Service()
 export class HomeSaga {
@@ -29,6 +32,9 @@ export class HomeSaga {
 
     @Inject()
     private localeHelper: LocaleHelperService;
+
+    @Inject()
+    private appContext: AppContext;
     
     /**
      * These conditions are copied from MainViewController.m
@@ -68,7 +74,31 @@ export class HomeSaga {
         // need to copy platform cordova js's into give-www/bower_components/cordova
         yield call([this.fileService, this.fileService.copyCordovaJs]);
         this.logger.debug('Copied over platform specific cordova JS to assess give-www');
-        const targetPage = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
+        const debugUrl = yield call([this, this.getDebugPlaceholderLocation]);
+        const homeUI = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
+        // refer MainViewController.m #640
+        const targetPage = `${debugUrl}?dest=${homeUI}`;
         this.logger.success(`Will forward to ${targetPage}`);
+        window.location.href = targetPage;
+    }
+
+    private getDebugPlaceholderLocation(): Promise<string> {
+        
+        if ( !this.appContext.withinCordova ) {
+            return Promise.resolve('http://localhost/give/debugLoadPlaceholder.html'); // for local dev
+        }
+        return this.fileService.getContentWwwDir()
+        .then((wwwDir: DirectoryEntry ) => {
+            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL()}`);
+            return new Promise<string>((res, rej) => {
+                wwwDir.getFile(`${GIVE_WWW}/debugLoadPlaceholder.html`, { create: false },  file => {
+                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL()}`);
+                    res(file.toInternalURL());
+                }, e => {
+                    this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);
+                    rej(e);
+                });
+            });   
+        });     
     }
 }

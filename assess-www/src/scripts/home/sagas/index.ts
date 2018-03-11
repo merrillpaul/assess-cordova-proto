@@ -38,7 +38,7 @@ class HomeSagaWatcher {
 
     private *preAssessChecks(action: any) {
         const contentQueryState: IContentQueryState = this.contentStateProvider.getQueryContentResult();
-        
+        this.logger.debug(`In preassess checks with state as ${contentQueryState.contentQueryStatus.toString()}`);
         const launchState: ILaunchState = {
             canLaunchGive: false,
             failedDownloading: false,
@@ -46,6 +46,7 @@ class HomeSagaWatcher {
         };
 
         const response = yield call([this.contentUtilsService, this.contentUtilsService.canLaunchAssess]);
+        this.logger.debug(`Can launch assess ? ${response}`);
         launchState.canLaunchGive = response;
 
         switch (contentQueryState.contentQueryStatus) {
@@ -57,6 +58,9 @@ class HomeSagaWatcher {
 
             case QueryVersionStatus.UPDATE_NEEDED:
                 launchState.platformUpdateNeeded = true;
+                break;
+
+            default:
                 break;
         }
         yield call([this.homeSaga, this.homeSaga.finishWithResult], launchState);

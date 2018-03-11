@@ -394,7 +394,7 @@ export class FileService {
   public getWwwDir(): Promise<DirectoryEntry> {
 
     if (this.wwwDir != null) {
-      return Promise.resolve(this.rootDir);
+      return Promise.resolve(this.wwwDir);
     }
 
     return new Promise<DirectoryEntry>((res, rej) => {

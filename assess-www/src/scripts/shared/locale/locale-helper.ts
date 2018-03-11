@@ -25,14 +25,19 @@ export class LocaleHelperService {
         }
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
+            this.logger.debug(`getHomeLocalized got content www dir as ${wwwDir.toInternalURL()}`);
             return Promise.all([wwwDir, this.getLanguageCodeForHomeUI()]);
         }).then (results => {
             const wwwDir = results[0];
             const langCode = results[1];
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/homeUI_${langCode}.html`, { create: false },  file => {
+                    this.logger.debug(`Yep we have the localized home ui @ ${file.toInternalURL()}`);
                     res(file.toInternalURL());
-                }, e => rej(e));
+                }, e => {
+                    this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);
+                    rej(e);
+                });
             });            
         });
     }
@@ -68,7 +73,7 @@ export class LocaleHelperService {
             const preferredLangs = window.navigator.language;
             if (langs.indexOf(preferredLangs) !== -1) {
                     return preferredLangs;
-                }
+            }
             return 'en';
         });
     }
