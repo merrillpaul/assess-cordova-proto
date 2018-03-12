@@ -76,7 +76,8 @@ export class ContentDownloadSaga {
         yield call([this.spinner, this.spinner.updateTemplate], { data: {message: this.i18n.getMessage('give.content.query')}});
         yield put({type: constants.QUERY_VERSION_PENDING});
         try {
-            const queryVersionResult = yield call([this.queryContentService, this.queryContentService.queryVersion], action.payload);
+            const queryVersionResult = yield call([this.queryContentService, 
+                this.queryContentService.queryVersion], action.payload);
             yield apply(this.spinner, this.spinner.dispose);
             yield put({type: constants.QUERY_VERSION_FULFILLED, queryVersionResult});
 
@@ -162,9 +163,6 @@ export class ContentDownloadSaga {
     public *startExtraction(action: any): IterableIterator<any> {
         const tarDownloadResult: ITarDownloadState = this.provider.getTarDownloadResult();
         const extractedHashes: any = this.provider.getQueryContentResult().extractedHashes;
-        // check if there are any errors in download and ask user to continue
-
-        // if no errors
         
         // start CONTENT_EXTRACT_SAGA_TAR_STARTED
         yield put({downloadedVersions: tarDownloadResult.completedDownloads, extractedHashes, 
@@ -206,15 +204,6 @@ export class ContentDownloadSaga {
         yield apply(this.fileService, this.fileService.writeExtractedHashes, [hashes]);
         yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED}); 
     }
-
-    /**
-     * Pre checks any error in the entire content download saga before we show homeUI
-     * @param action 
-     */
-    public *preAssessChecks(action: any) : IterableIterator<any> { 
-        // TODO
-    }
-
 
     private *download(newVersion: NewContentVersion) {
         const channel = this.appContext.withinCordova ?

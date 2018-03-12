@@ -80,6 +80,7 @@ export class HomeSaga {
         const homeUI = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
         // refer MainViewController.m #640
         const targetPage = `${debugUrl}?dest=${homeUI}`;
+        // alert(`Will forward to ${targetPage}`);
         this.logger.success(`Will forward to ${targetPage}`);
         window.location.href = targetPage;
     }
