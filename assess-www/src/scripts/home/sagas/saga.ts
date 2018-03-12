@@ -6,7 +6,9 @@ import { I18n } from '@assess/i18n/i18n';
 import { Dialog } from '@assess/shared/dialog/dialog';
 import { FileService } from '@assess/shared/file/file-service';
 import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
+
 import { call, put } from 'redux-saga/effects';
 import { Inject, Service } from 'typedi';
 

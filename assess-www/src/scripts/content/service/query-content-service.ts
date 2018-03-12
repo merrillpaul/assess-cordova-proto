@@ -1,7 +1,8 @@
 import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { HttpService } from '@assess/shared/http/http-service';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 import { Inject, Service } from 'typedi';
 import * as interfaceManifest from '../../../public/data/interface-manifest.json';
 

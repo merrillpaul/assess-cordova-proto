@@ -1,6 +1,7 @@
 import loginConstants  from '@assess/login/constants';
 import { MfaSaga } from '@assess/mfa/sagas/saga';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 import constants from '../constants';
 
 import { all, put, takeLatest } from 'redux-saga/effects';

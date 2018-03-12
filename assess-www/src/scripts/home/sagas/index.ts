@@ -6,7 +6,8 @@ import constants from '@assess/home/constants';
 import { ILaunchState } from '@assess/home/dto';
 import { HomeSaga } from '@assess/home/sagas/saga';
 import loginConstants  from '@assess/login/constants';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 
 import { all, apply, call, put, takeLatest } from 'redux-saga/effects';
 import { Container, Inject, Service } from 'typedi';

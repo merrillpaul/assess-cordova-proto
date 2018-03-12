@@ -1,6 +1,7 @@
 import { AppContext } from '@assess/app-context';
 import { FileService } from '@assess/shared/file/file-service';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 import { Inject, Service } from 'typedi';
 
 const GIVE_WWW = 'give-www';

@@ -4,7 +4,8 @@ import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
 import { NewContentVersion } from '@assess/content/dto';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 
 
 const EXTRACTED_VERSIONS_FILE: string = "extractedHashes.json";
@@ -23,8 +24,7 @@ export class FileService {
   @Inject()
   private appContext: AppContext;
 
-  @Logger()
-  private logger: LoggingService;
+  private logger: LoggingService = new LoggingService('FileService');
   
   /**
    * Makde dirs recursively under a parent dir

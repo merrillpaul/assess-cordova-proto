@@ -10,7 +10,8 @@ import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 
 const ASSESS_GIVE_WWW: string = 'give-www';
 

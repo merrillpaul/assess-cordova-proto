@@ -17,8 +17,8 @@ import { ContentProgressOverlay } from '@assess/content/component/progress/progr
 import { ContentUtilsService } from '@assess/content/service/content-utils-service';
 import { I18n } from '@assess/i18n/i18n';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
-import { Logger, LoggingService } from '@assess/shared/log/logging-service';
-
+import { Logger } from '@assess/shared/log/logger-annotation';
+import {  LoggingService } from '@assess/shared/log/logging-service';
 
 @Service()
 export class ContentDownloadSaga {

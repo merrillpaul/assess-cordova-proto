@@ -8,115 +8,128 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const ENV = process.env.npm_lifecycle_event;
 const isProd = ENV === "build";
+const modules = {
+  rules: [
+    {
+      test: /\.ts$/,
+      loader: "ts-loader"
+    },
+    {
+      enforce: "pre",
+      test: /\.ts$/,
+      loader: "tslint-loader"
+    },
+    {
+      test: /\.jpe?g$|\.gif$|\.png$/i,
+      exclude: /node_modules/,
+      use: [
+        {
+          loader: "file-loader?name=images/[name].[ext]",
+          options: {
+            emitFile: false
+          }
+        }
+      ]
+    },
+    {
+      // scss loader for webpack
+      test: /\.scss$/,
+      use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: [
+          {
+            loader: "css-loader",
+            options: { url: false }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              includePaths: [path.resolve(__dirname, "src/styles/commons")]
+            }
+          }
+        ]
+      })
+    },
+    {
+      test: /\.html$/,
+      exclude: /node_modules/,
+      loader: "html-loader?exportAsEs6Default"
+    },
+    {
+      test: /\.ts$/,
+      enforce: "pre",
+      include: [
+        path.resolve(__dirname, "src/config")
+      ],
+      use: [{ loader: 'configLoader' }]
+    }
+  ]
+};
+const pluginsapp = (isProd) => {
+  return [
+    new HtmlWebpackPlugin({
+      template: "public/index.html",
+      chunksSortMode: "dependency",
+      chunks: ['app']
+    }),
+
+    new ExtractTextPlugin({
+      filename: "css/[name].[hash].css",
+      disable: !isProd
+    }),
+
+    new CopyWebpackPlugin([
+      { from: "public" },
+      { from: "images", to: "images" }
+    ]),
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: 'localdev',
+      DEBUG: false
+    })     
+  ];
+};
+const pluginslib = (isProd) => {
+  return [
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: 'localdev',
+      DEBUG: false
+    })      
+  ];
+};
+
+const resolve = {
+  modules: ["node_modules", path.resolve(process.cwd(), "src")],
+  extensions: [".ts", ".js", "scss"],
+  alias: {
+    '@assess': path.resolve(__dirname, 'src/scripts'),
+    'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require'),
+    'handlebars' : path.resolve(__dirname, 'node_modules/handlebars/dist/handlebars.js')
+  },
+};
+const loaders = {
+  modules: ["node_modules", path.resolve(__dirname, "loaders")]
+};
+
+
 const baseConfig = (env) => {
   env = env || 'localdev';
   env = env.toLowerCase();
   console.log(`Webpack with Env ${env}`);
-  return {
+  return [{
     entry: {
       app: ["scripts/app.ts"]
     },
-  
     context: path.join(process.cwd(), "src"),
   
     output: {
       path: path.join(process.cwd(), "dist"),
-      filename: "scripts/[name].[hash].js"
+      filename: "scripts/[name].[hash].js"     
     },
   
-    module: {
-      rules: [
-        {
-          test: /\.ts$/,
-          loader: "ts-loader"
-        },
-        {
-          enforce: "pre",
-          test: /\.ts$/,
-          loader: "tslint-loader"
-        },
-        {
-          test: /\.jpe?g$|\.gif$|\.png$/i,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: "file-loader?name=images/[name].[ext]",
-              options: {
-                emitFile: false
-              }
-            }
-          ]
-        },
-        {
-          // scss loader for webpack
-          test: /\.scss$/,
-          use: ExtractTextPlugin.extract({
-            fallback: "style-loader",
-            use: [
-              {
-                loader: "css-loader",
-                options: { url: false }
-              },
-              {
-                loader: "sass-loader",
-                options: {
-                  includePaths: [path.resolve(__dirname, "src/styles/commons")]
-                }
-              }
-            ]
-          })
-        },
-        {
-          test: /\.html$/,
-          exclude: /node_modules/,
-          loader: "html-loader?exportAsEs6Default"
-        },
-        {
-          test: /\.ts$/,
-          enforce: "pre",
-          include: [
-            path.resolve(__dirname, "src/config")
-          ],
-          use: [{ loader: 'configLoader' }]
-        }
-      ]
-    },
-  
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: "public/index.html",
-        chunksSortMode: "dependency"
-      }),
-  
-      new ExtractTextPlugin({
-        filename: "css/[name].[hash].css",
-        disable: !isProd
-      }),
-  
-      new CopyWebpackPlugin([
-        { from: "public" },
-        { from: "images", to: "images" }
-      ]),
-      new webpack.EnvironmentPlugin({
-        NODE_ENV: 'localdev',
-        DEBUG: false
-      })     
-    ],
-  
-    resolve: {
-      modules: ["node_modules", path.resolve(process.cwd(), "src")],
-      extensions: [".ts", ".js", "scss"],
-      alias: {
-        '@assess': path.resolve(__dirname, 'src/scripts'),
-        'typedi': path.resolve(__dirname, 'node_modules/typedi-no-dynamic-require'),
-        'handlebars' : path.resolve(__dirname, 'node_modules/handlebars/dist/handlebars.js')
-      },
-    },
-  
-    resolveLoader: {
-      modules: ["node_modules", path.resolve(__dirname, "loaders")]
-    },
-  
+    module: modules,  
+    plugins: pluginsapp(isProd),  
+    resolve: resolve,  
+    resolveLoader: loaders,  
     devServer: {
       contentBase: path.join(process.cwd(), "dist"),
       clientLogLevel: "info",
@@ -128,10 +141,28 @@ const baseConfig = (env) => {
         poll: 500
       },
       open: true
+    },  
+    devtool: "source-map"
+  },
+  {
+    entry: {
+      plugins: ["scripts/app-plugin-lib.ts"]
     },
   
+    context: path.join(process.cwd(), "src"),
+  
+    output: {
+      path: path.join(process.cwd(), "dist/plugins"),
+      filename: "[name].js" ,
+      library: 'AssessPlugins'    
+    },
+  
+    module: modules,  
+    plugins: pluginslib(isProd),  
+    resolve: resolve,  
+    resolveLoader: loaders,  
     devtool: "source-map"
-  };
+  }];
   
 }
 
