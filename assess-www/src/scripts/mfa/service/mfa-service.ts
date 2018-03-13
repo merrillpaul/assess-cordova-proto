@@ -17,7 +17,7 @@ export class MfaService {
      */
     public triggerOTP(mfaType: string, codeFldName: string): Promise<IOtpResult> {
         const url = `/mfa/triggerOtp?${codeFldName}=${mfaType}`;
-        return this.httpService.getCentralRequest().post(url).then(result => {
+        return this.httpService.post(url).then(result => {
             const otpResult: IOtpResult = result.data;
             return otpResult;
         });
@@ -30,7 +30,7 @@ export class MfaService {
         bodyFormData[mfaDetails.codeEntryFldName] = mfaCode;
         const url = `/${mfaDetails.postUrl}`;
         return new Promise<boolean>((res, rej) => {
-            this.httpService.getCentralRequest().post(url, qs.stringify(bodyFormData)).then(() => res(true), e => res(false));
+            this.httpService.post(url, qs.stringify(bodyFormData)).then(() => res(true), e => res(false));
         });
     }
 }

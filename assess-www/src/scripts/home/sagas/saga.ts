@@ -3,6 +3,7 @@ import { ContentProgressOverlay } from '@assess/content/component/progress/progr
 import constants from '@assess/home/constants';
 import { ILaunchState } from '@assess/home/dto';
 import { I18n } from '@assess/i18n/i18n';
+import { AppPreferences } from '@assess/shared/config/app-preferences';
 import { Dialog } from '@assess/shared/dialog/dialog';
 import { FileService } from '@assess/shared/file/file-service';
 import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
@@ -11,6 +12,7 @@ import {  LoggingService } from '@assess/shared/log/logging-service';
 
 import { call, put } from 'redux-saga/effects';
 import { Inject, Service } from 'typedi';
+
 
 const GIVE_WWW = 'give-www';
 
@@ -37,6 +39,9 @@ export class HomeSaga {
 
     @Inject()
     private appContext: AppContext;
+
+    @Inject()
+    private appPreferences: AppPreferences;
     
     /**
      * These conditions are copied from MainViewController.m
@@ -77,9 +82,16 @@ export class HomeSaga {
         yield call([this.fileService, this.fileService.copyCordovaJs]);
         this.logger.debug('Copied over platform specific cordova JS to assess give-www');
         const debugUrl = yield call([this, this.getDebugPlaceholderLocation]);
-        const homeUI = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
+        let targetPart;
+        if (this.appContext.withinCordova) {
+            const isPractitioner = yield call([this.appPreferences, this.appPreferences.isPractitioner]);
+            targetPart = isPractitioner ? yield call([this.localeHelper, this.localeHelper.getHomeLocalized]) 
+                : yield call([this.localeHelper, this.localeHelper.getStimLocalized]);           
+        } else {
+            targetPart = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
+        }
         // refer MainViewController.m #640
-        const targetPage = `${debugUrl}?dest=${homeUI}`;
+        const targetPage = `${debugUrl}?dest=${targetPart}`;
         // alert(`Will forward to ${targetPage}`);
         this.logger.success(`Will forward to ${targetPage}`);
         window.location.href = targetPage;

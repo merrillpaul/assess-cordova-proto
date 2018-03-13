@@ -60,12 +60,14 @@ export class Bootstrapper {
 		if ( inCordova ) {
 			Container.get(AppContext).setInCordova();
 			AppSettingsService.fetch('application_mode_preference')
-			.then(val => console.log(`For mode preference value sis ${val}`))
-			.catch(e => console.log(JSON.stringify(e)));
+			.then(val => this.logger.info(`For mode preference value sis ${val}`))
+			.catch(e => this.logger.error(JSON.stringify(e)));
 		}
 			
 		this.initEvents();
-		this.logger.success(`App starting up with ${JSON.stringify(this.configService.getConfig())}`);		
+		this.configService.getConfig().then( config => {
+			this.logger.success(`App starting up with ${JSON.stringify(config)}`);	
+		});	
 		this.appContext.getStore().dispatch({ type: STARTUP_ACTIONS.BOOTSTRAP });
 	}	
 

@@ -9,8 +9,7 @@ export class AuthService {
   private httpService: HttpService;
 
   public login(username: string, password: string): Promise<any> {
-    return this.httpService.getCentralRequest()
-      .get('/sync/checkAuth', { auth: { password, username }, timeout: 1000 * 30 });
+    return this.httpService.get('/sync/checkAuth', { auth: { password, username }, timeout: 1000 * 30 });
   }
 }
 

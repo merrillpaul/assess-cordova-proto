@@ -294,7 +294,7 @@ successCallback, errorCallback
  * @example How to get notified:
  * ```javascript
  * plugins.AppSettings.watch();
- * document.addEventListener ('preferencesChanged', function (evt) {
+ * document.addEventListener ('settingsChanged', function (evt) {
  *     // with some platforms can give you details what is changed
  *     if (evt.key) {
  *         // handle key change

@@ -57,8 +57,7 @@ export class ContentUtilsService {
 
 
     public downloadTar(contentVersion: NewContentVersion): Channel<any> {
-        const url = contentVersion.path ? this.configService.getConfig().centralEndpoint + 
-            contentVersion.path : contentVersion.url;
+        
         return eventChannel(emitter => {
             const progressSubject = new Subject<ProgressEvent>();
             progressSubject
@@ -70,24 +69,30 @@ export class ContentUtilsService {
                     type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
                 });
             });
-            this.fileService.getZipExtractTmpDir()
-                .then(tmpDir => {
-                    this.logger.debug(`Downloading  ${contentVersion}`);
-                    return this.fileService.downloadUrlToDir(contentVersion, url, `${contentVersion.versionWithType}.tar`, tmpDir, 
-                    (progressEvent: ProgressEvent) => {
-                        progressSubject.next(progressEvent);
-                    });
-                }).then(tmptarFile => {
-                    this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
-                    return this.fileService.copyToContentArchiveDir(tmptarFile);
-                }).then(() => {
-                    progressSubject.complete();
-                    emitter({
-                        currentVersion: contentVersion,
-                        type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
-                    });
-                    emitter(END);
-                }).catch(e =>  { progressSubject.complete(); throw e; });
+            this.configService.getConfig().then( conf => {
+                    const url = contentVersion.path ? conf.centralEndpoint + 
+                        contentVersion.path : contentVersion.url;
+
+                    this.fileService.getZipExtractTmpDir()
+                        .then(tmpDir => {
+                            this.logger.debug(`Downloading  ${contentVersion}`);
+                            return this.fileService.downloadUrlToDir(contentVersion, url, `${contentVersion.versionWithType}.tar`, tmpDir, 
+                            (progressEvent: ProgressEvent) => {
+                                progressSubject.next(progressEvent);
+                            });
+                        }).then(tmptarFile => {
+                            this.logger.debug(`Copying ${tmptarFile.toInternalURL()} to contentArchive`);
+                            return this.fileService.copyToContentArchiveDir(tmptarFile);
+                        }).then(() => {
+                            progressSubject.complete();
+                            emitter({
+                                currentVersion: contentVersion,
+                                type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                            });
+                            emitter(END);
+                        }).catch(e =>  { progressSubject.complete(); throw e; });
+                }
+            );           
 
             return () => {                
                 this.logger.warn(`Download progress monitor`);
@@ -99,11 +104,9 @@ export class ContentUtilsService {
      * Plain download for mock in browser to showcase progress
      * @param contentVersion 
      */
-    public downloadTarUrl(contentVersion: NewContentVersion): Channel<any> {
-        
-        const url = contentVersion.path ? this.configService.getConfig().centralEndpoint +  
-            contentVersion.path : contentVersion.url;
-        this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
+    public downloadTarUrl(contentVersion: NewContentVersion): Channel<any> {     
+       
+       
         return eventChannel(emitter => {
             const progressSubject = new Subject<ProgressEvent>();
             progressSubject
@@ -115,20 +118,26 @@ export class ContentUtilsService {
                     type: constants.CONTENT_DOWNLOAD_TAR_PROGRESS,
                 });
             });
-            const request = this.httpService.getRequest().get(url, {
-                onDownloadProgress: (progressEvent: ProgressEvent) => {
-                    progressSubject.next(progressEvent);
-                },
-                responseType: 'blob'                
-            }).then (res => {
-                progressSubject.complete();
-                emitter({
-                    currentVersion: contentVersion,
-                    type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
-                });
-                emitter(END);
-            }).catch(e =>  { progressSubject.complete(); throw e; });
 
+            this.configService.getConfig().then( conf => {
+                const url = contentVersion.path ? conf.centralEndpoint + 
+                    contentVersion.path : contentVersion.url;
+                this.logger.info(`Downloading content from ${url}  for ${contentVersion.displayName}`, contentVersion.versionWithType);
+                this.httpService.get(url, {
+                    onDownloadProgress: (progressEvent: ProgressEvent) => {
+                        progressSubject.next(progressEvent);
+                    },
+                    responseType: 'blob'                
+                }, true ).then (res => {
+                    progressSubject.complete();
+                    emitter({
+                        currentVersion: contentVersion,
+                        type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                    });
+                    emitter(END);
+                }).catch(e =>  { progressSubject.complete(); throw e; });
+            });
+            
             return () => {
                 this.logger.warn(`Download progress monitor`);
             }

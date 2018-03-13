@@ -26,17 +26,20 @@ export class QueryContentService {
     public queryVersion(query: string): Promise<IContentQueryState> {
         const url = '/content/queryVersion';
         return new Promise<IContentQueryState>((res, rej) => {
-            const bodyFormData: any = {};
-            const config = this.configService.getConfig();
-            bodyFormData.branch = config.branch;
-            bodyFormData.config = config.config;
-            bodyFormData.interfaceManifest = JSON.stringify(interfaceManifest);
-            bodyFormData.query = query;
+            
 
             this.logger.info(`Querying version with ${query}`);
 
-            this.httpService.getCentralRequest().post(url, qs.stringify(bodyFormData))
-            .then(response => {
+            this.configService.getConfig().then (config => {
+                const bodyFormData: any = {};
+                bodyFormData.branch = config.branch;
+                bodyFormData.config = config.config;
+                bodyFormData.interfaceManifest = JSON.stringify(interfaceManifest);
+                bodyFormData.query = query;
+                return bodyFormData;
+            }).then(bodyFormData =>
+                this.httpService.post(url, qs.stringify(bodyFormData))
+                .then(response => {
                 const downloadables: NewContentVersion[] = [];
                 for (let i = 0, len = response.data.length; i < len; i++ ) {
                     const item = response.data[i];
@@ -75,7 +78,7 @@ export class QueryContentService {
                     downloadsNeeded: downloadables
                 };
                 res(result);
-            })
+            }))
             .catch(error => rej(QueryVersionStatus.FAILED));
         });
        
