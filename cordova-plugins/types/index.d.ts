@@ -12,6 +12,15 @@ interface TarService {
     
 }
 
+interface AppSettingsService {
+    show(
+        successCallback: () => void,
+        errorCallback: () => void): void;
+
+    fetch (key: string): Promise<any>;
+}
+
 declare var TarService: {
     new (): TarService;
 };
+declare var AppSettingsService: AppSettingsService;

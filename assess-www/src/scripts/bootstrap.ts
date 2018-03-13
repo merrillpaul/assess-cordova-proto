@@ -59,9 +59,13 @@ export class Bootstrapper {
 		this.appArea.innerHTML = "";
 		if ( inCordova ) {
 			Container.get(AppContext).setInCordova();
+			AppSettingsService.fetch('application_mode_preference')
+			.then(val => console.log(`For mode preference value sis ${val}`))
+			.catch(e => console.log(JSON.stringify(e)));
 		}
+			
 		this.initEvents();
-		this.logger.success(`App starting up with ${JSON.stringify(this.configService.getConfig())}`);
+		this.logger.success(`App starting up with ${JSON.stringify(this.configService.getConfig())}`);		
 		this.appContext.getStore().dispatch({ type: STARTUP_ACTIONS.BOOTSTRAP });
 	}	
 

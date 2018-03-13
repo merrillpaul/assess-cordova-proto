@@ -14,16 +14,36 @@
   <js-module src="www/tar/TarService.js" name="TarService">
     <clobbers target="window.TarService" />
   </js-module>
+
+  <js-module src="www/settings/AppSettings.js" name="appsettings">
+		<clobbers target="window.AppSettingsService" />
+	</js-module>
   
+
+  <hook type="before_plugin_install" src="bin/before_plugin_install.js" />
+  <hook type="after_prepare" src="bin/after_prepare.js" />
+	<hook type="after_plugin_install" src="bin/after_plugin_install.js" />
+	<hook type="before_plugin_uninstall" src="bin/before_plugin_uninstall.js" />
+
   <platform name="android">
     <source-file src="src/android/Tar.java" target-dir="src/com/pearson/assess/cordova" />
+    <source-file src="src/android/AppSettings.java" target-dir="src/com/pearson/assess/cordova" />
 
     <config-file target="res/xml/config.xml" parent="/widget">
       <feature name="Tar">
         <param name="android-package" value="com.pearson.assess.cordova.Tar"/>
       </feature>
+      <feature name="AppSettings" >
+				<param name="android-package" value="com.pearson.assess.cordova.AppSettings"/>
+			</feature>
     </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<activity android:name="com.pearson.assess.cordova.AppSettingsActivity" />
+		</config-file>
+		
     <lib-file src="src/android/libs/jtar-2.3.jar"/>
+    <lib-file src="src/android/libs/android-support-v4.jar"/>
   </platform>
 
   <platform name="ios">
@@ -42,11 +62,18 @@
     <header-file src="src/ios/tar/helpers/TarRegularFileHandler.h" target-dir="Plugins/tar" />
     <source-file src="src/ios/tar/helpers/TarRegularFileHandler.m" target-dir="Plugins/tar"/>
 
+    <header-file src="src/ios/settings/AppSettingsPlugin.h" />
+		<source-file src="src/ios/settings/AppSettingsPlugin.m" />
+
     <config-file target="config.xml" parent="/widget">
 
       <feature name="Tar">
         <param name="ios-package" value="TarPlugin"/>
       </feature>
+      
+      <feature name="AppSettings">
+				<param name="ios-package" value="AppSettingsPlugin"/>
+			</feature>
 
     </config-file> 
     <framework src="libz.dylib" />  

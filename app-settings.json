@@ -1,0 +1,153 @@
+{
+    "settings": [
+        {
+            "title":"give.settings.applicationMode",
+            "type":"radio",
+            "key":"application_mode_preference",
+            "default": "practitioner",
+            "items":[{
+                "value":"practitioner",
+                "title":"give.settings.practitioner"
+            }, {
+                "value":"patient",
+                "title":"give.settings.client"
+            }]
+        },
+        {
+            "title":"give.settings.enableBluetoothBypass",
+            "type":"toggle",
+            "default":false,
+            "key":"enable_bluetooth_bypass"
+        },
+        {
+            "title":"give.settings.enableAudioCapture",
+            "type":"toggle",
+            "default":true,
+            "key":"enable_audio_capture"
+        },
+        {
+            "title":"give.settings.externalApp",
+            "type":"toggle",
+            "default":false,
+            "key":"external_app_mode_preference"
+        },
+        {
+            "title":"give.settings.errorReporting",
+            "type":"toggle",
+            "default":false,
+            "key":"error_reporting_mode_preference"
+        },
+        {
+            "title":"give.settings.host",
+            "type":"radio",
+            "key":"application_host_preference",
+            "default": "prod",
+            "items":[
+                {
+                    "value":"localdev",
+                    "title":"LOCALDEV"
+                }, {
+                    "value":"dev",
+                    "title":"DEV"
+                }, {
+                    "value":"int",
+                    "title":"INT"
+                }, {
+                    "value":"qa",
+                    "title":"QA"
+                }, {
+                    "value":"test",
+                    "title":"Test"
+                }, {
+                    "value":"ppe",
+                    "title":"Pre-Production"
+                }, {
+                    "value":"beta1",
+                    "title":"Beta1"
+                }, {
+                    "value":"prod",
+                    "title":"Production"
+                }
+            ]
+        }
+    ],
+    "i18n": {
+        "da": {
+            "give.settings.applicationMode" : "Anvendelsesområde",
+            "give.settings.practitioner" : "Testleder",
+            "give.settings.client" : "Testperson",
+            "give.settings.enableBluetoothBypass" : "Aktivér Bluetooth bypass",
+            "give.settings.enableAudioCapture" : "Aktivér lydoptagelse",
+            "give.settings.errorReporting" : "Fejlrapportering",
+            "give.settings.host" : "Vært",
+            "give.settings.version" : "Version",
+            "give.settings.externalApp" : "Aktivér dataindsamling"
+        },
+        "de": {
+            "give.settings.applicationMode" : "Anwendungsmodus",
+            "give.settings.practitioner" : "Testleiter",
+            "give.settings.client" : "Testperson",
+            "give.settings.enableBluetoothBypass" : "Bluetooth-Umgehung aktivieren",
+            "give.settings.enableAudioCapture" : "Audioaufnahme aktivieren",
+            "give.settings.errorReporting" : "Fehlerberichterstattung",
+            "give.settings.host" : "Host",
+            "give.settings.version" : "Version",
+            "give.settings.externalApp" : "Feldforschung aktivieren"
+        },
+        "en": {
+            "give.settings.applicationMode" : "Application Mode",
+            "give.settings.practitioner" : "Practitioner",
+            "give.settings.client" : "Client",
+            "give.settings.enableBluetoothBypass" : "Enable Bluetooth Bypass",
+            "give.settings.enableAudioCapture" : "Enable Audio Capture",
+            "give.settings.errorReporting" : "Error Reporting",
+            "give.settings.host" : "Host",
+            "give.settings.version" : "Version",
+            "give.settings.externalApp" : "Enable Field Research"
+        },
+        "fr": {
+            "give.settings.applicationMode" : "Mode Application",
+            "give.settings.practitioner" : "Examinateur",
+            "give.settings.client" : "Sujet",
+            "give.settings.enableBluetoothBypass" : "Activer le Bypass du bluetooth",
+            "give.settings.enableAudioCapture" : "Activer la Capture audio",
+            "give.settings.errorReporting" : "Rapport d'erreur",
+            "give.settings.host" : "Hôte",
+            "give.settings.version" : "Version",
+            "give.settings.externalApp" : "Afficher le champ de recherche"
+        },
+        "nb": {
+            "give.settings.applicationMode" : "Programmodus",
+            "give.settings.practitioner" : "Testleder",
+            "give.settings.client" : "Testperson",
+            "give.settings.enableBluetoothBypass" : "Aktiver forbikobling av bluetooth",
+            "give.settings.enableAudioCapture" : "Aktiver lydinnspilling",
+            "give.settings.errorReporting" : "Feilrapportering",
+            "give.settings.host" : "Vert",
+            "give.settings.version" : "Versjon",
+            "give.settings.externalApp" : "Aktiver datainnsamling"
+        },
+        "nl": {
+            "give.settings.applicationMode" : "Programma Modus",
+            "give.settings.practitioner" : "Testleider",
+            "give.settings.client" : "Cliënt",
+            "give.settings.enableBluetoothBypass" : "Sta Bluetooth Bypass toe",
+            "give.settings.enableAudioCapture" : "Sta Audio Opname toe",
+            "give.settings.errorReporting" : "Foutmelding",
+            "give.settings.host" : "Host",
+            "give.settings.version" : "Versie",
+            "give.settings.externalApp" : "Sta dataverzameling toe"
+        },
+        "sv": {
+            "give.settings.applicationMode" : "Application Mode",
+            "give.settings.practitioner" : "Testledare",
+            "give.settings.client" : "Testperson",
+            "give.settings.enableBluetoothBypass" : "Aktivera förbikoppling av bluetooth",
+            "give.settings.enableAudioCapture" : "Aktivera ljudinspelning",
+            "give.settings.errorReporting" : "Felrapportering",
+            "give.settings.host" : "Värddator",
+            "give.settings.version" : "Version",
+            "give.settings.externalApp" : "Aktivera datainsamling"
+        }
+    }
+}
