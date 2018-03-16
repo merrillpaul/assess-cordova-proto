@@ -3,6 +3,10 @@ export interface IConfig {
   centralContext?: string;
   config?: string;
   branch?: string;
+  configuredVersion: string;
+	commitId: string;
+	commitDate: string;
+	buildHost: string;
 }
 
 export interface IEnvironment {

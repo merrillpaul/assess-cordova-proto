@@ -7,7 +7,8 @@ export default keyMirror({
     LOGIN_REQUEST_FULFILLED: null, 
     LOGIN_REQUEST_NEED_MFA: null,  
     LOGIN_REQUEST_PENDING: null,
-    LOGIN_REQUEST_REJECTED: null,    
+    LOGIN_REQUEST_REJECTED: null, 
+    MARK_USER_LOGIN: null,   
     PASSWORD_ERROR: null,
     START_LOGIN: null,    
     USERNAME_ERROR: null

@@ -13,6 +13,8 @@ const CONTENT_ARCHIVE_DIR: string = "contentArchive";
 const TMP_EXTRACT_DIR:string = "zipExtractTemp";
 const CONTENT_WWW_FOLDER = "contentWww";
 const WWW_FOLDER = "give-www"
+const USERS_FOLDER = "users"
+
 
 @Service()
 export class FileService {
@@ -20,6 +22,8 @@ export class FileService {
   private rootDir: DirectoryEntry;
 
   private wwwDir: DirectoryEntry;
+
+  private userDir: DirectoryEntry;
 
   @Inject()
   private appContext: AppContext;
@@ -175,6 +179,18 @@ export class FileService {
     return p;
   }
 
+  /**
+   * Returns a promise which evaluates the user path where we save the project/app files
+   */
+  public getUserDir(): Promise<DirectoryEntry> {
+    return this.getRootPath()
+      .then(root => {
+        return new Promise<DirectoryEntry>((res, rej) => {
+          root.getDirectory(USERS_FOLDER, { create: true, exclusive: false}, dir => res(dir), e => rej(e));
+        });
+    });
+  }
+
   public getContentArchiveDir(): Promise<DirectoryEntry> {
    return this.getRootPath()
       .then(root => {
@@ -244,6 +260,22 @@ export class FileService {
       })
       .catch(e => rej(e));
 
+    });
+    return p;
+  }
+
+
+  public readAsText(parentDir: DirectoryEntry, fileName: string, create: boolean = true): Promise<string> {
+    const p = new Promise<string>((res, rej) => {   
+          parentDir.getFile(fileName, { create, exclusive: false}, fileEntry => {
+            fileEntry.file(file => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                res(reader.result);                
+              };
+              reader.readAsText(file);              
+            });            
+          }, e => rej(e));
     });
     return p;
   }

@@ -16,6 +16,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/bcryptjs": "^2.4.1",
     "@types/cordova": "0.0.34",
     "@types/es6-promise": "0.0.28",
     "@types/handlebars": "^4.0.36",
@@ -56,6 +57,7 @@
     "@types/node": "^9.4.6",
     "@types/uuid": "^3.4.3",
     "axios": "^0.17.1",
+    "bcryptjs": "^2.4.3",
     "cordova-browser": "^5.0.3",
     "cordova-plugin-file": "^6.0.1",
     "cordova-plugin-file-transfer": "^1.7.1",

@@ -1,11 +1,14 @@
 import { invalidPassword, invalidUsername } from '@assess/login/actions';
 import constants from '@assess/login/constants';
+import { LoginStateProvider } from '@assess/login/reducers/state-provider';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
+import { LoginUserInfo } from '@assess/shared/dto/login-state';
 import { AuthService } from '@assess/shared/security/auth-service';
-import { Container, Inject, Service } from 'typedi';
+import { UserStoreService } from '@assess/shared/security/user-store-service';
 
+import * as bcrypt from 'bcryptjs';
 import { apply, call, put } from 'redux-saga/effects';
-
+import { Container, Inject, Service } from 'typedi';
 
 @Service()
 export class LoginSaga {
@@ -15,6 +18,12 @@ export class LoginSaga {
 
     @Inject()
     private loginSpinner: LoginSpinnerOverlay;
+
+    @Inject()
+    private provider: LoginStateProvider;
+
+    @Inject()
+    private userStoreService: UserStoreService;
 
     /**
      * Generator that kick starts the login process
@@ -35,6 +44,8 @@ export class LoginSaga {
         try {
             const response = yield call([this.authService, this.authService.login], action.username, action.password);
             const loginResult = response.data;
+            const salt = bcrypt.genSaltSync(10);
+            const hashedPassword = bcrypt.hashSync(action.password, salt);            
             if (loginResult.mfaDetails) {
                 yield apply (this.loginSpinner, this.loginSpinner.dispose);
                 yield put({type: constants.LOGIN_REQUEST_NEED_MFA, loginResult});                
@@ -42,9 +53,18 @@ export class LoginSaga {
                 yield put({type: constants.LOGIN_REQUEST_FULFILLED, loginResult});
                 yield put({type: constants.LOGIN_REQUEST_COMPLETED});
             }
+            yield put({hashedPassword , type: constants.MARK_USER_LOGIN, username: action.username});
         } catch(error) {
             yield apply (this.loginSpinner, this.loginSpinner.dispose);
             yield put({type: constants.LOGIN_REQUEST_REJECTED, error});
         }
     }
+
+    public *markLogin(action: any): IterableIterator<any> {
+        const userInfo: LoginUserInfo = this.provider.getUserInfo();
+        const hashedPassword = action.hashedPassword;
+        const username: string = action.username;
+        this.userStoreService.markLoggedinUser(userInfo, username, hashedPassword);
+    }
+
 }
