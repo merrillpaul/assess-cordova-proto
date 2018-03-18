@@ -26,14 +26,18 @@ export class AssessmentService {
             this.configService.getConfig().then (config => {
                 const bodyFormData: any = {};
                 bodyFormData.platformVersion = config.configuredVersion;
-                bodyFormData.json = JSON.stringify(existingAssessmentIds);                
+                bodyFormData.json = JSON.stringify({assessmentIds: existingAssessmentIds});                
                 return bodyFormData;
             }).then(bodyFormData =>
                 this.httpService.post(url, qs.stringify(bodyFormData))
-                .then(response => {               
-                    res(response as BatteryInfo);
+                .then(response => { 
+                    this.logger.success(`Get assessment list successfull with ${JSON.stringify(response.data)}`);              
+                    res(response.data as BatteryInfo);
             }))
-            .catch(error => rej(error));
+            .catch(error => {
+                this.logger.error(`Error getting assessment list ${JSON.stringify(error)}`);
+                rej(error);
+            });
         });
     }
 

@@ -26,7 +26,9 @@ interface Window {
 		size: number,
 		successCallback: (fileSystem: FileSystem) => void,
 		errorCallback?: (fileError: FileError) => void
-	): void;
+    ): void;
+    
+    jasmine: any;
 
    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
 }

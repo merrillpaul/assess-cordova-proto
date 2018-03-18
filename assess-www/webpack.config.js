@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 
 const ENV = process.env.npm_lifecycle_event;
@@ -85,7 +86,10 @@ const pluginsapp = (isProd) => {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'localdev',
       DEBUG: false
-    })     
+    }) ,
+    new UglifyJsPlugin({
+      sourceMap: true, uglifyOptions: { mangle: false }
+    })    
   ];
 };
 const pluginslib = (isProd) => {
@@ -93,7 +97,10 @@ const pluginslib = (isProd) => {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'localdev',
       DEBUG: false
-    })      
+    }),
+    new UglifyJsPlugin({
+      sourceMap: true, uglifyOptions: { mangle: false }
+    })       
   ];
 };
 

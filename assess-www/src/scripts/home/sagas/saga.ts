@@ -80,6 +80,7 @@ export class HomeSaga {
     public *performInterfaceCheckAndLaunchGive(): IterableIterator<any> {
         // need to copy platform cordova js's into give-www/bower_components/cordova
         yield call([this.fileService, this.fileService.copyCordovaJs]);
+        yield call([this.fileService, this.fileService.copyAssessPluginsJs]);
         this.logger.debug('Copied over platform specific cordova JS to assess give-www');
         const debugUrl = yield call([this, this.getDebugPlaceholderLocation]);
         let targetPart;

@@ -265,7 +265,7 @@ export class FileService {
   }
 
 
-  public readAsText(parentDir: DirectoryEntry, fileName: string, create: boolean = true): Promise<string> {
+  public readAsText(parentDir: DirectoryEntry, fileName: string, create: boolean = true, encoding: string = 'UTF-8'): Promise<string> {
     const p = new Promise<string>((res, rej) => {   
           parentDir.getFile(fileName, { create, exclusive: false}, fileEntry => {
             fileEntry.file(file => {
@@ -273,11 +273,34 @@ export class FileService {
               reader.onloadend = () => {
                 res(reader.result);                
               };
-              reader.readAsText(file);              
+              reader.readAsText(file, encoding);              
             });            
           }, e => rej(e));
     });
     return p;
+  }
+
+
+  public hasFile(parentDir: DirectoryEntry, filePath: string): Promise<boolean> {
+    return new Promise<boolean>((res, rej) => {
+      parentDir.getFile(filePath, {}, fileEntry => {
+        fileEntry.file(file => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              // The file exists and is readable
+              this.logger.success(`Found file ${fileEntry.toInternalURL()}`);
+              res(true);
+          };
+          reader.readAsText(file);
+      }, e => {
+        this.logger.error(`hasFile error  finding file ${fileEntry.toInternalURL()} with ${JSON.stringify(e)}`);
+        res(false);
+      });
+      }, e => {
+        this.logger.error(`hasFile: no file found ${parentDir.toInternalURL()} ${filePath} with ${JSON.stringify(e)}`);
+        res(false);
+      });
+    });
   }
 
 
@@ -313,6 +336,12 @@ export class FileService {
       parentDir.getDirectory(subDir, { create: false }, dirEntry => {
         dirEntry.removeRecursively(() => res(true), () => res(false));
       }, e => res(false))
+    });
+  }
+
+  public deleteDirSilently(dir: DirectoryEntry): Promise<boolean> {
+    return new Promise((res, rej) => {     
+        dir.removeRecursively(() => res(true), () => res(false));      
     });
   }
 
@@ -420,6 +449,13 @@ export class FileService {
     });
   }
 
+  public getGiveWwwDir(): Promise<DirectoryEntry> {
+    return this.getContentWwwDir()
+    .then (dir => new Promise<DirectoryEntry>((res, rej) => {
+      dir.getDirectory(WWW_FOLDER, {}, wwwDir => res(wwwDir), e => rej(e));
+    }));
+  }
+
   /**
    * Gets/Creates the assess www folder
    */
@@ -455,6 +491,12 @@ export class FileService {
   }
 
 
+  public getFile(parentDir: DirectoryEntry, path: string, create: boolean = false): Promise<FileEntry> {
+    return new Promise<FileEntry>((res, rej) => {
+      parentDir.getFile(path, {create, exclusive: false}, fileEntry => res(fileEntry), e => rej(e));
+    });
+  }
+
   /**
    * Copies cordova.js from www to our give-www/bower_components/cordova.
    * Relying on this because we are browserifying so all plugins and core go
@@ -485,6 +527,46 @@ export class FileService {
         const cordovaJSFile: FileEntry = results[0];
         const targetDir: DirectoryEntry = results[1];
         this.logger.debug(`Deleting the cordova indexjs from ${targetDir.toInternalURL()}`);
+        return this.deleteFileSilently(targetDir, 'index.js').then(() => 
+          new Promise<boolean> ((res, rej) => {
+            this.logger.debug(`Copying ${cordovaJSFile.toInternalURL()}`);
+            cordovaJSFile.copyTo(targetDir, 'index.js', () => res(true), e => rej(e));
+          })
+        );        
+    });
+  }
+
+
+  /**
+   * Copies plugin.js from www to our give-www/bower_components/assess_plugins.
+   * Relying on this because we are browserifying so all plugins and core go
+   * to a single file.
+   */
+  public copyAssessPluginsJs(): Promise<boolean> {
+    if (!this.appContext.withinCordova) {
+      // mock in browser
+      return Promise.resolve(true);
+    }
+
+    return this.getWwwDir().then(wwwDir => {
+      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toInternalURL());
+      return new Promise<FileEntry>((res, rej) => {
+        wwwDir.getFile('plugins/plugins.js', {}, fileEntry => res(fileEntry), e => rej(e));
+      });      
+    })
+    .then(cordovaJsFile => {
+      return Promise.all([cordovaJsFile, 
+        new Promise<DirectoryEntry>((res, rej) => {
+          this.getContentWwwDir().then(wwwDir => {
+            wwwDir.getDirectory(`${WWW_FOLDER}/bower_components/assess_plugins`, {}, dir => res(dir), e => rej(e));
+          }).catch((e) => rej(e));
+        })
+      ]);
+    })
+    .then(results => {
+        const cordovaJSFile: FileEntry = results[0];
+        const targetDir: DirectoryEntry = results[1];
+        this.logger.debug(`Deleting the assess plugins indexjs from ${targetDir.toInternalURL()}`);
         return this.deleteFileSilently(targetDir, 'index.js').then(() => 
           new Promise<boolean> ((res, rej) => {
             this.logger.debug(`Copying ${cordovaJSFile.toInternalURL()}`);

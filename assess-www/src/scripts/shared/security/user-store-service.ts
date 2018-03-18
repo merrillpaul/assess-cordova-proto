@@ -40,42 +40,47 @@ export class UserStoreService {
                 return this.fileService.writeFile(userDir, `${CURRENT_USER_KEY}.json`, new Blob([JSON.stringify(userInfo)], { type: 'application/json' }));
             })
             .then(fileEntry => this.logger.success(`Wrote current user into ${fileEntry.nativeURL}`))
-            .then(() =>  this.updatePasswordFile(username, hashedPassword));
+            .then(() =>  this.updatePasswordFile(userInfo.userId, hashedPassword));
+        }
+    }
+
+
+    public markLogout(): Promise<boolean> {
+        this.logger.info('marking user logout');
+        
+        if (!this.appContext.withinCordova) {
+            window.localStorage.removetItem(CURRENT_USER_KEY);
+            return Promise.resolve(true);
+        } else {
+            return this.getUserPendingBatteryDir()
+            .then((dir) => this.fileService.deleteDirSilently(dir))
+            .then(() => {
+                this.fileService.getUserDir().then(userDir => {
+                    this.logger.debug(`removing current logged in user into ${userDir.nativeURL}`);               
+                    return this.fileService.deleteFileSilently(userDir, `${CURRENT_USER_KEY}.json`);
+                })
+            })         
+            .then(() => true);
         }
     }
 
     public forgetCachedCredentialsForLoggedInUser(): void {
-        this.getLoggedInUser().then(userInfo => this.removePasswordHash(userInfo.userName));
+        this.getLoggedInUserDetails().then(userInfo => this.removePasswordHash(userInfo.userId));
     }
 
 
-    public getLoggedInUser(): Promise<LoginUserInfo> {
-        if (!this.appContext.withinCordova) {
-            return Promise.resolve(JSON.parse( window.localStorage.getItem(CURRENT_USER_KEY)));            
-        } else {
-            return new Promise<LoginUserInfo>((res, rej) =>{
-                this.fileService.getUserDir().then(userDir => {
-                    userDir.getFile(`${CURRENT_USER_KEY}.json`, {}, fileEntry => {
-                        fileEntry.file(file => {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            res(JSON.parse(reader.result || "{}"));                
-                          };
-                          reader.readAsText(file);              
-                        });
-                        
-                      }, e => rej(e));
-                })
-            });
-        }
+    public getLoggedInClinician(): Promise<string> {
+        return this.getLoggedInUserDetails()
+        .then(userInfo => userInfo.userName);
     }
 
     public getLoggedInClinicianId(): Promise<string> {
-        return this.getLoggedInUser().then(user => user.userId);
+        return this.getLoggedInUserDetails().then(user => user.userId);
     }
 
     public getEligibleSubtestGuids(): Promise<string[]> {
-        return this.getLoggedInUser().then(user => user.eligibleSubtestGUIDs);
+        this.logger.debug('calling getEligibleSubtestGuids');
+        return this.getLoggedInUserDetails().then(user => user.eligibleSubtestGUIDs);
     }
 
 
@@ -122,7 +127,26 @@ export class UserStoreService {
         });
     }
 
-
+    private getLoggedInUserDetails(): Promise<LoginUserInfo> {
+        if (!this.appContext.withinCordova) {
+            return Promise.resolve(JSON.parse( window.localStorage.getItem(CURRENT_USER_KEY)));            
+        } else {
+            return new Promise<LoginUserInfo>((res, rej) =>{
+                this.fileService.getUserDir().then(userDir => {
+                    userDir.getFile(`${CURRENT_USER_KEY}.json`, {}, fileEntry => {
+                        fileEntry.file(file => {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            res(JSON.parse(reader.result || "{}"));                
+                          };
+                          reader.readAsText(file);              
+                        });
+                        
+                      }, e => rej(e));
+                })
+            });
+        }
+    }
 
     private updatePasswordFile(userName: string, hashedPassword: string): void {
         if (!this.appContext.withinCordova) {
