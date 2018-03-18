@@ -143,7 +143,9 @@ module.exports = function (Q, fs, path, plist, xcode) {
 
 					promises.push(
 						fs.mkdir('platforms/ios/Settings.bundle/' + lang + '.lproj')
-						.then(fs.writeFile('platforms/ios/Settings.bundle/' + lang + '.lproj/Root.strings', str.join('\r\n') ))
+						.then(function() {
+							return fs.writeFile('platforms/ios/Settings.bundle/' + lang + '.lproj/Root.strings', str.join('\r\n') );
+						})
 					);
 					
 				});
@@ -185,7 +187,9 @@ module.exports = function (Q, fs, path, plist, xcode) {
 
 					promises.push(
 						fs.unlink('platforms/ios/Settings.bundle/' + lang + '.lproj/Root.strings', '/* */')
-						.then(fs.rmdir('platforms/ios/Settings.bundle/' + lang + '.lproj'))						
+						.then(function () {
+							return fs.rmdir('platforms/ios/Settings.bundle/' + lang + '.lproj');
+						})						
 					);
 					
 				});

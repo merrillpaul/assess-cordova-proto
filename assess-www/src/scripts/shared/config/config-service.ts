@@ -24,4 +24,17 @@ export class ConfigService {
         }
     }
 
+    public getVersionInfo(): Promise<any> {
+        return this.getConfig()
+        .then(config => {
+            return {
+                branch: config.branch,
+                buildHost: config.buildHost,
+                commitDate: config.commitDate,
+                commitId: config.commitId,
+                configuredVersion: config.configuredVersion
+            };
+        });
+    }
+
 }

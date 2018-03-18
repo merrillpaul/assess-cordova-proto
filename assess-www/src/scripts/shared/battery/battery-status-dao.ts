@@ -20,6 +20,7 @@ interface IActive {
     id: string;
     type: string;
     subtestInstanceId: string;
+    batteryId: string;
 }
 
 interface ISync {
@@ -201,6 +202,19 @@ export class BatteryStatusDAO {
         });
     }
 
+    public removeImageFromPending(imageId: string, subtestInstanceId: string, batteryId: string): Promise<boolean> {
+        return this.getPendingImages()
+        .then(pendingImages => {
+            return pendingImages = pendingImages.filter(image => {
+                return !(image.fileName === imageId && image.batteryId === batteryId && image.subtestInstanceId === subtestInstanceId );
+            });
+        })
+        .then(newPendingImages => {
+            this.status.sync.pendingImages = newPendingImages;
+            return true;
+        })
+    }
+
     public addImageToRepoAndPending(imageId: string, subtestInstanceId: string, batteryId: string): Promise<boolean> {
         return this.addImage(imageId, batteryId, subtestInstanceId)
         .then(added => {
@@ -336,6 +350,20 @@ export class BatteryStatusDAO {
         })
     }
 
+    public getActiveItem(): Promise<IActive> {
+        return this.initIfNot().then(() => this.status.sync.active)
+        .then(active => {
+            if (
+                active.id === null && active.batteryId === null &&
+                active.type === null && active.subtestInstanceId === null
+            ) {
+                return null;
+            }
+            return active;
+        });
+    }
+
+
     public getActiveBatteryId(): Promise<string> {
         return this.initIfNot().then(() => this.status.sync.active.id);
     }
@@ -353,9 +381,10 @@ export class BatteryStatusDAO {
                 return found;
             }
             const active: IActive = {
+                batteryId,
                 id: batteryId,
                 subtestInstanceId: null,
-                type: 'battery'
+                type: 'battery'                
             };
             this.status.sync.active = active;
             return this.removeBatteryIdFromPending(batteryId)
@@ -363,6 +392,47 @@ export class BatteryStatusDAO {
                 this.saveStatus(); 
                 return true;
             })
+        });
+    }
+
+    public setActiveImage(imageId: string, batteryId: string, subtestGuid: string ): Promise<boolean> {
+        return this.getBatteryFromRepo(batteryId)
+        .then(battery => {
+            if(!battery) {
+                throw new Error(`Battery not found in repo for ${batteryId}`);
+            }
+            return this.isImagePending(imageId, subtestGuid, batteryId);
+        })
+        .then(isPending => {
+            if (!isPending) {
+                throw new Error('Cannot set image active for sync because it was not in the image sync pending queue');
+            }
+            const active: IActive = {
+                batteryId,
+                id: imageId,
+                subtestInstanceId: subtestGuid,
+                type: 'image'                
+            };
+            this.status.sync.active = active;
+            return this.removeImageFromPending(imageId, subtestGuid, batteryId);
+        })
+        .then(removed => {
+            this.saveStatus();
+            return true;
+        });
+    }
+
+    public clearActive(): Promise<boolean> {
+        return this.getStatusSyncMap()
+        .then(status => {
+            status.active = {
+                batteryId: null,
+                id: null,
+                subtestInstanceId: null,
+                type: null            
+            };
+            this.saveStatus();
+            return true;
         });
     }
 
@@ -392,9 +462,10 @@ export class BatteryStatusDAO {
     private createNewStatus(): IStatus {
 
         const active: IActive = {
+            batteryId: null,
             id: null,
             subtestInstanceId: null,
-            type: null
+            type: null            
         };
         const sync: ISync = {
             active,
