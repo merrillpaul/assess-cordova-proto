@@ -280,6 +280,19 @@ export class FileService {
     return p;
   }
 
+  public readAsTextFromFile(fileEntry: FileEntry, encoding: string = 'UTF-8'): Promise<string> {
+    const p = new Promise<string>((res, rej) => {            
+        fileEntry.file(file => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                res(reader.result);                
+              };
+              reader.readAsText(file, encoding);              
+            });   
+    });
+    return p;
+  }
+
 
   public hasFile(parentDir: DirectoryEntry, filePath: string): Promise<boolean> {
     return new Promise<boolean>((res, rej) => {

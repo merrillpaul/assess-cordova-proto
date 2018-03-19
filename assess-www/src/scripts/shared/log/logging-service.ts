@@ -39,6 +39,34 @@ export class LoggingService {
 		this.consoleLog( [`%c ${this.buildLogArray(msg, data)}`, 'color: green; font-weight: bold']);
 	}
 
+	public getConsoleLog(): Promise<string> {
+		if(!this.appContext.withinCordova) {
+			return Promise.resolve(`
+				Not within a device. Hence get your console logs from your browser's console window!
+			`);
+		}
+
+		return this.getLogFile()
+		.then(fileEntry => {
+			const fileService = Container.get(FileService);
+			return fileService.readAsTextFromFile(fileEntry);
+		});
+	}
+
+	public clearConsoleLog(): Promise<boolean> {
+		if(!this.appContext.withinCordova) {
+			this.success('Fake clear console log');
+			return Promise.resolve(true);
+		}
+
+		const fileService = Container.get(FileService);
+		return fileService.getRootPath()
+		.then(rootDir => {
+			return fileService.writeFile(rootDir, CONSOLE_LOG, new Blob([''], { type: 'text/plain'}));
+		})
+		.then(() => true);
+	}
+
 	private buildLogArray(msg?: string, data?): string {
 		const name = this.src instanceof String || typeof this.src === "string" ? this.src : this.src.name;
 		return `[${name}] >>>> ${msg} ${data && data.length > 0 ? 
