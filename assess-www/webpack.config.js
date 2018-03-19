@@ -87,9 +87,9 @@ const pluginsapp = (isProd) => {
       NODE_ENV: 'localdev',
       DEBUG: false
     }) ,
-    new UglifyJsPlugin({
+    /*new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    })    
+    })  */  
   ];
 };
 const pluginslib = (isProd) => {
@@ -98,9 +98,9 @@ const pluginslib = (isProd) => {
       NODE_ENV: 'localdev',
       DEBUG: false
     }),
-    new UglifyJsPlugin({
+    /*new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    })       
+    }) */      
   ];
 };
 

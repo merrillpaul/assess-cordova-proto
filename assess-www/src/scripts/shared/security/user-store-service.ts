@@ -129,7 +129,14 @@ export class UserStoreService {
 
     private getLoggedInUserDetails(): Promise<LoginUserInfo> {
         if (!this.appContext.withinCordova) {
-            return Promise.resolve(JSON.parse( window.localStorage.getItem(CURRENT_USER_KEY)));            
+            // the or condition is for direct give-www url
+            const userInfo = window.localStorage.getItem(CURRENT_USER_KEY) || 
+            JSON.stringify({
+                eligibleSubtestGUIDs: null,
+                userId: 'a10000',
+                userName: 'Yo-Yo Ma'                
+            });
+            return Promise.resolve(JSON.parse(userInfo));            
         } else {
             return new Promise<LoginUserInfo>((res, rej) =>{
                 this.fileService.getUserDir().then(userDir => {

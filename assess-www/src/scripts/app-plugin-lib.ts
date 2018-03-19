@@ -9,7 +9,7 @@ import { Container, Inject, Service } from "typedi";
 
 const bootup = (inCordova) => {
     const ctx : AppContext = Container.get(AppContext);
-    if (inCordova) {
+    if (inCordova && (device && device.platform !== 'browser')) {
         ctx.setInCordova();
     }
 };

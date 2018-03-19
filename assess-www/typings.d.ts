@@ -2,6 +2,7 @@
 /// <reference path="../node_modules/cordova-plugin-file/types/index.d.ts" />
 /// <reference path="../node_modules/cordova-plugin-file-transfer/types/index.d.ts" />
 /// <reference path="../cordova-plugins/types/index.d.ts" />
+/// <reference path="../node_modules/cordova-plugin-device/types/index.d.ts" />
 
 declare module "*.html" {
 	const content: string;

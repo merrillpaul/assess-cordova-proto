@@ -1,3 +1,4 @@
+import { AppContext } from '@assess/app-context';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { BatteryInfo } from '@assess/shared/dto/battery';
 import { HttpService } from '@assess/shared/http/http-service';
@@ -5,6 +6,7 @@ import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import * as qs from 'qs';
 import { Inject, Service } from 'typedi';
+
 
 @Service()
 export class AssessmentService {
@@ -17,7 +19,15 @@ export class AssessmentService {
     @Logger()
     private logger: LoggingService;
 
+    @Inject()
+    private appContext: AppContext;
+
     public getAssessmentList(existingAssessmentIds: string[]): Promise<BatteryInfo> {
+
+        if(!this.appContext.withinCordova) {
+            return Promise.resolve({ assessments: [], deletedAssessmentIds: []});
+        }
+
         const url = '/sync/getReady';
         return new Promise<BatteryInfo>((res, rej) => {            
 
