@@ -9,7 +9,7 @@
         "build": "npm run reset_platform && cordova build --browserify",
         "test": "echo \"Error: no test specified\" && exit 1",
         "refresh_plugins": "npm install && cordova plugin remove assess-cordova-plugins && cordova plugin add cordova-plugins/ -save && cordova build --browserify",
-        "reset_platform": "npm install && npm run refresh_plugins && cordova platform remove browser ios && cordova platform add browser ios --browserify && cordova prepare --browserify"
+        "reset_platform": "npm install && cordova plugin remove assess-cordova-plugins && cordova plugin add cordova-plugins/ -save && cordova platform remove browser ios && cordova platform add browser ios --browserify && cordova prepare --browserify"
     },
     "author": "Q-interactive Team",
     "license": "Apache-2.0",
