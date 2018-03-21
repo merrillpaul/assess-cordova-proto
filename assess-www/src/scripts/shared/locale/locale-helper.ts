@@ -71,11 +71,23 @@ export class LocaleHelperService {
             // TODO this is actually not right. in IOS is different, refer GiveLocalHelper.m
             // this actually uses NSLocale preferredLanguages. We might need to add a localeplugin
             // which retrieves this.
-            const preferredLangs = window.navigator.language;
-            if (langs.indexOf(preferredLangs) !== -1) {
-                    return preferredLangs;
+            const preferredLang = window.navigator.language.split('-')[0];
+            this.logger.debug(`Getting home ui for nav language ${preferredLang}`);
+            if (langs.indexOf(preferredLang) !== -1) {
+                    return preferredLang;
             }
-            return 'en';
+            return null;
+        })
+        .then(langPart => {
+            if (langPart === null) {
+                return 'en';
+            }
+
+            const lang = window.navigator.language.split('-');
+            if (lang[1]) {
+                lang[1] = lang[1].toUpperCase();
+            }
+            return lang.join('-');
         });
     }
 
@@ -95,13 +107,13 @@ export class LocaleHelperService {
                     const readEntries = () => {
                         reader.readEntries(entries => {
                         if (!entries.length) {
-                            this.logger.debug(`Got i18ns  ${i18nmessageFiles.length}`);
+                            this.logger.debug(`Got i18ns  ${i18nmessageFiles.length} ${JSON.stringify(i18nmessageFiles)}`);
                             this.supportedLanguages = i18nmessageFiles;
                             res(i18nmessageFiles);
                         } else {
                             i18nmessageFiles = i18nmessageFiles.concat(entries.map(it => it.name).filter((it) => {
                                 return (REGEX).test(it);
-                            })).map(it => REGEX.exec(it)[2].toLowerCase());
+                            })).map(it => REGEX.exec(it)[2]);
                             readEntries();
                         }
                         }, e => rej(e));

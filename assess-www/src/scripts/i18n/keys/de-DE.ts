@@ -60,10 +60,10 @@ KEYS["give.content.query"] = "Please wait a moment while Assess gets any new con
 KEYS["give.content.old.platform"] = "Aktualisierte Inhalte sind verfügbar, können jedoch nicht heruntergeladen werden, bis Sie ein Upgrade von Assess zur neuesten Version durchführen.";
 KEYS["give.content.old.platform.title"] = "Update erforderlich";
 
-KEYS["give.login.page.hello"] = "Hello";
-KEYS["give.login.page.username"] = "Username";
-KEYS["give.login.page.password"] = "Password";
-KEYS["give.login.page.login.btn"] = "Login";
+KEYS["give.login.page.hello"] = "Hallo";
+KEYS["give.login.page.username"] = "Nutzernamen";
+KEYS["give.login.page.password"] = "Passwort";
+KEYS["give.login.page.login.btn"] = "Anmelden";
 
 /* Login error messages */
 KEYS["give.login.badcredential"] = "Entschuldigung, wir konnten keinen Nutzer mit diesem Nutzernamen und Passwort finden.";
