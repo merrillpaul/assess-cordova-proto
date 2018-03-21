@@ -30,7 +30,7 @@ export class SyncOperationQ {
     private errors: any[] = [];
 
     constructor() {
-        taskQManager.defineTask(TASK_NAME, (task) => this.batteryUploadService.runSyncOperation(task))
+        taskQManager.defineTask(TASK_NAME, (task) => this.batteryUploadService.runSyncOperation(task));
         taskQManager.onEmpty.subscribe(val => {
             if (val.taskName === TASK_NAME && val.status === true) {
                 this.queEmpty.next({errors: this.errors});
@@ -56,6 +56,7 @@ export class SyncOperationQ {
             // running these serially instead of parallel execution with Promise.all
             this.logger.debug(`Got repoids ${JSON.stringify(repoIds)}`);
             if (repoIds.length > 0 ) {
+                /*
                 return repoIds.reduce((promise, id) => {
                     return promise.then(() => this.updateFileForBatteryOperation(id))
                     .then(val => {
@@ -68,7 +69,28 @@ export class SyncOperationQ {
                             return Promise.resolve();
                         }
                     });
-                }, Promise.resolve());
+                }, Promise.resolve());*/
+                const promises = [];
+                repoIds.forEach(id => {
+                    const p = this.updateFileForBatteryOperation(id)
+                    .then(val => {
+                        if (!val) {
+                            this.logger.debug('adding battery id');
+                            return this.batteryStatusDAO.addBatteryIdToPending(id)
+                            .then(() => this.batteryUploadService.opToSyncBattery(id, false));                            
+                        } else {
+                            return Promise.resolve(null);
+                        }
+                    }).catch(e => {
+                        this.logger.error(`An error occured for ${id} with ${JSON.stringify(e)}`);
+                        return null;
+                    });
+                    promises.push(p);
+                });
+                return Promise.all(promises)
+                .then(batteries => batteries.filter(it => it !== null))
+                .then(batteries => batteries.map(bat => this.uploadBattery(bat)))
+                .then(() => true);
                 
             } else {
                 manualStatus.next({
@@ -93,10 +115,10 @@ export class SyncOperationQ {
 	    // syncErrorLogs;
     }  
 
-    private uploadBattery(battery: IBatteryUpload): Promise<boolean> {
+    private uploadBattery(battery: IBatteryUpload): boolean {
         this.logger.debug(`adding battery upload to q for ${battery.batteryId}`);
-        taskQManager.addToTask(TASK_NAME, { battery });
-        return Promise.resolve(true);
+        taskQManager.addToTask(TASK_NAME, { battery });   
+        return true;     
     }
 
     private updateFileForBatteryOperation(batteryId: string): Promise<boolean> {
