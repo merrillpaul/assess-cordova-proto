@@ -5,7 +5,9 @@ import { GiveHelperService } from '@assess/plugins/utils/give-helper';
 import { BatteryService } from '@assess/shared/battery/battery-service';
 import { AppPreferences } from '@assess/shared/config/app-preferences';
 import { LoggingService } from '@assess/shared/log/logging-service';
+import { SyncService } from '@assess/shared/sync/sync-service';
 import { Container, Inject, Service } from "typedi";
+
 
 const bootup = (inCordova) => {
     const ctx : AppContext = Container.get(AppContext);
@@ -28,6 +30,10 @@ export const helperService = () => {
 
 export const batteryService = () => {
     return Container.get(BatteryService);
+}
+
+export const syncService = () => {
+    return Container.get(SyncService);
 }
 
 if (window.cordova) {

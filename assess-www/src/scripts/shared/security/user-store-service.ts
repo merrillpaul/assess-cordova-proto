@@ -49,7 +49,7 @@ export class UserStoreService {
         this.logger.info('marking user logout');
         
         if (!this.appContext.withinCordova) {
-            window.localStorage.removetItem(CURRENT_USER_KEY);
+            window.localStorage.removeItem(CURRENT_USER_KEY);
             return Promise.resolve(true);
         } else {
             return this.getUserPendingBatteryDir()
@@ -107,7 +107,7 @@ export class UserStoreService {
     }
 
     public getUserPendingBatteryDir(): Promise<DirectoryEntry> {
-        return this.getUserHomeDir().then(homeDir => {
+        return this.getUserSavedBatteryDir().then(homeDir => {
            
                 return new Promise<DirectoryEntry>((res, rej) => {
                     homeDir.getDirectory('pending', {create: true}, dir => res(dir), e => rej(e));

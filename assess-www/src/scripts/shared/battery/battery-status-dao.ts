@@ -5,6 +5,7 @@ import { LoggingService } from '@assess/shared/log/logging-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
 import { Inject, Service } from 'typedi';
 
+
 interface IImage {
     fileName: string;
     subtestInstanceId: string;
@@ -254,12 +255,13 @@ export class BatteryStatusDAO {
     }
 
     public isBatteryIdPending(batteryId: string): Promise<boolean> {
-        return this.isBatteryIdPending(batteryId)
+        this.logger.debug(`Checking if ${batteryId} is pending`);
+        return this.isBatteryInRepo(batteryId)
         .then(status => {
             if (!status) {
-                return status;
+                throw new Error(`battery with id ${batteryId} not in repo`);
             }
-
+            this.logger.debug(`Battery ${batteryId} is in repo`);
             return this.getSyncPending().then(pending => {
                 return pending.indexOf(batteryId) !== -1;
             });
@@ -272,14 +274,18 @@ export class BatteryStatusDAO {
     }
 
     public addBatteryIdToPending(batteryId: string): Promise<boolean> {
+        this.logger.debug(`Adding battery ${batteryId} to the repo`);
         return this.isBatteryInRepo(batteryId)
         .then(status => {
+            this.logger.debug(`Is in repo battery ${batteryId}  ${status}`);
             if(!status) {
                 return status;
             }
+            
             return this.isBatteryIdPending(batteryId);
         })
         .then(status => {
+            this.logger.debug(`Is battery pending ${batteryId}  ${status}`);
             if(!status) { return status; }
             return this.getSyncPending().then(pending => { pending.push(batteryId); return true; });
         })
@@ -436,12 +442,14 @@ export class BatteryStatusDAO {
         });
     }
 
-    private initIfNot(): Promise<boolean>{
+    private initIfNot(): Promise<boolean> {
+        this.logger.debug(`Initing ${this.inited}`);
         if (this.inited === false) {
             return this.loadOrCreateBatteryStatus()
             .then((status: IStatus) => {
                 this.status = status;
                 this.inited = true;
+                this.logger.debug(`got battery status ${JSON.stringify(status)}`);
                 return true;
             })
             .then(() => this.saveStatus())
@@ -521,7 +529,10 @@ export class BatteryStatusDAO {
                 });
             } else {
                 return this.fileService.readAsText(userDir, STATUS_FILE)
-                .then(statusJson => JSON.parse(statusJson));
+                .then(statusJson => {
+                    this.logger.debug(`status contents ${statusJson}`);
+                    return JSON.parse(statusJson);
+                });
             }
         })
 
