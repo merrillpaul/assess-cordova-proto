@@ -1,3 +1,4 @@
+import { AppContext } from '@assess/app-context';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { ISyncState } from '@assess/shared/sync/battery-upload';
@@ -11,18 +12,30 @@ export class SyncService {
     @Inject()
     private syncQ: SyncOperationQ;
 
+    @Inject()
+    private appContext: AppContext;
+
     @Logger()
     private logger: LoggingService;
 
     public syncSubtestDataToShare(): Observable<ISyncState> {
 
-        // TODO all those offline checks
+        // TODO all those offline checks and auth checks
         this.logger.debug('Running syncSubtestDataToShare');
         return this.syncQ.performManualSync();        
     }
 
-    public getLastSuccessfulSyncDateString(): Promise<string> {
-        return Promise.resolve('02-Jan-2018 22:22:30');
+    public transferSingleBatteryDataToShareAndRemove(batteryId: string): Observable<ISyncState> {
+        // TODO all those offline checks and auth checks
+        this.logger.debug(`Transfering single battery data to central for ${batteryId}`);
+        return this.syncQ.transferBatteryToShareAndRemove(batteryId);
+    }
+
+    public getLastSuccessfulSyncDate(): Promise<string> {
+        if (!this.appContext.withinCordova) {
+            return Promise.resolve('');
+        }
+        return this.syncQ.getLastSuccessfulSyncDate()
     }
 
     public queueBatteryForSync(batteryId: string) : Promise<boolean> {
@@ -41,7 +54,7 @@ export class SyncService {
         return Promise.resolve(true);
     }
 
-    public transferSingleBatteryDataToShareAndRemove(batteryId: string): Promise<boolean> {
-        return Promise.resolve(true);
+    public cancelPendingSyncs(): void {
+        this.syncQ.cancelPendingSyncs();
     }
 }

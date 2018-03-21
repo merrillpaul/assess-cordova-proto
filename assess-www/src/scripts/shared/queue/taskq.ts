@@ -166,6 +166,14 @@ class TaskQ {
         return maxReached.asObservable();
     }
 
+    public cancelPending(taskName: string): any[] {
+        const pendingOnes = (this.pendingTasksData[taskName] || []).map(it => it.data);
+        this.pendingTasksData[taskName] = [];
+        this.tasks[taskName] = [];
+        this.running[taskName] = false;
+        return pendingOnes;
+    }
+
     private tryRun(taskName: string): void {
         const maxTasks = this.taskOptions[taskName].concurrency;
         const waitTime = this.remainingInterval(taskName);

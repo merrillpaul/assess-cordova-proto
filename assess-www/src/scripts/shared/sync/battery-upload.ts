@@ -1,3 +1,5 @@
+import { CancelTokenSource } from 'axios';
+
 export enum UploadType {
     BACKGROUND, MANUAL
 }
@@ -9,6 +11,7 @@ export interface IBatteryUpload {
     destURL: string;
     batteryId: string;
     opType: UploadType;
+    cancelToken?: CancelTokenSource
 }
 
 

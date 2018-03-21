@@ -155,6 +155,16 @@ export class BatteryService {
         .then(tests => JSON.stringify(tests));
     }
 
+     /**
+     * Delete audio files associated with the battery.
+     * They would reside in a subdirectory of savedBatteries
+     * battery itself:  savedBatteries/{id}.json
+     * audio directory:  savedBatteries/{id}/{files}
+     */
+    public deleteAudioFilesForBatteryId(batteryId: string): Promise<boolean> {
+        return this.userStoreService.getUserSavedBatteryDir()
+        .then (savedBatteryDir => this.fileService.deleteFolderSilently(savedBatteryDir, batteryId))
+    }
 
     private getBatteryContents(batteryId: string): Promise<string> {
         return new Promise<string>((res, rej) => {
@@ -169,15 +179,6 @@ export class BatteryService {
         });       
     }
 
-    /**
-     * Delete audio files associated with the battery.
-     * They would reside in a subdirectory of savedBatteries
-     * battery itself:  savedBatteries/{id}.json
-     * audio directory:  savedBatteries/{id}/{files}
-     */
-    private deleteAudioFilesForBatteryId(batteryId: string): Promise<boolean> {
-        return this.userStoreService.getUserSavedBatteryDir()
-        .then (savedBatteryDir => this.fileService.deleteFolderSilently(savedBatteryDir, batteryId))
-    }
+   
 
 }

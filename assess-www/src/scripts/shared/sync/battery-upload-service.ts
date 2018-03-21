@@ -1,3 +1,5 @@
+import { BatteryService } from '@assess/shared/battery/battery-service';
+import { BatteryStatusDAO } from '@assess/shared/battery/battery-status-dao';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
@@ -5,6 +7,7 @@ import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
 import { IBatteryUpload, UploadType } from '@assess/shared/sync/battery-upload';
+import { default as axios } from 'axios';
 import * as qs from 'qs';
 import { Inject, Service } from 'typedi';
 import { v4 } from 'uuid';
@@ -27,6 +30,12 @@ export class BatteryUploadService {
     @Inject()
     private configService: ConfigService;
 
+    @Inject()
+    private batteryStatusDao: BatteryStatusDAO;
+
+    @Inject()
+    private batteryService: BatteryService;
+
     @Logger()
     private logger: LoggingService;
 
@@ -40,7 +49,19 @@ export class BatteryUploadService {
         }); 
     }
 
-    public  runSyncOperation(task: any): Promise<boolean> {
+    public opToSyncBatteryInForeground(batteryId: string,  isRemove:boolean): Promise<IBatteryUpload> {
+        this.logger.debug(`operation to sync battery in the fg ${batteryId} and is remove ${isRemove}`); 
+
+        return this.prepBasicOperationForBattery(batteryId, isRemove? RETURN_CONTROL_TO_SHARE_URL: SHARE_SYNC_URL)
+        .then(batteryUpload => {
+                this.logger.debug(`Battery upload for ${JSON.stringify(batteryUpload)}`);
+                batteryUpload.isRemove = isRemove;
+                batteryUpload.opType = UploadType.MANUAL;
+                return batteryUpload;
+        }); 
+    }
+
+    public runSyncOperation(task: any): Promise<boolean> {
         const battery: IBatteryUpload = task.battery;
         const batteryId = task.batteryId;
 
@@ -53,16 +74,25 @@ export class BatteryUploadService {
 
     public uploadBatteryJson(battery: IBatteryUpload, json: string) : Promise<boolean> {
         this.logger.debug(`Uploading json to Central for ${battery.batteryId} from ${battery.pendingBatteryFileName}`);
+        const cancelToken = axios.CancelToken.source();
+        battery.cancelToken = cancelToken;
+        this.logger.debug(`Getting cancellation token for ${battery.destURL} with ${cancelToken.token}`);
         const bodyFormData: any = {};
         bodyFormData.json = json;     
-        return this.httpService.post(battery.destURL, qs.stringify(bodyFormData), {timeout: 1000 * 120 })
+        return this.httpService.post(battery.destURL, qs.stringify(bodyFormData), {timeout: 1000 * 120, cancelToken: cancelToken.token })
         .then(response => {
             this.logger.success(`Successful sync with result ${JSON.stringify(response.data)} for ${battery.batteryId}`);
-            return true;
+            return this.onUploadSucceeded(battery);
         })
         .catch(error => {
-            this.logger.error(`Error syncing datat ${JSON.stringify(error)}`);
-            throw error;
+            
+            if (axios.isCancel(error)) {
+                this.logger.warn(`Request was cancelled for ${battery.batteryId}`);
+                return true;
+            }
+            this.logger.error(`Error syncing data ${JSON.stringify(error)}`);
+            this.batteryStatusDao.setActiveBattery(null)
+            .then(() => { throw error;});
         });
     }
 
@@ -103,5 +133,23 @@ export class BatteryUploadService {
 
     private getDestinationPathName(batteryId: string): string {
         return `${Date.now()}_${v4()}_${batteryId}.json`;
+    }
+
+    private onUploadSucceeded(battery: IBatteryUpload): Promise<boolean> {
+        return this.batteryStatusDao.setActiveBattery(null)
+        .then(() => this.userStore.getUserPendingBatteryDir())
+        .then(pendingDir => this.fileService.deleteFileSilently(pendingDir, battery.pendingBatteryFileName))
+        .then(() => {
+            if (battery.isRemove) {
+                return this.batteryService.deleteAudioFilesForBatteryId(battery.batteryId)
+                .then(() => this.userStore.getUserSavedBatteryDir())
+                .then(savedDir => this.fileService.deleteFileSilently(savedDir, battery.savedBatteryFileName))
+                .then(() => this.batteryStatusDao.removeBatteryFromRepoWithId(battery.batteryId))
+
+            } else {
+                return true;
+            }
+        })
+        .then(() => true );
     }
 }

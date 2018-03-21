@@ -28,8 +28,8 @@ interface ISync {
     pending: any[];
     pendingImages: IImage[];
     active: IActive;
-    lastSync: any;
-    lastSyncSuccess: any;
+    lastSync: string;
+    lastSyncSuccess: string;
 }
 interface IStatus {
     sync: ISync;
@@ -56,8 +56,10 @@ export class BatteryStatusDAO {
     private logger: LoggingService;
 
     public addBatteryToRepoWithId(batteryId: string): Promise<boolean> {
+        this.logger.debug(`Adding battery ${batteryId} to repo with Id`);
         return this.isBatteryInRepo(batteryId)
         .then(status => {
+            this.logger.debug(`is battery ${batteryId} to in repo ? ${status}`);
             if (status) {
                 return status;
             } else {
@@ -66,6 +68,7 @@ export class BatteryStatusDAO {
                 .then(repos => { 
                     repos.push(item); 
                     this.saveStatus();
+                    return true;
                 })
                 .then(() => true);
             }
@@ -82,6 +85,8 @@ export class BatteryStatusDAO {
                 .then(repos => { 
                     repos = repos.filter(it => it.id !== batteryId);
                     this.status.repo = repos;
+                    this.saveStatus();
+                    return true;
                 })
                 .then(() => true);
             }
@@ -103,9 +108,9 @@ export class BatteryStatusDAO {
         return this.getBatteryFromRepo(batteryId)
         .then(battery => {
             if (battery) {
-            const image = battery.images
-            .filter(im => im.fileName === imageId && im.subtestInstanceId === subtestInstanceId )[0];
-            return image;
+                const image = battery.images
+                .filter(im => im.fileName === imageId && im.subtestInstanceId === subtestInstanceId )[0];
+                return image;
             } else {
                 return null;
             }
@@ -443,7 +448,7 @@ export class BatteryStatusDAO {
     }
 
     private initIfNot(): Promise<boolean> {
-        this.logger.debug(`Initing ${this.inited}`);
+        this.logger.debug(`Inited ${this.inited}`);
         if (this.inited === false) {
             return this.loadOrCreateBatteryStatus()
             .then((status: IStatus) => {

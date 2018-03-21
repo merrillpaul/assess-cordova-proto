@@ -5,11 +5,13 @@ import { LoggingService } from '@assess/shared/log/logging-service';
 import { IEmpty, taskQManager } from '@assess/shared/queue/taskq';
 import { IBatteryUpload, ISyncState } from '@assess/shared/sync/battery-upload';
 import { BatteryUploadService } from '@assess/shared/sync/battery-upload-service';
+import * as dateformat from 'dateformat';
 import { Observable, Subject } from "rxjs";
 import { Inject, Service } from 'typedi';
 
 
 const TASK_NAME = 'syncOperation';
+const DATE_FORMAT = 'ddd, dd mmm yyyy HH:MM:ss Z';
 
 @Service()
 export class SyncOperationQ {
@@ -34,6 +36,10 @@ export class SyncOperationQ {
         taskQManager.onEmpty.subscribe(val => {
             if (val.taskName === TASK_NAME && val.status === true) {
                 this.queEmpty.next({errors: this.errors});
+                this.batteryStatusDAO.setLastSync(dateformat(Date.now(), DATE_FORMAT));
+                if (this.errors.length === 0 ) {
+                    this.batteryStatusDAO.setLastSyncSuccess(dateformat(Date.now(), DATE_FORMAT));                    
+                }
                 this.errors = [];
             }
         });
@@ -47,6 +53,10 @@ export class SyncOperationQ {
     public get syncQueEmpty() : Observable<ISyncState> {
         return this.queEmpty.asObservable();
     }
+
+    public getLastSuccessfulSyncDate(): Promise<string> {
+        return this.batteryStatusDAO.getLastSyncSuccess();
+    }
     
     public performManualSync(): Observable<ISyncState> {
         this.logger.debug('performing manual sync');
@@ -55,21 +65,7 @@ export class SyncOperationQ {
         .then(repoIds => {
             // running these serially instead of parallel execution with Promise.all
             this.logger.debug(`Got repoids ${JSON.stringify(repoIds)}`);
-            if (repoIds.length > 0 ) {
-                /*
-                return repoIds.reduce((promise, id) => {
-                    return promise.then(() => this.updateFileForBatteryOperation(id))
-                    .then(val => {
-                        if (!val) {
-                            this.logger.debug('adding battery id');
-                            return this.batteryStatusDAO.addBatteryIdToPending(id)
-                            .then(() => this.batteryUploadService.opToSyncBattery(id, false))
-                            .then(battery => this.uploadBattery(battery))
-                        } else {
-                            return Promise.resolve();
-                        }
-                    });
-                }, Promise.resolve());*/
+            if (repoIds.length > 0 ) {                
                 const promises = [];
                 repoIds.forEach(id => {
                     const p = this.updateFileForBatteryOperation(id)
@@ -113,7 +109,45 @@ export class SyncOperationQ {
         // TODO
         // syncPerformanceLogs;
 	    // syncErrorLogs;
-    }  
+    } 
+
+    /**
+     * Transferring a single battery before removing. Typically called when removed from ipad
+     * @param batteryId 
+     */
+    public transferBatteryToShareAndRemove(batteryId: string): Observable<ISyncState> {
+        this.logger.debug(`transfering battery to central and remove for ${batteryId}`);
+        const transferStatus = new Subject<ISyncState>();
+        this.syncQueEmpty.subscribe((syncState: ISyncState) => {
+            syncState.isWaitingForManualComplete = true;
+            syncState.isRemove = true;
+            this.logger.success('Del ques done');
+            transferStatus.next(syncState);
+        });
+        // TODO check all those images to be uploaded
+        this.batteryStatusDAO.addBatteryIdToPending(batteryId)
+        .then(() => this.batteryUploadService.opToSyncBatteryInForeground(batteryId, true))
+        .then((bat) => this.uploadBattery(bat))
+        .then(() => true);
+        
+
+        return transferStatus;
+    }
+    
+    
+    public cancelPendingSyncs(): void {
+        this.logger.info('Cancelling pending syncs');
+        try {
+        const pendingOnes = taskQManager.cancelPending(TASK_NAME);
+        pendingOnes.forEach((it: IBatteryUpload) => {
+            if (it.cancelToken) {
+                it.cancelToken.cancel(`Cancelling sync for battery ${it.batteryId}`);
+            }
+        });
+        } catch(e) {
+            this.logger.warn('Ignore any error while cancelling');
+        }
+    }
 
     private uploadBattery(battery: IBatteryUpload): boolean {
         this.logger.debug(`adding battery upload to q for ${battery.batteryId}`);
