@@ -1,12 +1,12 @@
 import { BatteryService } from '@assess/shared/battery/battery-service';
-import { BatteryStatusDAO } from '@assess/shared/battery/battery-status-dao';
+import { BatteryStatusDAO, IImage } from '@assess/shared/battery/battery-status-dao';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
-import { IBatteryUpload, UploadType } from '@assess/shared/sync/battery-upload';
+import { IBatteryUpload, IImageUpload, UploadType } from '@assess/shared/sync/battery-upload';
 import { default as axios } from 'axios';
 import * as qs from 'qs';
 import { Inject, Service } from 'typedi';
@@ -14,6 +14,7 @@ import { v4 } from 'uuid';
 
 const SHARE_SYNC_URL = '/sync/syncBatteryData';
 const RETURN_CONTROL_TO_SHARE_URL ='/sync/returnControlToShare';
+const UPLODA_FILE_URL ='/sync/uploadFile';
 
 @Service()
 export class BatteryUploadService {
@@ -61,6 +62,10 @@ export class BatteryUploadService {
         }); 
     }
 
+    public opToUploadImage(image: IImage, batteryId: string): Promise<IImageUpload> {    
+       return this.prepBasicOperationForImage(image, batteryId);
+    }
+
     public runSyncOperation(task: any): Promise<boolean> {
         const battery: IBatteryUpload = task.battery;
         const batteryId = task.batteryId;
@@ -69,6 +74,15 @@ export class BatteryUploadService {
         return this.userStore.getUserPendingBatteryDir()
         .then(dir => this.fileService.readAsText(dir, battery.pendingBatteryFileName))
         .then(json => this.uploadBatteryJson(battery, json));
+    }
+
+    public runImageSyncOperation(task: any): Promise<boolean> {
+        const image: IImageUpload = task.image;      
+
+        this.logger.debug(`Running image sync operation for ${image.batteryId}`);
+        return this.userStore.getUserPendingImageDir()
+        .then(dir => this.fileService.readAsBinary(dir, `${image.batteryId}/${image.subtestGUID}/${image.imageName}.png`))
+        .then(json => true); // TODO
     }
 
 
@@ -117,6 +131,20 @@ export class BatteryUploadService {
         .then(dir => this.fileService.deleteFileSilently(dir, fileName));
     }
 
+    public updatePendingImageCopyIfPossible(image: IImageUpload): Promise<boolean> {
+        return this.userStore.getUserSavedImageDir()
+        .then(savedDir => this.fileService.getFile(savedDir, `${image.batteryId}/${image.subtestGUID}/${image.imageName}.png`))
+        .then(imageFileEntry => Promise.all([imageFileEntry, this.userStore.getUserPendingImageDir()]))
+        .then(results => {
+            const imageFileEntry = results[0];
+            const pendingDir = results[1];
+            return new Promise<boolean>((res, rej) => {
+                this.logger.debug(`Copying ${imageFileEntry.nativeURL} to ${pendingDir.toInternalURL()}/${image.imageName}.png`);
+                imageFileEntry.copyTo(pendingDir, `${image.imageName}.png`, () => res(true), e => rej(e));
+            });
+        });
+    }
+
     private prepBasicOperationForBattery(batteryId: string, url: string): Promise<IBatteryUpload> {
         const battery: IBatteryUpload = {
             batteryId,
@@ -129,6 +157,20 @@ export class BatteryUploadService {
 
         return this.updatePendingCopyIfPossible(battery)
         .then(() => battery);
+    }
+
+    private prepBasicOperationForImage(image: IImage, batteryId: string): Promise<IImageUpload> {
+        const imagery: IImageUpload = {
+            batteryId,
+            destURL: UPLODA_FILE_URL,
+            imageId: `${batteryId}-${image.subtestInstanceId}-${image.fileName}`,
+            imageName: image.fileName,
+            opType: UploadType.MANUAL,
+            subtestGUID: image.subtestInstanceId
+        };
+
+        return this.updatePendingImageCopyIfPossible(imagery)
+        .then(() => imagery).catch(() => null);
     }
 
     private getDestinationPathName(batteryId: string): string {

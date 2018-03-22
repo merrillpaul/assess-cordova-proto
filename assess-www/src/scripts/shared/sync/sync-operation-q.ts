@@ -3,7 +3,7 @@ import { BatteryStatusDAO } from '@assess/shared/battery/battery-status-dao';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { IEmpty, taskQManager } from '@assess/shared/queue/taskq';
-import { IBatteryUpload, ISyncState } from '@assess/shared/sync/battery-upload';
+import { IBatteryUpload, IImageUpload, ISyncState } from '@assess/shared/sync/battery-upload';
 import { BatteryUploadService } from '@assess/shared/sync/battery-upload-service';
 import * as dateformat from 'dateformat';
 import { Observable, Subject } from "rxjs";
@@ -11,6 +11,7 @@ import { Inject, Service } from 'typedi';
 
 
 const TASK_NAME = 'syncOperation';
+const IMAGE_TASK_NAME = 'imageSyncOperation';
 const DATE_FORMAT = 'ddd, dd mmm yyyy HH:MM:ss Z';
 
 @Service()
@@ -33,6 +34,8 @@ export class SyncOperationQ {
 
     constructor() {
         taskQManager.defineTask(TASK_NAME, (task) => this.batteryUploadService.runSyncOperation(task));
+        taskQManager.defineTask(IMAGE_TASK_NAME, (task) => this.batteryUploadService.runImageSyncOperation(task));
+        
         taskQManager.onEmpty.subscribe(val => {
             if (val.taskName === TASK_NAME && val.status === true) {
                 this.queEmpty.next({errors: this.errors});
@@ -125,11 +128,44 @@ export class SyncOperationQ {
             transferStatus.next(syncState);
         });
         // TODO check all those images to be uploaded
-        this.batteryStatusDAO.addBatteryIdToPending(batteryId)
-        .then(() => this.batteryUploadService.opToSyncBatteryInForeground(batteryId, true))
-        .then((bat) => this.uploadBattery(bat))
-        .then(() => true);
-        
+
+        const uploadBatteryOp = () => {
+            return this.batteryStatusDAO.addBatteryIdToPending(batteryId)
+            .then(() => this.batteryUploadService.opToSyncBatteryInForeground(batteryId, true))
+            .then((bat) => this.uploadBattery(bat))
+            .then(() => true);
+        };
+
+        this.batteryStatusDAO.isBatteryInRepo(batteryId)
+        .then(found => {
+            if (found) {
+                this.batteryStatusDAO.getPendingImages().then(images => images.filter(it => it.batteryId === batteryId))
+                .then(batteryImages => {
+                    if (batteryImages.length > 0) {
+                        const promises = batteryImages.map(i => {
+                            return this.batteryUploadService.opToUploadImage(i, batteryId)
+                        });
+                        const imageEmpty = taskQManager.onEmpty.subscribe(val => {
+                            if (val.taskName === IMAGE_TASK_NAME && val.status === true) {
+                                uploadBatteryOp();
+                                imageEmpty.unsubscribe();
+                            }
+                        });
+                     
+                        return Promise.all(promises)
+                        .then(imageUploads => imageUploads.filter(i => i !== null))
+                        .then(imageUploads => imageUploads.map(i => this.uploadImage(i)))
+                        .then(() => true);
+                    } else {
+                        // start the battery upload
+                        return uploadBatteryOp();
+                    }
+                })
+            } else {
+                transferStatus.next({errors: [], isWaitingForManualComplete: true, noneToSync: true});
+                return true;
+            }
+        });
 
         return transferStatus;
     }
@@ -150,8 +186,14 @@ export class SyncOperationQ {
     }
 
     private uploadBattery(battery: IBatteryUpload): boolean {
-        this.logger.debug(`adding battery upload to q for ${battery.batteryId}`);
+        this.logger.debug(`adding image upload to q for ${battery.batteryId}`);
         taskQManager.addToTask(TASK_NAME, { battery });   
+        return true;     
+    }
+
+    private uploadImage(image: IImageUpload): boolean {
+        this.logger.debug(`adding image upload to q for ${image.batteryId} ${image.imageId}`);
+        taskQManager.addToTask(IMAGE_TASK_NAME, { image });   
         return true;     
     }
 

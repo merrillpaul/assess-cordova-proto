@@ -280,6 +280,21 @@ export class FileService {
     return p;
   }
 
+  public readAsBinary(parentDir: DirectoryEntry, fileName: string, create: boolean = true): Promise<string> {
+    const p = new Promise<string>((res, rej) => {   
+          parentDir.getFile(fileName, { create, exclusive: false}, fileEntry => {
+            fileEntry.file(file => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                res(reader.result);                
+              };
+              reader.readAsBinaryString(file);              
+            });            
+          }, e => rej(e));
+    });
+    return p;
+  }
+
   public readAsTextFromFile(fileEntry: FileEntry, encoding: string = 'UTF-8'): Promise<string> {
     const p = new Promise<string>((res, rej) => {            
         fileEntry.file(file => {

@@ -49,17 +49,20 @@ export class HomeSaga {
      * @param launchState 
      */
     public *finishWithResult(launchState: ILaunchState) : IterableIterator<any> {
-        this.progress.dispose();
+        
         if (launchState.platformUpdateNeeded) {
+            this.progress.dispose();
             if (launchState.canLaunchGive) {
                 yield call([this.dialog, this.dialog.alert], this.i18n.getMessage('give.content.old.platform.title'), 
                     this.i18n.getMessage('give.content.old.platform'));
                 yield put({type: constants.CHECK_INTERFACES});                
             } else {
+                
                 yield call([this.dialog, this.dialog.alert], this.i18n.getMessage('give.content.must.update.title'), 
                     this.i18n.getMessage('give.content.must.update'));
             }
         } else if (!launchState.canLaunchGive) {
+            this.progress.dispose();
             if (launchState.failedDownloading) {
                 yield call([this.dialog, this.dialog.alert], this.i18n.getMessage('give.content.generic.error.title'), 
                     this.i18n.getMessage('give.content.generic.error'));
@@ -68,6 +71,7 @@ export class HomeSaga {
                     this.i18n.getMessage('give.content.no-content.error'));
             }
         } else if (launchState.failedDownloading) {
+            this.progress.dispose();
             yield call([this.dialog, this.dialog.alert], this.i18n.getMessage('give.content.generic.error.title'), 
                     this.i18n.getMessage('give.content.cannot.check.run.old'));
             yield put({type: constants.CHECK_INTERFACES});

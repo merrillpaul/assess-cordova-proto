@@ -127,6 +127,16 @@ export class UserStoreService {
         });
     }
 
+    public getUserPendingImageDir(): Promise<DirectoryEntry> {
+        return this.getUserSavedImageDir().then(homeDir => {
+           
+                return new Promise<DirectoryEntry>((res, rej) => {
+                    homeDir.getDirectory('pending', {create: true}, dir => res(dir), e => rej(e));
+                }); 
+             
+        });
+    }
+
     private getLoggedInUserDetails(): Promise<LoginUserInfo> {
         if (!this.appContext.withinCordova) {
             // the or condition is for direct give-www url

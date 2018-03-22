@@ -6,18 +6,18 @@ import { UserStoreService } from '@assess/shared/security/user-store-service';
 import { Inject, Service } from 'typedi';
 
 
-interface IImage {
+export interface IImage {
     fileName: string;
     subtestInstanceId: string;
     batteryId: string;
 }
 
-interface IBatteryItem {
+export interface IBatteryItem {
     id: string;
     images?: IImage[]
 }
 
-interface IActive {
+export interface IActive {
     id: string;
     type: string;
     subtestInstanceId: string;

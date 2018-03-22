@@ -21,3 +21,13 @@ export interface ISyncState {
     noneToSync?: boolean;
     errors: any[]
 }
+
+export interface IImageUpload {
+    destURL: string;
+    batteryId: string;
+    subtestGUID: string;
+    imageName?: string;
+    imageId: string;
+    opType: UploadType;
+    cancelToken?: CancelTokenSource
+}
