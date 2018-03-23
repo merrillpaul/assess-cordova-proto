@@ -4,11 +4,34 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
+const networkInterfaces = require('os').networkInterfaces;
+const getLocalExternalIp = () => [].concat.apply([], Object.values(networkInterfaces()))
+.filter(details => details.family === 'IPv4' && !details.internal)
+.pop().address;
+const getBranch = () =>  process.env.QI_BRANCH || "master";
+const getConfigName = () =>  process.env.QI_CONFIG_NAME || "dev";
+const getCommitDate = () =>  process.env.QI_COMMIT_DATE || "today";
+const getCommitId = () =>  process.env.QI_COMMIT_ID || "12345";
+const getBuildHost = () =>  process.env.QI_BUILD_HOST || "localmachine";
+const getConfiguredVersion = () =>  process.env.QI_CONF_VERSION || "dev";
 
 
 const ENV = process.env.npm_lifecycle_event;
 const isProd = ENV === "build";
+
+const envPlugin = new webpack.EnvironmentPlugin({
+  'NODE_ENV': 'localdev',
+  'LOCAL_IP': getLocalExternalIp(),
+  'QI_GITHUB_BRANCH': getBranch(),
+  'CONFIG_NAME': getConfigName(),
+  'QI_BUILD_HOST': getBuildHost(),
+  'QI_COMMIT_DATE': getCommitDate(),
+  'QI_COMMIT_ID': getCommitId(),
+  'QI_CONF_VERSION': getConfiguredVersion()
+});
+
 const modules = {
   rules: [
     {
@@ -56,14 +79,14 @@ const modules = {
       exclude: /node_modules/,
       loader: "html-loader?exportAsEs6Default"
     },
-    {
+    /*{
       test: /\.ts$/,
       enforce: "pre",
       include: [
         path.resolve(__dirname, "src/config")
       ],
       use: [{ loader: 'configLoader' }]
-    }
+    }*/
   ]
 };
 const pluginsapp = (isProd) => {
@@ -83,10 +106,7 @@ const pluginsapp = (isProd) => {
       { from: "public" },
       { from: "images", to: "images" }
     ]),
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'localdev',
-      DEBUG: false
-    }) ,
+    envPlugin,
     /*new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
     })  */  
@@ -94,10 +114,7 @@ const pluginsapp = (isProd) => {
 };
 const pluginslib = (isProd) => {
   return [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'localdev',
-      DEBUG: false
-    }),
+    envPlugin,
     new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
     })   
@@ -114,7 +131,7 @@ const resolve = {
   },
 };
 const loaders = {
-  modules: ["node_modules", path.resolve(__dirname, "loaders")]
+  modules: ["node_modules"]//, path.resolve(__dirname, "loaders")]
 };
 
 
