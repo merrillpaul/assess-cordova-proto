@@ -1,4 +1,3 @@
-import { Promise } from 'es6-promise';
 import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
 
@@ -163,7 +162,7 @@ export class FileService {
           );       
       } else {
         window.webkitRequestFileSystem(
-            window.PERSISTENT,
+            window.TEMPORARY,
             1024 * 1024 * 1024,
             fs => {
               this.rootDir = fs.root;
@@ -280,15 +279,15 @@ export class FileService {
     return p;
   }
 
-  public readAsBinary(parentDir: DirectoryEntry, fileName: string, create: boolean = true): Promise<string> {
-    const p = new Promise<string>((res, rej) => {   
+  public readAsBinary(parentDir: DirectoryEntry, fileName: string, create: boolean = true): Promise<Blob> {
+    const p = new Promise<Blob>((res, rej) => {   
           parentDir.getFile(fileName, { create, exclusive: false}, fileEntry => {
             fileEntry.file(file => {
               const reader = new FileReader();
               reader.onloadend = () => {
                 res(reader.result);                
               };
-              reader.readAsBinaryString(file);              
+              reader.readAsArrayBuffer(file);              
             });            
           }, e => rej(e));
     });
