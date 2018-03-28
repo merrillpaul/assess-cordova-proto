@@ -1,12 +1,12 @@
 import { AppContext } from '@assess/app-context';
-import { BatteryStatusDAO } from '@assess/shared/battery/battery-status-dao';
+import { BatteryStatusDAO, IImage } from '@assess/shared/battery/battery-status-dao';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { IEmpty, taskQManager } from '@assess/shared/queue/taskq';
-import { IBatteryUpload, IImageUpload, ISyncState } from '@assess/shared/sync/battery-upload';
+import { IBatteryUpload, IImageSyncState, IImageUpload, ImageSyncStateEnum, ISyncState  } from '@assess/shared/sync/battery-upload';
 import { BatteryUploadService } from '@assess/shared/sync/battery-upload-service';
 import * as dateformat from 'dateformat';
-import { Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { Inject, Service } from 'typedi';
 
 
@@ -31,6 +31,7 @@ export class SyncOperationQ {
 
     private queEmpty: Subject<ISyncState> = new Subject<ISyncState>();
     private errors: any[] = [];
+    private imageErrors: any[] = [];
 
     constructor() {
         taskQManager.defineTask(TASK_NAME, (task) => this.batteryUploadService.runSyncOperation(task));
@@ -120,14 +121,41 @@ export class SyncOperationQ {
      */
     public transferBatteryToShareAndRemove(batteryId: string): Observable<ISyncState> {
         this.logger.debug(`transfering battery to central and remove for ${batteryId}`);
-        const transferStatus = new Subject<ISyncState>();
-        this.syncQueEmpty.subscribe((syncState: ISyncState) => {
+        const transferStatus: BehaviorSubject<ISyncState> = new BehaviorSubject<ISyncState>({ errors: []});
+       /* this.syncQueEmpty.subscribe((syncState: ISyncState) => {
             syncState.isWaitingForManualComplete = true;
             syncState.isRemove = true;
             this.logger.success('Del ques done');
+            syncState.needsImages = false;
             transferStatus.next(syncState);
+        });*/
+
+        const queEmpty = taskQManager.onEmpty.subscribe(val => {
+            if (val.taskName === TASK_NAME && val.status === true) {
+                // if there were any image upload errors
+                const syncState: ISyncState = transferStatus.value;
+                syncState.isWaitingForManualComplete = true;
+                syncState.isRemove = true;
+                syncState.needsImages = false;
+                if (this.errors.length > 0 ) {
+                    this.logger.error('There have been errors in battery uploading');   
+                    syncState.errors = this.errors;                    
+                } else {
+                    this.logger.success('Synq Que done');
+                    syncState.errors = [];
+                                     
+                }
+                queEmpty.unsubscribe();
+                transferStatus.next(syncState);  
+                this.errors = [];
+            }
         });
-        // TODO check all those images to be uploaded
+        taskQManager.onFailed.subscribe(val => {
+            if (val.taskName === TASK_NAME) {
+                this.errors.push({data: val.data, error: val.error});
+            }
+        });
+       
 
         const uploadBatteryOp = () => {
             return this.batteryStatusDAO.addBatteryIdToPending(batteryId)
@@ -143,22 +171,59 @@ export class SyncOperationQ {
                 .then(batteryImages => {
                     if (batteryImages.length > 0) {
                         const promises = batteryImages.map(i => {
-                            return this.batteryUploadService.opToUploadImage(i, batteryId)
+                            return this.batteryUploadService.opToUploadImage(i)
                         });
                         const imageEmpty = taskQManager.onEmpty.subscribe(val => {
                             if (val.taskName === IMAGE_TASK_NAME && val.status === true) {
-                                uploadBatteryOp();
+                                // if there were any image upload errors
+                                if (this.imageErrors.length > 0 ) {
+                                    this.logger.error('There have been errors in image uploading');
+                                    const imageState: ISyncState = transferStatus.value;
+                                    imageState.errors = this.imageErrors;
+                                    imageState.imageSyncState.status = ImageSyncStateEnum.ERROR;
+                                    transferStatus.next(imageState);
+                                } else {
+                                    const imageState: ISyncState = transferStatus.value;
+                                    imageState.errors = [];
+                                    imageState.imageSyncState.status = ImageSyncStateEnum.COMPLETE;
+                                    transferStatus.next(imageState);
+                                    uploadBatteryOp();
+                                }
                                 imageEmpty.unsubscribe();
+                                this.imageErrors = [];
+                            }
+                        });
+                        taskQManager.onFailed.subscribe(val => {
+                            if (val.taskName === IMAGE_TASK_NAME) {
+                                this.imageErrors.push({data: val.data, error: val.error});
                             }
                         });
                      
                         return Promise.all(promises)
                         .then(imageUploads => imageUploads.filter(i => i !== null))
-                        .then(imageUploads => imageUploads.map(i => this.uploadImage(i)))
+                        .then(imageUploads => { 
+                            if (imageUploads.length > 0) {
+                                const imageState: ISyncState = {
+                                    errors: [],                                     
+                                    imageSyncState: { 
+                                        numImagesRemaining: imageUploads.length,
+                                        status: ImageSyncStateEnum.STARTED   ,
+                                        totalNumImagesToUpload: imageUploads.length                                                                        
+                                    },
+                                    needsImages: true, 
+                                };
+
+                                transferStatus.next(imageState);
+                                imageUploads.map(i => this.uploadImage(i, transferStatus));
+                            }
+                            
+                            return true;
+                        })
                         .then(() => true);
                     } else {
                         // start the battery upload
-                        return uploadBatteryOp();
+                        uploadBatteryOp()
+                        return true;
                     }
                 })
             } else {
@@ -169,15 +234,89 @@ export class SyncOperationQ {
 
         return transferStatus;
     }
+
+    /**
+     * Uploads all images from the repo
+     */
+    public async uploadAllAssessmentImages(transferStatus: BehaviorSubject<ISyncState>): Promise<boolean> {
+        this.logger.debug(`uploadAllAssessmentImages battery to central`);
+        const pendingImages: IImage[] = await this.batteryStatusDAO.getPendingImages();
+        const imageState: ISyncState = {
+            errors: [],
+            imageSyncState: { 
+                numImagesRemaining: pendingImages.length,
+                status: ImageSyncStateEnum.STARTED,
+                totalNumImagesToUpload: pendingImages.length                         
+            }, 
+            needsImages: true,            
+        };
+        if (pendingImages.length > 0) {
+            let imageUploads: IImageUpload[] = [];
+            for (let t = 0, len = pendingImages.length; t < len; t++) {
+                imageUploads.push(await this.batteryUploadService.opToUploadImage(pendingImages[t]));
+            }
+            imageUploads = imageUploads.filter(it => it !== null);
+            imageState.imageSyncState.totalNumImagesToUpload = imageUploads.length;
+            imageState.imageSyncState.numImagesRemaining = imageUploads.length;
+            transferStatus.next(imageState);            
+
+            const imageEmpty = taskQManager.onEmpty.subscribe(val => {
+                if (val.taskName === IMAGE_TASK_NAME && val.status === true) {
+                    // if there were any image upload errors
+                    if (this.imageErrors.length > 0 ) {
+                        this.logger.error('There have been errors in image uploading');
+                        imageState.errors = this.imageErrors;
+                        imageState.imageSyncState.status = ImageSyncStateEnum.ERROR;
+                    } else {
+                        imageState.imageSyncState.status = ImageSyncStateEnum.COMPLETE;
+                    }
+                    transferStatus.next(imageState);
+                    imageEmpty.unsubscribe();
+                    this.imageErrors = [];
+                }
+            });
+            taskQManager.onFailed.subscribe(val => {
+                if (val.taskName === IMAGE_TASK_NAME) {
+                    this.imageErrors.push({data: val.data, error: val.error});
+                }
+            });
+            imageUploads.map(i => this.uploadImage(i, transferStatus));
+            return true;
+            
+        } else {
+           // imageState.imageSyncState.status = ImageSyncStateEnum.COMPLETE;
+            transferStatus.next(imageState);
+        }
+
+        return true;
+        
+    }
     
     
     public cancelPendingSyncs(): void {
         this.logger.info('Cancelling pending syncs');
         try {
         const pendingOnes = taskQManager.cancelPending(TASK_NAME);
-        pendingOnes.forEach((it: IBatteryUpload) => {
-            if (it.cancelToken) {
-                it.cancelToken.cancel(`Cancelling sync for battery ${it.batteryId}`);
+        pendingOnes.forEach((it: any) => {
+            const battery: IBatteryUpload = it.battery;
+            if (battery.cancelToken) {
+                battery.cancelToken.cancel(`Cancelling sync for battery ${it.batteryId}`);
+            }
+        });
+        } catch(e) {
+            this.logger.warn('Ignore any error while cancelling');
+        }
+    }
+
+    public cancelPendingImageSyncs(): void {
+        this.logger.info('Cancelling pending image syncs');
+        try {
+        const pendingOnes = taskQManager.cancelPending(IMAGE_TASK_NAME);
+        pendingOnes.forEach((it: any) => {
+            const image: IImageUpload = it.image;
+            if (image.uploadTracker) {
+                image.uploadTracker.abort();
+                this.logger.warn(`Cancelling sync for battery ${it.batteryId}`);
             }
         });
         } catch(e) {
@@ -186,14 +325,14 @@ export class SyncOperationQ {
     }
 
     private uploadBattery(battery: IBatteryUpload): boolean {
-        this.logger.debug(`adding image upload to q for ${battery.batteryId}`);
+        this.logger.debug(`adding battery upload to q for ${battery.batteryId}`);
         taskQManager.addToTask(TASK_NAME, { battery });   
         return true;     
     }
 
-    private uploadImage(image: IImageUpload): boolean {
+    private uploadImage(image: IImageUpload, imageSyncState: BehaviorSubject<ISyncState>): boolean {
         this.logger.debug(`adding image upload to q for ${image.batteryId} ${image.imageId}`);
-        taskQManager.addToTask(IMAGE_TASK_NAME, { image });   
+        taskQManager.addToTask(IMAGE_TASK_NAME, { image, imageSyncState });   
         return true;     
     }
 

@@ -78,9 +78,9 @@ export class GiveHelperService {
         .then(indexHtml => `${indexHtml.toInternalURL()}?logout=true`)
         .then(targetPage => window.location.href = targetPage);
         
-
-        // TODO cancel all syncs using axios cancelling semantics
+        // cancel all syncs using axios and FT upload cancelling semantics
         this.syncService.cancelPendingSyncs();
+        this.syncService.cancelUploadAssessmentImages();
 
     }
 

@@ -448,7 +448,6 @@ export class BatteryStatusDAO {
     }
 
     private initIfNot(): Promise<boolean> {
-        this.logger.debug(`Inited ${this.inited}`);
         if (this.inited === false) {
             return this.loadOrCreateBatteryStatus()
             .then((status: IStatus) => {

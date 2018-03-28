@@ -4,6 +4,13 @@ export enum UploadType {
     BACKGROUND, MANUAL
 }
 
+export enum ImageSyncStateEnum {
+    COMPLETE = 'COMPLETE',
+    ERROR = 'ERROR',   
+    IMAGE_UPLOADED = 'IMAGE_UPLOADED',
+    STARTED = 'STARTED'
+}
+
 export interface IBatteryUpload {
     isRemove: boolean;
     savedBatteryFileName: string;
@@ -14,12 +21,21 @@ export interface IBatteryUpload {
     cancelToken?: CancelTokenSource
 }
 
+export interface IImageSyncState {
+    totalNumImagesToUpload: number;
+    numImagesRemaining: number;
+    errors?: any[],
+    status: ImageSyncStateEnum
+}
+
 
 export interface ISyncState {
     isRemove?: boolean;
     isWaitingForManualComplete?: boolean;
     noneToSync?: boolean;
-    errors: any[]
+    errors: any[];
+    needsImages?: boolean;
+    imageSyncState?: IImageSyncState;
 }
 
 export interface IImageUpload {
@@ -29,5 +45,5 @@ export interface IImageUpload {
     imageName?: string;
     imageId: string;
     opType: UploadType;
-    cancelToken?: CancelTokenSource
+    uploadTracker?: FileTransfer
 }

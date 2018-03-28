@@ -99,6 +99,8 @@ export class HomeSaga {
         const targetPage = `${debugUrl}?dest=${targetPart}`;
         // alert(`Will forward to ${targetPage}`);
         this.logger.success(`Will forward to ${targetPage}`);
+        const loginElement: HTMLDivElement =   document.querySelector('.login-ctr');
+        loginElement.style.display = 'none';
         window.location.href = targetPage;
     }
 

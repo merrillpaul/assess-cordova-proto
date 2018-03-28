@@ -3,7 +3,7 @@ import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { ISyncState } from '@assess/shared/sync/battery-upload';
 import { SyncOperationQ } from '@assess/shared/sync/sync-operation-q';
-import { Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { Inject, Service } from 'typedi';
 
 @Service()
@@ -46,15 +46,21 @@ export class SyncService {
         return Promise.resolve(true);
     }
 
-    public cancelUploadAssessmentImages(): Promise<boolean> {
-        return Promise.resolve(true);
-    }
-
-    public uploadAssessmentImagesToChooseShare(): Promise<boolean> {
-        return Promise.resolve(true);
+    public uploadAssessmentImagesToChooseShare(): Observable<ISyncState> {
+        this.logger.debug(`Transfering uploading all images from the repo`);
+        const transferStatus: BehaviorSubject<ISyncState> = new BehaviorSubject<ISyncState>({ errors: []});
+        this.syncQ.uploadAllAssessmentImages(transferStatus);
+        return transferStatus;
     }
 
     public cancelPendingSyncs(): void {
         this.syncQ.cancelPendingSyncs();
+    }
+
+    public cancelUploadAssessmentImages(): Promise<boolean> {
+        if (this.appContext.withinCordova) {
+            this.syncQ.cancelPendingImageSyncs();
+        }
+        return Promise.resolve(true);
     }
 }

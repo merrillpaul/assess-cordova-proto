@@ -1,3 +1,4 @@
+import { IConfig } from '@assess/config-type';
 import { BatteryService } from '@assess/shared/battery/battery-service';
 import { BatteryStatusDAO, IImage } from '@assess/shared/battery/battery-status-dao';
 import { ConfigService } from '@assess/shared/config/config-service';
@@ -6,15 +7,16 @@ import { HttpService } from '@assess/shared/http/http-service';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
-import { IBatteryUpload, IImageUpload, UploadType } from '@assess/shared/sync/battery-upload';
+import { IBatteryUpload, IImageUpload, ImageSyncStateEnum, ISyncState, UploadType  } from '@assess/shared/sync/battery-upload';
 import { default as axios } from 'axios';
 import * as qs from 'qs';
+import { BehaviorSubject } from "rxjs";
 import { Inject, Service } from 'typedi';
 import { v4 } from 'uuid';
 
 const SHARE_SYNC_URL = '/sync/syncBatteryData';
 const RETURN_CONTROL_TO_SHARE_URL ='/sync/returnControlToShare';
-const UPLODA_FILE_URL ='/sync/uploadFile';
+const UPLOAD_FILE_URL ='/sync/uploadFile';
 
 @Service()
 export class BatteryUploadService {
@@ -62,8 +64,8 @@ export class BatteryUploadService {
         }); 
     }
 
-    public opToUploadImage(image: IImage, batteryId: string): Promise<IImageUpload> {    
-       return this.prepBasicOperationForImage(image, batteryId);
+    public opToUploadImage(image: IImage): Promise<IImageUpload> {    
+       return this.prepBasicOperationForImage(image, image.batteryId);
     }
 
     public runSyncOperation(task: any): Promise<boolean> {
@@ -78,13 +80,13 @@ export class BatteryUploadService {
 
     public runImageSyncOperation(task: any): Promise<boolean> {
         const image: IImageUpload = task.image;      
-
+        const imageSyncState: BehaviorSubject<ISyncState> = task.imageSyncState;
         this.logger.debug(`Running image sync operation for ${image.batteryId}`);
         return this.userStore.getUserPendingImageDir()
-        .then(dir => this.fileService.readAsBinary(dir, `${image.batteryId}/${image.subtestGUID}/${image.imageName}.png`))
-        .then(json => true); // TODO
+        .then(imageDir => {
+            return this.syncImage(imageDir, image, imageSyncState);
+        });
     }
-
 
     public uploadBatteryJson(battery: IBatteryUpload, json: string) : Promise<boolean> {
         this.logger.debug(`Uploading json to Central for ${battery.batteryId} from ${battery.pendingBatteryFileName}`);
@@ -109,7 +111,6 @@ export class BatteryUploadService {
             .then(() => { throw error;});
         });
     }
-
 
     public updatePendingCopyIfPossible(battery: IBatteryUpload): Promise<boolean> {
         return this.userStore.getUserSavedBatteryDir()
@@ -145,6 +146,45 @@ export class BatteryUploadService {
         });
     }
 
+    private async syncImage(pendingImageDir: DirectoryEntry, image: IImageUpload, imageSyncState: BehaviorSubject<ISyncState>): Promise<boolean> {
+        const imageUrl = `${pendingImageDir.toInternalURL()}${image.batteryId}/${image.subtestGUID}/${image.imageName}.png`;
+        const ft = new FileTransfer();
+        image.uploadTracker = ft;
+        const imageState: ISyncState = imageSyncState.value;
+        const options: FileUploadOptions = {
+            fileKey: 'data',
+            fileName: image.imageName,
+            mimeType: 'image/png',
+            params: {
+                assessmentId: image.batteryId,
+                fileName: image.imageName,
+                subtestInstanceID: image.subtestGUID,
+                type: 'image'
+            }
+        };
+        const conf: IConfig = await this.configService.getConfig();
+        const uploadUrl = conf.centralEndpoint + UPLOAD_FILE_URL;        
+        const status = await new Promise((res, rej) => {
+            ft.upload(imageUrl, encodeURI(uploadUrl), () => {
+                imageState.imageSyncState.status = ImageSyncStateEnum.IMAGE_UPLOADED;
+                imageState.imageSyncState.numImagesRemaining =- 1;
+                res(true);
+            }, e => {
+                if (  e.code === FileTransferError.ABORT_ERR) {
+                    // called due to an abort and we ignore it
+                    imageState.imageSyncState.status = ImageSyncStateEnum.IMAGE_UPLOADED;
+                    imageState.imageSyncState.numImagesRemaining =- 1;
+                    res(true);
+                } else {
+                    rej(e);
+                }
+                
+            }, options);
+        });
+        imageSyncState.next(imageState);
+        return true;
+    }
+
     private prepBasicOperationForBattery(batteryId: string, url: string): Promise<IBatteryUpload> {
         const battery: IBatteryUpload = {
             batteryId,
@@ -162,7 +202,7 @@ export class BatteryUploadService {
     private prepBasicOperationForImage(image: IImage, batteryId: string): Promise<IImageUpload> {
         const imagery: IImageUpload = {
             batteryId,
-            destURL: UPLODA_FILE_URL,
+            destURL: UPLOAD_FILE_URL,
             imageId: `${batteryId}-${image.subtestInstanceId}-${image.fileName}`,
             imageName: image.fileName,
             opType: UploadType.MANUAL,

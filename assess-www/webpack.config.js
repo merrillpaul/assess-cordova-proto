@@ -109,15 +109,15 @@ const pluginsapp = (isProd) => {
     envPlugin,
     /*new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    })  */  
+    })  */ 
   ];
 };
 const pluginslib = (isProd) => {
   return [
     envPlugin,
-    new UglifyJsPlugin({
+    /*new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    })   
+    }) */  
   ];
 };
 
