@@ -1,22 +1,44 @@
 "use strict";
 const path = require("path");
+const os = require('os');
+const execSync = require("child_process").execSync;
 const webpack = require('webpack');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-const networkInterfaces = require('os').networkInterfaces;
+const networkInterfaces = os.networkInterfaces;
 const getLocalExternalIp = () => [].concat.apply([], Object.values(networkInterfaces()))
 .filter(details => details.family === 'IPv4' && !details.internal)
 .pop().address;
-const getBranch = () =>  process.env.QI_BRANCH || "master";
-const getConfigName = () =>  process.env.QI_CONFIG_NAME || "dev";
-const getCommitDate = () =>  process.env.QI_COMMIT_DATE || "today";
-const getCommitId = () =>  process.env.QI_COMMIT_ID || "12345";
-const getBuildHost = () =>  process.env.QI_BUILD_HOST || "localmachine";
-const getConfiguredVersion = () =>  process.env.QI_CONF_VERSION || "dev";
 
+const getBranch = () =>  {
+  let branch = execSync("git branch | grep '^\*' | sed 's/^\* //'", { encoding: 'utf8'} );
+  branch = branch.replace(/\n$/, '');
+  return process.env.QI_BRANCH || branch || "master";
+};
+
+const getCommitId = () => {
+  let commId = execSync("git rev-parse --short HEAD", { encoding: 'utf8'});
+  commId = commId.replace(/\n$/, '');
+  return process.env.QI_COMMIT_ID  || commId || "12345";
+};
+
+const getCommitDate = () => {
+  // Get the date from Git as a Unix timestamp, or at least as closely as Git will approximate one,
+  // then format it in a way that will work in all locales.
+  const gitDate = execSync("git show -s --format=format:'%ct'", { encoding: 'utf8' }).replace(/\n$/, '');
+  const formatedDate = execSync(`date -j -f '%s' ${gitDate} '+%Y-%m-%d %H:%M'`, { encoding: 'utf8' }).replace(/\n$/, '');
+  return formatedDate;
+
+};
+
+const getConfigName = () =>  process.env.QI_CONFIG_NAME || "dev";
+// not sure why , i just put this duplicate
+const getConfiguredVersion = () =>  process.env.QI_CONFIG_NAME || "dev";
+
+const getBuildHost = () =>  os.hostname();
 
 const ENV = process.env.npm_lifecycle_event;
 const isProd = ENV === "build";

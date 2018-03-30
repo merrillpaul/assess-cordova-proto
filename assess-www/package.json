@@ -60,6 +60,7 @@
     "@types/uuid": "^3.4.3",
     "axios": "^0.17.1",
     "bcryptjs": "^2.4.3",
+    "chalk": "^2.3.2",
     "cordova-browser": "^5.0.3",
     "cordova-plugin-file": "^6.0.1",
     "cordova-plugin-file-transfer": "^1.7.1",
