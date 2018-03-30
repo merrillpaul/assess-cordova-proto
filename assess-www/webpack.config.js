@@ -29,8 +29,9 @@ const getCommitDate = () => {
   // Get the date from Git as a Unix timestamp, or at least as closely as Git will approximate one,
   // then format it in a way that will work in all locales.
   const gitDate = execSync("git show -s --format=format:'%ct'", { encoding: 'utf8' }).replace(/\n$/, '');
+  const tz = execSync("date '+%z'", { encoding: 'utf8' }).replace(/\n$/, '');
   const formatedDate = execSync(`date -j -f '%s' ${gitDate} '+%Y-%m-%d %H:%M'`, { encoding: 'utf8' }).replace(/\n$/, '');
-  return formatedDate;
+  return formatedDate + ' ' + tz;
 
 };
 
