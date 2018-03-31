@@ -1,6 +1,6 @@
 import { AppContext } from '@assess/app-context';
 import { ConfigService } from '@assess/shared/config/config-service';
-import { BatteryInfo } from '@assess/shared/dto/battery';
+import { IBatteryInfo } from '@assess/shared/dto/battery';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
@@ -22,14 +22,14 @@ export class AssessmentService {
     @Inject()
     private appContext: AppContext;
 
-    public getAssessmentList(existingAssessmentIds: string[]): Promise<BatteryInfo> {
+    public getAssessmentList(existingAssessmentIds: string[]): Promise<IBatteryInfo> {
 
         if(!this.appContext.withinCordova) {
             return Promise.resolve({ assessments: [], deletedAssessmentIds: []});
         }
 
         const url = '/sync/getReady';
-        return new Promise<BatteryInfo>((res, rej) => {            
+        return new Promise<IBatteryInfo>((res, rej) => {            
 
             this.logger.info(`Pulling assessment list`);
 
@@ -42,7 +42,7 @@ export class AssessmentService {
                 this.httpService.post(url, qs.stringify(bodyFormData))
                 .then(response => { 
                     this.logger.success(`Get assessment list successfull with ${JSON.stringify(response.data)}`);              
-                    res(response.data as BatteryInfo);
+                    res(response.data as IBatteryInfo);
             }))
             .catch(error => {
                 this.logger.error(`Error getting assessment list ${JSON.stringify(error)}`);

@@ -1,4 +1,4 @@
-import { IContentQueryState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
+import { IContentQueryState, INewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { HttpService } from '@assess/shared/http/http-service';
 import { Logger } from '@assess/shared/log/logger-annotation';
@@ -40,7 +40,7 @@ export class QueryContentService {
             }).then(bodyFormData =>
                 this.httpService.post(url, qs.stringify(bodyFormData))
                 .then(response => {
-                const downloadables: NewContentVersion[] = [];
+                const downloadables: INewContentVersion[] = [];
                 for (let i = 0, len = response.data.length; i < len; i++ ) {
                     const item = response.data[i];
                     const status = item.status;

@@ -1,5 +1,5 @@
 import { AppContext } from '@assess/app-context';
-import { LoginUserInfo } from '@assess/shared/dto/login-state';
+import { ILoginUserInfo } from '@assess/shared/dto/login-state';
 import { FileService } from '@assess/shared/file/file-service';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import { LoggingService } from '@assess/shared/log/logging-service';
@@ -28,7 +28,7 @@ export class UserStoreService {
      * and 
      * @param userInfo 
      */
-    public markLoggedinUser(userInfo: LoginUserInfo, username: string, hashedPassword: string): void {
+    public markLoggedinUser(userInfo: ILoginUserInfo, username: string, hashedPassword: string): void {
         this.logger.info('marking user login');
         
         if (!this.appContext.withinCordova) {
@@ -137,7 +137,7 @@ export class UserStoreService {
         });
     }
 
-    private getLoggedInUserDetails(): Promise<LoginUserInfo> {
+    private getLoggedInUserDetails(): Promise<ILoginUserInfo> {
         if (!this.appContext.withinCordova) {
             // the or condition is for direct give-www url
             const userInfo = window.localStorage.getItem(CURRENT_USER_KEY) || 
@@ -148,7 +148,7 @@ export class UserStoreService {
             });
             return Promise.resolve(JSON.parse(userInfo));            
         } else {
-            return new Promise<LoginUserInfo>((res, rej) =>{
+            return new Promise<ILoginUserInfo>((res, rej) =>{
                 this.fileService.getUserDir().then(userDir => {
                     userDir.getFile(`${CURRENT_USER_KEY}.json`, {}, fileEntry => {
                         fileEntry.file(file => {

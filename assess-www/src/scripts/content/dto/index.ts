@@ -1,18 +1,18 @@
-import { NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
+import { INewContentVersion, QueryVersionStatus } from '@assess/content/dto';
 
 export * from './new-content-version';
 export * from './content-query-status';
 
 export interface IContentQueryState {
     contentQueryStatus: QueryVersionStatus;
-    downloadsNeeded: NewContentVersion[];
+    downloadsNeeded: INewContentVersion[];
     extractedHashes?: any;
 }
 
 export interface ITarDownloadState {
-    downloadsInError: NewContentVersion[];
-    pendingDownloads: NewContentVersion[];
-    completedDownloads: NewContentVersion[];
+    downloadsInError: INewContentVersion[];
+    pendingDownloads: INewContentVersion[];
+    completedDownloads: INewContentVersion[];
     totalSize: number;
     downloadedSize: number;
     versionsTotal: number;
@@ -20,7 +20,7 @@ export interface ITarDownloadState {
 
 export interface ITarExtractionState {
     completedTarFiles: string[];
-    downloadedVersions: NewContentVersion[];
+    downloadedVersions: INewContentVersion[];
     extractionsWithError: string[];
     extractedHashes: any; 
     pendingTarFiles: string[];

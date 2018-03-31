@@ -5,7 +5,7 @@ import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
 import constants from '@assess/content/constants';
-import { NewContentVersion } from '@assess/content/dto';
+import { INewContentVersion } from '@assess/content/dto';
 import { ConfigService } from '@assess/shared/config/config-service';
 import { FileService } from '@assess/shared/file/file-service';
 import { HttpService } from '@assess/shared/http/http-service';
@@ -56,7 +56,7 @@ export class ContentUtilsService {
     }
 
 
-    public downloadTar(contentVersion: NewContentVersion): Channel<any> {
+    public downloadTar(contentVersion: INewContentVersion): Channel<any> {
         
         return eventChannel(emitter => {
             const progressSubject = new Subject<ProgressEvent>();
@@ -104,7 +104,7 @@ export class ContentUtilsService {
      * Plain download for mock in browser to showcase progress
      * @param contentVersion 
      */
-    public downloadTarUrl(contentVersion: NewContentVersion): Channel<any> {     
+    public downloadTarUrl(contentVersion: INewContentVersion): Channel<any> {     
        
        
         return eventChannel(emitter => {
@@ -144,7 +144,7 @@ export class ContentUtilsService {
         });        
     }
 
-    public writeToContentArchive(contentVersion: NewContentVersion, blob: Blob) {
+    public writeToContentArchive(contentVersion: INewContentVersion, blob: Blob) {
         return  this.fileService.getContentArchiveDir().then(contentDir => {
             return this.fileService.writeFile(contentDir, `${contentVersion.versionWithType}.tar`, blob);
         });

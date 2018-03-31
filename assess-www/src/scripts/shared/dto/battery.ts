@@ -1,16 +1,16 @@
-export interface BatteryInfo {
-    assessments: Assessment[];
+export interface IBatteryInfo {
+    assessments: IAssessment[];
     deletedAssessmentIds: string[];
 }
 
-export interface Patient {
+export interface IPatient {
     dob: string;
     gender: string;
     id: string;
     name: string;
 }
 
-export interface Subtest {
+export interface ISubtest {
     abbr: string;
     normType: string;
     subtestGUID: string;
@@ -19,20 +19,20 @@ export interface Subtest {
     testName: string;
 }
 
-export interface Battery {
+export interface IBattery {
     name: string;
-    subtests: Subtest[];
+    subtests: ISubtest[];
     practiceMode: boolean;
 }
 
-export interface Assessment {
+export interface IAssessment {
     administrationDate: string;
     id: string;
     testLocation: string;
     title: string;
     hasObservations: boolean;
-    patient: Patient;
+    patient: IPatient;
     examiners: string[];
     grades: string[];
-    battery?: Battery;
+    battery?: IBattery;
 }

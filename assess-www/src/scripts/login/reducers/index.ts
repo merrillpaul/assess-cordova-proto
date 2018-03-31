@@ -1,5 +1,5 @@
 import constants from '@assess/login/constants';
-import { LoginFormState, LoginState } from '@assess/shared/dto/login-state';
+import { ILoginFormState, ILoginState } from '@assess/shared/dto/login-state';
 
 /*
  * state shape
@@ -53,7 +53,7 @@ const initialState = {
     userInfo: {}   
 };
 
-const login = (state: any = initialState, action: any): LoginState => {
+const login = (state: any = initialState, action: any): ILoginState => {
     let newState: any;
     switch(action.type) {
         case constants.LOGIN_REQUEST_PENDING:        
@@ -75,12 +75,12 @@ const login = (state: any = initialState, action: any): LoginState => {
     return newState;
 }
 
-const loginForm = (state: LoginFormState = {
+const loginForm = (state: ILoginFormState = {
     fetching: false,
     passwordInError: false,
     usernameInError: false    
-}, action: any): LoginFormState => {
-    let newState: LoginFormState;
+}, action: any): ILoginFormState => {
+    let newState: ILoginFormState;
     switch(action.type) {
         case constants.LOGIN_REQUEST_PENDING:
         case constants.START_LOGIN:

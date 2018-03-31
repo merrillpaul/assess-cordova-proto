@@ -6,7 +6,7 @@ import constants from '@assess/mfa/constants';
 import { MfaStateProvider } from '@assess/mfa/reducers/mfa-state-provider';
 import { MfaService } from '@assess/mfa/service/mfa-service';
 import { Dialog } from '@assess/shared/dialog/dialog';
-import { LoginUserInfo } from '@assess/shared/dto/login-state';
+import { ILoginUserInfo } from '@assess/shared/dto/login-state';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import {  LoggingService } from '@assess/shared/log/logging-service';
 import { AuthService } from '@assess/shared/security/auth-service';
@@ -45,7 +45,7 @@ export class MfaSaga {
      * @param action 
      */
     public *startMfaSaga(action: any): IterableIterator<any> {
-        const userInfo: LoginUserInfo = action.loginResult;
+        const userInfo: ILoginUserInfo = action.loginResult;
         if (!userInfo.mfaDetails.mfaVerified) {
             this.logger.warn('Needs mfa but user has not set it up');
             this.dialog.alert(this.i18n.getMessage('give.login.auth.error.mfa.not.setup.description'), 

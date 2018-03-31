@@ -1,7 +1,6 @@
 import { BatteryStatusDAO } from '@assess/shared/battery/battery-status-dao';
 import { AssessmentService } from '@assess/shared/central/assessment-service';
 import { ConfigService } from '@assess/shared/config/config-service';
-import { LoginUserInfo } from '@assess/shared/dto/login-state';
 import { FileService } from '@assess/shared/file/file-service';
 import { LocaleHelperService } from '@assess/shared/locale/locale-helper';
 import { Logger } from '@assess/shared/log/logger-annotation';

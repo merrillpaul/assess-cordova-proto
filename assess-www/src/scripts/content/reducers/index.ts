@@ -1,6 +1,6 @@
 import constants from '../constants';
-import { IContentQueryState, ITarDownloadState, ITarExtractionState,
-    NewContentVersion, QueryVersionStatus } from '../dto';
+import { IContentQueryState, INewContentVersion, ITarDownloadState, 
+    ITarExtractionState, QueryVersionStatus } from '../dto';
 
 const initialState: IContentQueryState = {
     contentQueryStatus: QueryVersionStatus.NONE,
@@ -67,13 +67,13 @@ const calculateDownloadSize =(downloadState: ITarDownloadState): number => {
 
 const tarsDownloaded = (state: ITarDownloadState = tarsDownloadedInitialState, action: any): ITarDownloadState => {
     let newState: ITarDownloadState;
-    let version: NewContentVersion;
-    let completedDownloads: NewContentVersion[];
-    let pendingDownloads: NewContentVersion[];
+    let version: INewContentVersion;
+    let completedDownloads: INewContentVersion[];
+    let pendingDownloads: INewContentVersion[];
     switch(action.type) {
 
         case constants.CONTENT_DOWNLOAD_TAR_SAGA_START:
-            const downloadsNeeded: NewContentVersion[]  = action.contentQueryResult.downloadsNeeded;
+            const downloadsNeeded: INewContentVersion[]  = action.contentQueryResult.downloadsNeeded;
             newState = {...tarsDownloadedInitialState, completedDownloads: [], downloadedSize: 0, pendingDownloads: downloadsNeeded, 
                 totalSize: action.totalSizeInBytes, versionsTotal: downloadsNeeded.length};
             break;
@@ -123,7 +123,7 @@ const tarsExtractionInitialState: ITarExtractionState = {
 const tarsExtracted = (state: ITarExtractionState = tarsExtractionInitialState, action: any): ITarExtractionState => {
     let newState: ITarExtractionState;
     let currentTar: string;
-    let currentTarVersion:NewContentVersion;
+    let currentTarVersion:INewContentVersion;
     let completedTarFiles: string[];
     let pendingTarFiles: string[];
     let extractedHashes: any;

@@ -15,7 +15,7 @@ export interface IMfaDetails {
     reAuthTimeout?: number;
 }
 
-export interface LoginUserInfo {
+export interface ILoginUserInfo {
     userName: string;
     userId: string;
     eligibleSubtestGUIDs: string[];
@@ -24,15 +24,15 @@ export interface LoginUserInfo {
     mfaDetails?: IMfaDetails;
 };
 
-export interface LoginState {
+export interface ILoginState {
     isLoggingIn: boolean;
     startedRequest?: boolean;
 	loggedIn: boolean;
-	userInfo?: LoginUserInfo;
+	userInfo?: ILoginUserInfo;
 	errors?: string[];
 };
 
-export interface LoginFormState {
+export interface ILoginFormState {
     usernameInError: boolean;
     passwordInError: boolean;
     fetching: boolean;

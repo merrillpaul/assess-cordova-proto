@@ -7,6 +7,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
+const HappyPack = require('happypack');
 
 const networkInterfaces = os.networkInterfaces;
 const getLocalExternalIp = () => [].concat.apply([], Object.values(networkInterfaces()))
@@ -55,16 +57,32 @@ const envPlugin = new webpack.EnvironmentPlugin({
   'QI_CONF_VERSION': getConfiguredVersion()
 });
 
+const happyPackPlugin = new HappyPack({
+  id: 'ts',
+  threads: 2,
+  loaders: [
+    {
+      path: 'ts-loader',
+      query: {
+        happyPackMode: true
+      }
+    }
+  ]
+});
+
 const modules = {
   rules: [
+    
     {
       test: /\.ts$/,
-      loader: "ts-loader"
+      loader: 'happypack/loader?id=ts',
+      exclude: /node_modules/
     },
     {
       enforce: "pre",
       test: /\.ts$/,
-      loader: "tslint-loader"
+      loader: "tslint-loader",
+      exclude: /node_modules/
     },
     {
       test: /\.jpe?g$|\.gif$|\.png$/i,
@@ -101,15 +119,7 @@ const modules = {
       test: /\.html$/,
       exclude: /node_modules/,
       loader: "html-loader?exportAsEs6Default"
-    },
-    /*{
-      test: /\.ts$/,
-      enforce: "pre",
-      include: [
-        path.resolve(__dirname, "src/config")
-      ],
-      use: [{ loader: 'configLoader' }]
-    }*/
+    }
   ]
 };
 const pluginsapp = (isProd) => {
@@ -130,17 +140,29 @@ const pluginsapp = (isProd) => {
       { from: "images", to: "images" }
     ]),
     envPlugin,
-    /*new UglifyJsPlugin({
+    new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    })  */ 
+    }),
+    happyPackPlugin,
+    new ForkTsCheckerPlugin({
+      tsconfig: path.resolve(__dirname, 'tsconfig.json'),
+      tslint: path.resolve(__dirname, 'tslint.json'),
+      checkSyntacticErrors: true
+    })
   ];
 };
 const pluginslib = (isProd) => {
   return [
     envPlugin,
-    /*new UglifyJsPlugin({
+    happyPackPlugin,
+    new ForkTsCheckerPlugin({
+      tsconfig: path.resolve(__dirname, 'tsconfig.json'),
+      tslint: path.resolve(__dirname, 'tslint.json'),
+      checkSyntacticErrors: true
+    }),
+    new UglifyJsPlugin({
       sourceMap: true, uglifyOptions: { mangle: false }
-    }) */  
+    }) 
   ];
 };
 
@@ -189,7 +211,10 @@ const baseConfig = (env) => {
       },
       open: true
     },  
-    devtool: "source-map"
+    devtool: "source-map",
+    stats: {
+      warningsFilter: /export .* was not found in/
+    }
   },
   {
     entry: {
@@ -208,7 +233,10 @@ const baseConfig = (env) => {
     plugins: pluginslib(isProd),  
     resolve: resolve,  
     resolveLoader: loaders,  
-    devtool: "source-map"
+    devtool: "source-map",
+    stats: {
+      warningsFilter: /export .* was not found in/
+    }
   }];
   
 }

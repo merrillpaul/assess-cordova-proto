@@ -1,4 +1,4 @@
-import { NewContentVersion } from '@assess/content/dto';
+import { INewContentVersion } from '@assess/content/dto';
 import { I18n } from '@assess/i18n/i18n';
 import { BaseOverlay } from '@assess/overlay/base-overlay';
 import { ComponentTemplate, IComponentModel } from '@assess/shared/component/base-component';
@@ -39,7 +39,7 @@ export class NewContentVersionPrompt extends BaseOverlay {
     super('new-content-version-ctr');
   }
 
-  public updateContentVersions(newContentVersions: NewContentVersion[]) {
+  public updateContentVersions(newContentVersions: INewContentVersion[]) {
     const totalSizeInBytes = newContentVersions.map(it => it.size || 0).reduce((prev, el) => prev + el);
     this.title.innerHTML = this.i18n.getMessage('give.content.new.available', { size: this.fileService.getSizeDescription(totalSizeInBytes)});
 
@@ -50,7 +50,7 @@ export class NewContentVersionPrompt extends BaseOverlay {
      
   }  
 
-  public showPrompt(newContentVersions: NewContentVersion[]) : Promise<string> {
+  public showPrompt(newContentVersions: INewContentVersion[]) : Promise<string> {
       super.show();
       this.updateContentVersions(newContentVersions);
       this.promise = new Promise((res, rej) => {

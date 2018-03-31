@@ -2,7 +2,7 @@ import { invalidPassword, invalidUsername } from '@assess/login/actions';
 import constants from '@assess/login/constants';
 import { LoginStateProvider } from '@assess/login/reducers/state-provider';
 import { LoginSpinnerOverlay } from '@assess/login/spinner/login-spinner';
-import { LoginUserInfo } from '@assess/shared/dto/login-state';
+import { ILoginUserInfo } from '@assess/shared/dto/login-state';
 import { AuthService } from '@assess/shared/security/auth-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
 
@@ -61,7 +61,7 @@ export class LoginSaga {
     }
 
     public *markLogin(action: any): IterableIterator<any> {
-        const userInfo: LoginUserInfo = this.provider.getUserInfo();
+        const userInfo: ILoginUserInfo = this.provider.getUserInfo();
         const hashedPassword = action.hashedPassword;
         const username: string = action.username;
         this.userStoreService.markLoggedinUser(userInfo, username, hashedPassword);

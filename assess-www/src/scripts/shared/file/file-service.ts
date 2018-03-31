@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
 
 import { AppContext } from '@assess/app-context';
-import { NewContentVersion } from '@assess/content/dto';
+import { INewContentVersion } from '@assess/content/dto';
 import { Logger } from '@assess/shared/log/logger-annotation';
 import {  LoggingService } from '@assess/shared/log/logging-service';
 
@@ -160,7 +160,7 @@ export class FileService {
               rej(e);
             }
           );       
-      } else {
+      } else { 
         window.webkitRequestFileSystem(
             window.TEMPORARY,
             1024 * 1024 * 1024,
@@ -384,7 +384,7 @@ export class FileService {
    * @param filename 
    * @param targetDir 
    */
-  public downloadUrlToDir(contentVersion: NewContentVersion, url: string, filename: string, targetDir: DirectoryEntry, progressCb): Promise<FileEntry> {
+  public downloadUrlToDir(contentVersion: INewContentVersion, url: string, filename: string, targetDir: DirectoryEntry, progressCb): Promise<FileEntry> {
     return new Promise((res, rej) => {
       const transfer = new FileTransfer();
       const uri = encodeURI(url);

@@ -4,7 +4,7 @@ import { Container, Inject, Service } from "typedi";
 import { AppContext } from '@assess/app-context';
 import { startContentDownload } from '@assess/content/actions';
 import constants from '@assess/content/constants';
-import { IContentQueryState, ITarDownloadState, NewContentVersion, QueryVersionStatus } from '@assess/content/dto';
+import { IContentQueryState, INewContentVersion, ITarDownloadState, QueryVersionStatus } from '@assess/content/dto';
 import { ContentStateProvider } from '@assess/content/reducers/content-state-provider';
 import { QueryContentService } from '@assess/content/service/query-content-service';
 import { FileService } from '@assess/shared/file/file-service';
@@ -143,7 +143,7 @@ export class ContentDownloadSaga {
         let downloadedSize: number = 0;      
         
         for (let i = 0, len = contentQueryResult.downloadsNeeded.length; i < len; i++) {
-            const newVersion: NewContentVersion = contentQueryResult.downloadsNeeded[i];
+            const newVersion: INewContentVersion = contentQueryResult.downloadsNeeded[i];
             yield put({type: constants.CONTENT_DOWNLOAD_TAR_STARTED, index: i});
 
             try {
@@ -205,7 +205,7 @@ export class ContentDownloadSaga {
         yield put({type: constants.CONTENT_DOWNLOAD_SAGA_FINISHED}); 
     }
 
-    private *download(newVersion: NewContentVersion) {
+    private *download(newVersion: INewContentVersion) {
         const channel = this.appContext.withinCordova ?
             yield apply (this.contentUtilService, this.contentUtilService.downloadTar, [newVersion]) :
             yield apply (this.contentUtilService, this.contentUtilService.downloadTarUrl, [newVersion]);             

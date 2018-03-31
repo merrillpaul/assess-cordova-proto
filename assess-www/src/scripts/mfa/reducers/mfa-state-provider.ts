@@ -1,5 +1,5 @@
 import { IMfaState } from '@assess/mfa/dto';
-import { IMfaDetails, LoginState } from '@assess/shared/dto/login-state';
+import { ILoginState, IMfaDetails } from '@assess/shared/dto/login-state';
 import { BaseStateProvider, IStoreObservable } from '@assess/shared/state/base-state-provider';
 import { Watchables } from '@assess/shared/state/watchable';
 import { Observable } from "rxjs";
@@ -31,7 +31,7 @@ export class MfaStateProvider extends BaseStateProvider {
     }
     
     public getCommunicatorAddress(mfaType: string): string {
-        const loginState: LoginState = this.appContext.getState().login as LoginState;
+        const loginState: ILoginState = this.appContext.getState().login as ILoginState;
         const mfaDetails: IMfaDetails = loginState.userInfo.mfaDetails;
         if (!mfaDetails) {
             return '';

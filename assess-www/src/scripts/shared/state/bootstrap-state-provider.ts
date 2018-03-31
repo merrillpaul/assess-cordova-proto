@@ -1,4 +1,4 @@
-import { LoginState, LoginUserInfo } from '@assess/shared/dto/login-state';
+import { ILoginState, ILoginUserInfo } from '@assess/shared/dto/login-state';
 import { BaseStateProvider,	IStoreObservable } from "@assess/shared/state/base-state-provider";
 import { Watchables } from "@assess/shared/state/watchable";
 
@@ -18,11 +18,11 @@ export class BootstrapStateProvider extends BaseStateProvider {
 		return this.onChange("startup", "targetPage");
 	}
 
-	public getState(): LoginState {
-        return this.appContext.getState().login as LoginState;
+	public getState(): ILoginState {
+        return this.appContext.getState().login as ILoginState;
     }
 
-    public getUserInfo() : LoginUserInfo {
+    public getUserInfo() : ILoginUserInfo {
         return this.getState().userInfo;
     }  
 }

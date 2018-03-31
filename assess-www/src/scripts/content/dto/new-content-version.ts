@@ -1,4 +1,4 @@
-export interface NewContentVersion {
+export interface INewContentVersion {
     versionWithType: string;
     displayName: string;
     hash: string;
