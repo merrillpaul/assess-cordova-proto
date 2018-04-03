@@ -15,6 +15,20 @@ or `cordova run build`.
 # Run in Browser
 `cordova run browser`
 
+## Cleanup browser file system
+```
+
+window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, function(fs) {
+  fs.root.getDirectory('assessRoot', {}, function(dirEntry) {
+
+    dirEntry.removeRecursively(function() {
+      console.log('Directory removed.');
+    });
+
+  });
+});
+```
+
 # Run with Xcode
 `cordova platform remove ios && cordova platform add ios && cordova build`
 Then open the platforms/ios/<Name>.xcode project and run it on an ipad simulator.

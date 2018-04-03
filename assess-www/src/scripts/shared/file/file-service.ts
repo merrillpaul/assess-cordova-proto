@@ -93,7 +93,6 @@ export class FileService {
     setTimeout(() => {
       this.mkDirs(parentDir, parentPath)
       .then((subDir: DirectoryEntry) => {
-        // console.log('subDir', subDir.fullPath, subDir.toURL(), subDir.nativeURL,  subDir.toInternalURL ? subDir.toInternalURL(): '');
         this.writeFile(subDir, fileName, contents)
           .then(fileEntry => {
             subject.next(fileEntry);
@@ -106,7 +105,6 @@ export class FileService {
       })
       .catch(e => {
         subject.error(e);
-        // console.error(parentPath, fileName, e);
         subject.complete();
       });
     }, 10);
@@ -128,8 +126,14 @@ export class FileService {
         { create: true },
         fileEntry => {
           fileEntry.createWriter(writer => {
-            writer.write(data);
-            res(fileEntry);
+            // cleaning up
+            writer.onwriteend = () => {
+              fileEntry.createWriter(writer1 => {
+                writer1.write(data);
+                res(fileEntry);
+              });
+            }
+            writer.truncate(0);
           });
         },
         e => {
@@ -161,18 +165,21 @@ export class FileService {
             }
           );       
       } else { 
-        window.webkitRequestFileSystem(
-            window.TEMPORARY,
-            1024 * 1024 * 1024,
-            fs => {
-              this.rootDir = fs.root;
-              res(fs.root);
-            },
-            e => {
-              rej(e);
-            }
-        );
-               
+        
+        window.webkitStorageInfo.requestQuota(window.PERSISTENT, 1024*1024*1024*2, // 2 GB ? :-)
+          (granted) => {
+            window.webkitRequestFileSystem(
+              window.PERSISTENT,
+              granted,
+              fs => {                
+                this.rootDir = fs.root;
+                res(fs.root);               
+              },
+              e => {
+                rej(e);
+              }
+            );
+          }, e => rej(e));               
       }
     });
     return p;
@@ -315,16 +322,16 @@ export class FileService {
           const reader = new FileReader();
           reader.onloadend = () => {
               // The file exists and is readable
-              this.logger.success(`Found file ${fileEntry.toInternalURL()}`);
+              this.logger.success(`Found file ${fileEntry.toInternalURL ? fileEntry.toInternalURL(): fileEntry.toURL()}`);
               res(true);
           };
           reader.readAsText(file);
       }, e => {
-        this.logger.error(`hasFile error  finding file ${fileEntry.toInternalURL()} with ${JSON.stringify(e)}`);
+        this.logger.error(`hasFile error  finding file ${fileEntry.toInternalURL ? fileEntry.toInternalURL(): fileEntry.toURL()} with ${JSON.stringify(e)}`);
         res(false);
       });
       }, e => {
-        this.logger.error(`hasFile: no file found ${parentDir.toInternalURL()} ${filePath} with ${JSON.stringify(e)}`);
+        this.logger.error(`hasFile: no file found ${parentDir.toInternalURL ? parentDir.toInternalURL(): parentDir.toURL()} ${filePath} with ${JSON.stringify(e)}`);
         res(false);
       });
     });
@@ -424,7 +431,7 @@ export class FileService {
   public getContentDirTarFileNames(): Promise<string[]> {
     return this.getContentArchiveDir().then(contentArchDir => {
       return new Promise<string[]>((res, rej) => {
-        this.logger.debug(`Getting list of tar file names in ${contentArchDir.toInternalURL()}`);
+        this.logger.debug(`Getting list of tar file names in ${contentArchDir.toInternalURL ? contentArchDir.toInternalURL(): contentArchDir.toURL()}`);
         const reader = contentArchDir.createReader();  
         let tarEntries: string[] = [];
         const readEntries = () => {
@@ -536,7 +543,8 @@ export class FileService {
     }
 
     return this.getWwwDir().then(wwwDir => {
-      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toInternalURL());
+      
+      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toInternalURL ? wwwDir.toInternalURL(): wwwDir.toURL());
       return new Promise<FileEntry>((res, rej) => {
         wwwDir.getFile('cordova.js', {}, fileEntry => res(fileEntry), e => rej(e));
       });      
@@ -553,10 +561,10 @@ export class FileService {
     .then(results => {
         const cordovaJSFile: FileEntry = results[0];
         const targetDir: DirectoryEntry = results[1];
-        this.logger.debug(`Deleting the cordova indexjs from ${targetDir.toInternalURL()}`);
+        this.logger.debug(`Deleting the cordova indexjs from ${targetDir.toInternalURL ? targetDir.toInternalURL(): targetDir.toURL()}`);
         return this.deleteFileSilently(targetDir, 'index.js').then(() => 
           new Promise<boolean> ((res, rej) => {
-            this.logger.debug(`Copying ${cordovaJSFile.toInternalURL()}`);
+            this.logger.debug(`Copying ${cordovaJSFile.toInternalURL ? cordovaJSFile.toInternalURL(): cordovaJSFile.toURL()}`);
             cordovaJSFile.copyTo(targetDir, 'index.js', () => res(true), e => rej(e));
           })
         );        
@@ -576,7 +584,7 @@ export class FileService {
     }
 
     return this.getWwwDir().then(wwwDir => {
-      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toInternalURL());
+      this.logger.debug('wwwDir location ' + wwwDir.nativeURL + ' internal ' + wwwDir.toURL());
       return new Promise<FileEntry>((res, rej) => {
         wwwDir.getFile('plugins/plugins.js', {}, fileEntry => res(fileEntry), e => rej(e));
       });      
@@ -593,10 +601,10 @@ export class FileService {
     .then(results => {
         const cordovaJSFile: FileEntry = results[0];
         const targetDir: DirectoryEntry = results[1];
-        this.logger.debug(`Deleting the assess plugins indexjs from ${targetDir.toInternalURL()}`);
+        this.logger.debug(`Deleting the assess plugins indexjs from ${targetDir.toURL()}`);
         return this.deleteFileSilently(targetDir, 'index.js').then(() => 
           new Promise<boolean> ((res, rej) => {
-            this.logger.debug(`Copying ${cordovaJSFile.toInternalURL()}`);
+            this.logger.debug(`Copying ${cordovaJSFile.toURL()}`);
             cordovaJSFile.copyTo(targetDir, 'index.js', () => res(true), e => rej(e));
           })
         );        

@@ -26,15 +26,15 @@ export class LocaleHelperService {
         }
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
-            this.logger.debug(`getHomeLocalized got content www dir as ${wwwDir.toInternalURL()}`);
+            this.logger.debug(`getHomeLocalized got content www dir as ${wwwDir.toInternalURL ? wwwDir.toInternalURL(): wwwDir.toURL()}`);
             return Promise.all([wwwDir, this.getLanguageCodeForHomeUI()]);
         }).then (results => {
             const wwwDir = results[0];
             const langCode = results[1];
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/homeUI_${langCode}.html`, { create: false },  file => {
-                    this.logger.debug(`Yep we have the localized home ui @ ${file.toInternalURL()}`);
-                    res(file.toInternalURL());
+                    this.logger.debug(`Yep we have the localized home ui @ ${file.toInternalURL ? file.toInternalURL(): file.toURL()}`);
+                    res(file.toInternalURL ? file.toInternalURL() : file.toURL());
                 }, e => {
                     this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);
                     rej(e);
@@ -55,7 +55,7 @@ export class LocaleHelperService {
             const langCode = results[1];
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/stimPad_${langCode}.html`, { create: false },  file => {
-                    res(file.toInternalURL());
+                    res(file.toInternalURL ? file.toInternalURL() : file.toURL());
                 }, e => rej(e));
             });            
         });
@@ -101,7 +101,7 @@ export class LocaleHelperService {
         .then(wwwDir => {
             return new Promise<string[]>((res, rej) => {
                 wwwDir.getDirectory(`${GIVE_WWW}/i18n`, {}, dir => {
-                    this.logger.debug(`Getting list of files from ${dir.toInternalURL()}`);
+                    this.logger.debug(`Getting list of files from ${dir.toInternalURL ? dir.toInternalURL(): dir.toURL()}`);
                     const reader = dir.createReader();  
                     let i18nmessageFiles: string[] = [];
                     const readEntries = () => {

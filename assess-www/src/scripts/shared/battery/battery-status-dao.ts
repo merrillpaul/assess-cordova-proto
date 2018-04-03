@@ -501,7 +501,7 @@ export class BatteryStatusDAO {
             this.userStoreService.getUserHomeDir()
             .then(userDir => this.fileService.writeFile(userDir, STATUS_FILE, new Blob([JSON.stringify(this.status)], 
             { type: 'application/json'})))
-            .then(savedStatusFile => this.logger.success(`Wrote battery dao status file into ${savedStatusFile.nativeURL}`))
+            .then(savedStatusFile => this.logger.success(`Wrote battery dao status file into ${savedStatusFile.nativeURL || savedStatusFile.fullPath}`))
             .catch(e => this.logger.error(`Error in saving battery dao status with ${JSON.stringify(e)}`));
         }
     }

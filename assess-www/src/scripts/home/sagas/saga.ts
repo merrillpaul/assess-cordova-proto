@@ -111,10 +111,10 @@ export class HomeSaga {
         }
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
-            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL()}`);
+            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL ? wwwDir.toInternalURL(): wwwDir.fullPath}`);
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/debugLoadPlaceholder.html`, { create: false },  file => {
-                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL()}`);
+                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL ? file.toInternalURL(): file.fullPath}`);
                     res(file.toInternalURL());
                 }, e => {
                     this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);
