@@ -22,7 +22,7 @@ export class LocaleHelperService {
 
     public getHomeLocalized(): Promise<string> {
         if ( !this.appContext.withinCordova ) {
-            return Promise.resolve('http://localhost/give/homeUI_en.html'); // for local dev
+            return Promise.resolve('/give/homeUI_en.html'); // for local dev
         }
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
@@ -45,7 +45,7 @@ export class LocaleHelperService {
 
     public getStimLocalized(): Promise<string> {
         if ( !this.appContext.withinCordova ) {
-            return Promise.resolve('http://localhost/give/stimPad_en.html'); // for local dev
+            return Promise.resolve('/give/stimPad_en.html'); // for local dev
         }
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {

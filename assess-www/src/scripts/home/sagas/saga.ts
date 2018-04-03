@@ -107,8 +107,9 @@ export class HomeSaga {
     private getDebugPlaceholderLocation(): Promise<string> {
         
         if ( !this.appContext.withinCordova ) {
-            return Promise.resolve('http://localhost/give/debugLoadPlaceholder.html'); // for local dev
+            return Promise.resolve('/give/debugLoadPlaceholder.html'); // for local dev
         }
+        
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
             this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL ? wwwDir.toInternalURL(): wwwDir.fullPath}`);

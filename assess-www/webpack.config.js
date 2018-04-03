@@ -209,7 +209,13 @@ const baseConfig = (env) => {
         aggregateTimeout: 300,
         poll: 500
       },
-      open: true
+      open: true,
+      proxy: {
+        "/give": {
+          target: "http://localhost/give",
+          pathRewrite: {"^/give" : ""}
+        }
+      }
     },  
     devtool: "source-map",
     stats: {
