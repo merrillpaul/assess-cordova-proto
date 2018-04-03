@@ -129,12 +129,26 @@ export class ContentUtilsService {
                     },
                     responseType: 'blob'                
                 }, true ).then (res => {
-                    progressSubject.complete();
-                    emitter({
-                        currentVersion: contentVersion,
-                        type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                    this.fileService.getContentArchiveDir()
+                    .then(contentDir => {
+                        return this.fileService.writeFile(contentDir, `${contentVersion.versionWithType}.tar`, res.data)
+                        .then(() => {
+                            progressSubject.complete();
+                            this.logger.success(`Copied ${contentVersion.versionWithType}.tar to ${contentDir.toURL()}`);
+                            emitter({
+                                currentVersion: contentVersion,
+                                type: constants.CONTENT_DOWNLOAD_TAR_FINISHED,
+                            });
+                            emitter(END);
+                            return true;
+                        });
+                    }).catch(e => {
+                        progressSubject.complete(); 
+                        throw e;
                     });
-                    emitter(END);
+                    
+
+
                 }).catch(e =>  { progressSubject.complete(); throw e; });
             });
             

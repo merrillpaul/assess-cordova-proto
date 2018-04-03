@@ -171,9 +171,11 @@ export class FileService {
             window.webkitRequestFileSystem(
               window.PERSISTENT,
               granted,
-              fs => {                
-                this.rootDir = fs.root;
-                res(fs.root);               
+              fs => {
+                fs.root.getDirectory('assessRoot', { create: true, exclusive: false}, dir => {
+                  this.rootDir = dir;
+                  res(dir);
+                }, e => rej(e));   
               },
               e => {
                 rej(e);
