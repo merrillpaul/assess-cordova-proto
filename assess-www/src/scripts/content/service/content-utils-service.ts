@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+import * as untar from 'js-untar';
 import { Channel, END, eventChannel } from 'redux-saga';
 import { Observable, Subject } from 'rxjs';
 import { Inject, Service } from 'typedi';
@@ -184,6 +185,37 @@ export class ContentUtilsService {
     }
 
     /**
+     * Extracts tar from content archive dir to tmp zip arch folder
+     * @param tarfileName 
+     */
+    public extractTarForBrowser(tarfileName: string): Promise<boolean> {          
+
+        return this.fileService.getContentArchiveDir().then(archiveDir => {
+            return new Promise<ArrayBuffer>((res, rej) => {
+                archiveDir.getFile(tarfileName, {}, tarFileEntry => {
+
+                    this.logger.debug(`Reading tar file from ${tarFileEntry.toURL()}`);
+                    tarFileEntry.file(file => {
+                        const reader: FileReader = new FileReader();
+                        reader.onloadend = () => {
+                            this.logger.success(`Got tar file contents from ${tarFileEntry.toURL()}`);
+                            res(reader.result);
+                        };
+                        reader.readAsArrayBuffer(file);
+                    }, e => rej(e));                    
+                }, e => rej(e));
+            }); 
+        }).then (arrayBuffer => {
+            return Promise.all([arrayBuffer, this.fileService.getZipExtractTmpDir()]);
+        }).then(results => {
+            const arrayBuffer: ArrayBuffer = results[0];
+            const tmpZipDir: DirectoryEntry = results[1];
+            return this.jsUntar(arrayBuffer, tmpZipDir, tarfileName);
+        });
+
+    }
+
+    /**
      * Moves give-www folder from the tmpZip folder onto the content-www folder.
      * We first remove the give-www folder in content-www and then make the move, cause 
      */
@@ -235,6 +267,43 @@ export class ContentUtilsService {
                 }
             });
         });        
+    }
+
+    private jsUntar(data: ArrayBuffer, targetDir: DirectoryEntry, tarfilename: string): Promise<boolean> {
+        this.logger.debug(`Starting to untar ${tarfilename}`);
+        return new Promise<boolean>((res, rej) => {
+            untar(data).then(
+                (allFiles: UntarredFile[]) => {
+                    const files = allFiles.filter (file => file.blob.size > 0).reverse();
+                    // this nextfile mechanism is to make the file writing sequentially
+                    // cause otherwise filewriting with html5 plugin complains if too many file calls
+                    // are done parallelly. So we kind of twist the asynchronous to synchronous file writing, one by one.
+                    const nextFile = () => {
+                        // if we have more files to process
+                        if (files.length > 0) {
+                          writeFiles(files.pop() as UntarredFile);
+                        } else {
+                          this.logger.success(`Extracted tar ${tarfilename}`);
+                          res(true);
+                        }
+                    };
+
+                    const writeFiles = (file: UntarredFile) => {  
+                        if (file) {
+                            const filename = file.name.split('/').pop() as string;
+                            this.fileService.createFileWithPath(targetDir, file.name, file.blob).subscribe(fileEntry => {                            
+                                nextFile();
+                            }, e => nextFile());   
+                        }          
+                    };
+                    writeFiles(files.pop() as UntarredFile); 
+
+                },
+                e => {
+                    rej(e);
+                }
+            );
+        });
     }
 
 }

@@ -209,9 +209,6 @@ export class FileService {
   }
 
   public getZipExtractTmpDir(): Promise<DirectoryEntry> {
-    if (!this.appContext.withinCordova) { // mock when opened in browser
-      return Promise.resolve(null);
-    }
     return this.getRootPath()
       .then(root => {
         return new Promise<DirectoryEntry>((res, rej) => {
@@ -222,16 +219,12 @@ export class FileService {
 
 
   public recreateZipExractTmpDir(): Promise<boolean> {
-    if (!this.appContext.withinCordova) { // mock when opened in browser
-      return Promise.resolve(true);
-    }
     const createTmpDir = (rootDir: DirectoryEntry, res, rej) => {
       rootDir.getDirectory(TMP_EXTRACT_DIR, {create: true}, (dir) => res(true), (e) => rej(e));
     };
-
     return new Promise((res, rej) => {
       this.getRootPath().then(rootDir => {
-          this.logger.debug( 'rootDir ', rootDir.nativeURL);
+          this.logger.debug( 'rootDir ');
           rootDir.getDirectory(TMP_EXTRACT_DIR, {}, dir => {
               // dir exists we need to remove and recreate
               dir.removeRecursively(() => createTmpDir(rootDir, res, rej), e => rej(e));                   
@@ -247,21 +240,21 @@ export class FileService {
    * 
    */
   public getExtractedHashesFileContent(): Promise<string> {
-    // we are mocking the extractedHashes for normal browser
-    if (!this.appContext.withinCordova) {
-      return Promise.resolve("{}");
-    }
-
+    
     const p = new Promise<string>((res, rej) => {
       this.getRootPath()
-      .then(rootDir => {
+      .then(rootDir => {          
           rootDir.getFile(EXTRACTED_VERSIONS_FILE, { create: true, exclusive: false}, fileEntry => {
             fileEntry.file(file => {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                res(reader.result || "{}");                
-              };
-              reader.readAsText(file);              
+              if(file.size === 0) {
+                res("{}");
+              } else {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  res(reader.result || "{}");                
+                };
+                reader.readAsText(file); 
+              }             
             });
             
           }, e => rej(e));
@@ -459,10 +452,6 @@ export class FileService {
   public writeExtractedHashes(hashes: any) : Promise<boolean> {
     const hashString: string = JSON.stringify(hashes);
     // this.logger.info(`Writing the hashes json with ${hashString}`);
-    if (!this.appContext.withinCordova) {
-      return Promise.resolve(true); // mock for browser
-    }
-
     return this.getRootPath()
     .then(rootDir => {
       return this.writeFile(rootDir, EXTRACTED_VERSIONS_FILE, new Blob([

@@ -6,7 +6,6 @@ import { ILoginUserInfo } from '@assess/shared/dto/login-state';
 import { AuthService } from '@assess/shared/security/auth-service';
 import { UserStoreService } from '@assess/shared/security/user-store-service';
 
-import * as bcrypt from 'bcryptjs';
 import { apply, call, put } from 'redux-saga/effects';
 import { Container, Inject, Service } from 'typedi';
 
@@ -44,8 +43,9 @@ export class LoginSaga {
         try {
             const response = yield call([this.authService, this.authService.login], action.username, action.password);
             const loginResult = response.data;
-            const salt = bcrypt.genSaltSync(10);
-            const hashedPassword = bcrypt.hashSync(action.password, salt);            
+            
+            const hashedPassword = this.authService.encrypt(action.password);  
+            alert(hashedPassword);
             if (loginResult.mfaDetails) {
                 yield apply (this.loginSpinner, this.loginSpinner.dispose);
                 yield put({type: constants.LOGIN_REQUEST_NEED_MFA, loginResult});                
