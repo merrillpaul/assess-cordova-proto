@@ -114,11 +114,11 @@ export class HomeSaga {
         
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
-            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL()}`);
+            this.logger.debug(`getDebugplaceholder got content www dir as ${this.appContext.withinCordova ? wwwDir.toInternalURL(): wwwDir.toURL()}`);
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/debugLoadPlaceholder.html`, { create: false },  file => {
-                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL()}`);
-                    res(file.toInternalURL());
+                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${this.appContext.withinCordova ? file.toInternalURL(): file.toURL()}`);
+                    res(this.appContext.withinCordova ? file.toInternalURL(): file.toURL());
                 }, e => {
                     this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);
                     rej(e);

@@ -40,11 +40,11 @@ export class LoggingService {
 	}
 
 	public getConsoleLog(): Promise<string> {
-		if(!this.appContext.withinCordova) {
+		/*if(!this.appContext.withinCordova) {
 			return Promise.resolve(`
 				Not within a device. Hence get your console logs from your browser's console window!
 			`);
-		}
+		}*/
 
 		return this.getLogFile()
 		.then(fileEntry => {
@@ -54,10 +54,10 @@ export class LoggingService {
 	}
 
 	public clearConsoleLog(): Promise<boolean> {
-		if(!this.appContext.withinCordova) {
+		/*if(!this.appContext.withinCordova) {
 			this.success('Fake clear console log');
 			return Promise.resolve(true);
-		}
+		}*/
 
 		const fileService = Container.get(FileService);
 		return fileService.getRootPath()
@@ -78,9 +78,9 @@ export class LoggingService {
 	
 	private consoleLog(msg: any[]) {
 
-		if (this.appContext.withinCordova) {
+		// if (this.appContext.withinCordova) {
 			this.writeLog(msg[0].substring(2));
-		}
+		// }
 		console.log.apply(console, msg);
 	}
 
