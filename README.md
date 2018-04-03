@@ -29,6 +29,9 @@ window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, function(fs) {
 });
 ```
 
+## Browse filesystem
+Paste `filesystem:http://localhost:3000/persistent/assessRoot/` in chrome url box and browse the file system
+
 # Run with Xcode
 `cordova platform remove ios && cordova platform add ios && cordova build`
 Then open the platforms/ios/<Name>.xcode project and run it on an ipad simulator.

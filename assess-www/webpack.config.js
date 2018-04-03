@@ -153,7 +153,7 @@ const pluginsapp = (isProd) => {
       { from: "images", to: "images" }
     ]),
     envPlugin,
-    uglifyPlugin,
+    /*uglifyPlugin,*/
     happyPackPlugin,
     forkedTsCheckerPlugin
   ];

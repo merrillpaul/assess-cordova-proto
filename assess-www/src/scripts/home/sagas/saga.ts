@@ -87,6 +87,7 @@ export class HomeSaga {
         yield call([this.fileService, this.fileService.copyAssessPluginsJs]);
         this.logger.debug('Copied over platform specific cordova JS to assess give-www');
         const debugUrl = yield call([this, this.getDebugPlaceholderLocation]);
+        this.logger.success(`debug url to ${debugUrl}`);
         let targetPart;
         if (this.appContext.withinCordova) {
             const isPractitioner = yield call([this.appPreferences, this.appPreferences.isPractitioner]);
@@ -95,6 +96,7 @@ export class HomeSaga {
         } else {
             targetPart = yield call([this.localeHelper, this.localeHelper.getHomeLocalized]);
         }
+        this.logger.debug(`Target landing page is ${targetPart}`);     
         // refer MainViewController.m #640
         const targetPage = `${debugUrl}?dest=${targetPart}`;
         // alert(`Will forward to ${targetPage}`);
@@ -112,10 +114,10 @@ export class HomeSaga {
         
         return this.fileService.getContentWwwDir()
         .then((wwwDir: DirectoryEntry ) => {
-            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL ? wwwDir.toInternalURL(): wwwDir.fullPath}`);
+            this.logger.debug(`getDebugplaceholder got content www dir as ${wwwDir.toInternalURL()}`);
             return new Promise<string>((res, rej) => {
                 wwwDir.getFile(`${GIVE_WWW}/debugLoadPlaceholder.html`, { create: false },  file => {
-                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL ? file.toInternalURL(): file.fullPath}`);
+                    this.logger.debug(`Yep we have the debugLoadPlaceholder @ ${file.toInternalURL()}`);
                     res(file.toInternalURL());
                 }, e => {
                     this.logger.error(`Seems a problem with ${e} ${JSON.stringify(e)}`);

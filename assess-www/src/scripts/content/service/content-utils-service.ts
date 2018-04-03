@@ -220,9 +220,7 @@ export class ContentUtilsService {
      * We first remove the give-www folder in content-www and then make the move, cause 
      */
     public updateContentWwwDir(): Promise<boolean> {
-        if (!this.appContext.withinCordova) {
-            return Promise.resolve(true);
-        }
+        
         return this.fileService.getContentWwwDir()
         .then(contentWwwDir => {
             return Promise.all([contentWwwDir, this.fileService.getZipExtractTmpDir()]);
@@ -270,34 +268,44 @@ export class ContentUtilsService {
     }
 
     private jsUntar(data: ArrayBuffer, targetDir: DirectoryEntry, tarfilename: string): Promise<boolean> {
+        if(tarfilename.indexOf('non-stim') === -1) {
+            return Promise.resolve(true);
+        }
         this.logger.debug(`Starting to untar ${tarfilename}`);
         return new Promise<boolean>((res, rej) => {
             untar(data).then(
                 (allFiles: UntarredFile[]) => {
                     const files = allFiles.filter (file => file.blob.size > 0).reverse();
-                    // this nextfile mechanism is to make the file writing sequentially
-                    // cause otherwise filewriting with html5 plugin complains if too many file calls
-                    // are done parallelly. So we kind of twist the asynchronous to synchronous file writing, one by one.
-                    const nextFile = () => {
-                        // if we have more files to process
-                        if (files.length > 0) {
-                          writeFiles(files.pop() as UntarredFile);
-                        } else {
-                          this.logger.success(`Extracted tar ${tarfilename}`);
-                          res(true);
-                        }
+                    const onlyUnique = (value, index, list) => { 
+                        return list.indexOf(value) === index;
                     };
+                    
+                    const dirNames = files.map(file => file.name.split('/').reverse().slice(1).reverse().join('/')).filter(onlyUnique);
 
-                    const writeFiles = (file: UntarredFile) => {  
-                        if (file) {
-                            const filename = file.name.split('/').pop() as string;
-                            this.fileService.createFileWithPath(targetDir, file.name, file.blob).subscribe(fileEntry => {                            
-                                nextFile();
-                            }, e => nextFile());   
-                        }          
-                    };
-                    writeFiles(files.pop() as UntarredFile); 
-
+                    // serially writing dirs
+                    dirNames.reduce((promise: Promise<any>, dir: string) => {
+                        return promise.then(() => {
+                            return this.fileService.mkDirs(targetDir, dir);
+                        });
+                    }, Promise.resolve(true))
+                    .then(() => {
+                        // now we need to serially write out the files
+                        return files.sort((a, b) => {
+                            if(a.name < b.name) { return -1 };
+                            if(a.name > b.name) { return 1 };
+                            return 0;
+                        }).reduce((promise: Promise<any>, file:UntarredFile) => {
+                            return promise.then(() => {
+                                
+                                    this.logger.info(`Writing file ${file.name} `);
+                                    return this.fileService.writeFile(targetDir, file.name, file.blob);
+                                
+                            });
+                        }, Promise.resolve(true));
+                        
+                    }, e => rej(e))
+                    .then(() => res(true))
+                    .catch(e => rej(e));
                 },
                 e => {
                     rej(e);

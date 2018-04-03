@@ -178,14 +178,9 @@ export class ContentDownloadSaga {
             yield put({type: constants.CONTENT_EXTRACT_TAR_STARTED, index: i});
             this.logger.debug(`Tar to extract ${tarfileName}`);
             try {
-                /*yield apply (this.contentUtilService, this.appContext.withinCordova ? 
-                            this.contentUtilService.extractTar: this.contentUtilService.extractTarForBrowser, [tarfileName]);*/
+                yield apply (this.contentUtilService, this.appContext.withinCordova ? 
+                            this.contentUtilService.extractTar: this.contentUtilService.extractTarForBrowser, [tarfileName]);
                 
-                if (this.appContext.withinCordova) {
-                    yield apply (this.contentUtilService, this.contentUtilService.extractTar, [tarfileName]);
-                } else { // mock for browser
-                    yield delay(100);
-                }
                 yield put({currentTar: tarfileName, type: constants.CONTENT_EXTRACT_TAR_FINISHED});
             } catch (error) {
                 this.logger.error(`Error in extracting tar for`, tarfileName);

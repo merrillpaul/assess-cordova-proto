@@ -120,7 +120,7 @@ export class BatteryUploadService {
             const batteryJson = results[0];
             const pendingDir = results[1];
             return new Promise<boolean>((res, rej) => {
-                this.logger.debug(`Copying ${batteryJson.nativeURL || batteryJson.fullPath} to ${pendingDir.toInternalURL ? pendingDir.toInternalURL() : pendingDir.fullPath}/${battery.pendingBatteryFileName}`);
+                this.logger.debug(`Copying ${batteryJson.nativeURL || batteryJson.fullPath} to ${pendingDir.fullPath}/${battery.pendingBatteryFileName}`);
                 batteryJson.copyTo(pendingDir, battery.pendingBatteryFileName, () => res(), e => rej(e));
             });
         });
@@ -140,7 +140,7 @@ export class BatteryUploadService {
             const imageFileEntry = results[0];
             const pendingDir = results[1];
             return new Promise<boolean>((res, rej) => {
-                this.logger.debug(`Copying ${imageFileEntry.nativeURL || imageFileEntry.fullPath} to ${pendingDir.toInternalURL ? pendingDir.toInternalURL(): pendingDir.fullPath}/${image.imageName}.png`);
+                this.logger.debug(`Copying ${imageFileEntry.nativeURL || imageFileEntry.fullPath} to ${pendingDir.fullPath}/${image.imageName}.png`);
                 imageFileEntry.copyTo(pendingDir, `${image.imageName}.png`, () => res(true), e => rej(e));
             });
         });

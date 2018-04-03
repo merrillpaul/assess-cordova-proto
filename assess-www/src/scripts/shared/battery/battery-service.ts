@@ -130,7 +130,7 @@ export class BatteryService {
 
     public getTestHierarchyJson(): Promise<string> {
         return this.fileService.getGiveWwwDir().then(wwwDir => {
-            this.logger.debug(`Getting testhiearchy from ${wwwDir.toInternalURL? wwwDir.toURL() : wwwDir.fullPath}`);
+            this.logger.debug(`Getting testhiearchy from ${wwwDir.fullPath}`);
             return this.fileService.readAsText(wwwDir, 'test-hierarchy.json');
         })
         .then(jsonStr => {
