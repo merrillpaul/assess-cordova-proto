@@ -46,6 +46,7 @@ export class LoginForm extends BaseComponent {
 	protected initEvents(rootContainer: HTMLDivElement) {
 
 		this.loginButton.addEventListener("click", () => {
+			debugger;
 			this.dispatchAction(
 				startLogin(this.usernameFld.value, this.passwordFld.value)
 			);

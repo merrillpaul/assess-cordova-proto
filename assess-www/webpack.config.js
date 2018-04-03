@@ -46,6 +46,8 @@ const getBuildHost = () =>  os.hostname();
 const ENV = process.env.npm_lifecycle_event;
 const isProd = ENV === "build";
 
+
+//////// PLUGINS /////////////////////////////////////////////////
 const envPlugin = new webpack.EnvironmentPlugin({
   'NODE_ENV': 'localdev',
   'LOCAL_IP': getLocalExternalIp(),
@@ -69,6 +71,17 @@ const happyPackPlugin = new HappyPack({
     }
   ]
 });
+
+const forkedTsCheckerPlugin = new ForkTsCheckerPlugin({
+  tsconfig: path.resolve(__dirname, 'tsconfig.json'),
+  tslint: path.resolve(__dirname, 'tslint.json'),
+  checkSyntacticErrors: true
+});
+
+const uglifyPlugin = new UglifyJsPlugin({
+  sourceMap: true, uglifyOptions: { mangle: false, compress: { drop_debugger: false } }
+});
+/////////////// PLUGINS end ////////////////////////////////////
 
 const modules = {
   rules: [
@@ -140,29 +153,17 @@ const pluginsapp = (isProd) => {
       { from: "images", to: "images" }
     ]),
     envPlugin,
-    new UglifyJsPlugin({
-      sourceMap: true, uglifyOptions: { mangle: false }
-    }),
+    uglifyPlugin,
     happyPackPlugin,
-    new ForkTsCheckerPlugin({
-      tsconfig: path.resolve(__dirname, 'tsconfig.json'),
-      tslint: path.resolve(__dirname, 'tslint.json'),
-      checkSyntacticErrors: true
-    })
+    forkedTsCheckerPlugin
   ];
 };
 const pluginslib = (isProd) => {
   return [
     envPlugin,
     happyPackPlugin,
-    new ForkTsCheckerPlugin({
-      tsconfig: path.resolve(__dirname, 'tsconfig.json'),
-      tslint: path.resolve(__dirname, 'tslint.json'),
-      checkSyntacticErrors: true
-    }),
-    new UglifyJsPlugin({
-      sourceMap: true, uglifyOptions: { mangle: false }
-    }) 
+    forkedTsCheckerPlugin,
+    uglifyPlugin
   ];
 };
 
