@@ -45,7 +45,6 @@ export class LoginSaga {
             const loginResult = response.data;
             
             const hashedPassword = this.authService.encrypt(action.password);  
-            alert(hashedPassword);
             if (loginResult.mfaDetails) {
                 yield apply (this.loginSpinner, this.loginSpinner.dispose);
                 yield put({type: constants.LOGIN_REQUEST_NEED_MFA, loginResult});                
