@@ -10,8 +10,10 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HappyPack = require('happypack');
 
-const networkInterfaces = os.networkInterfaces;
-const getLocalExternalIp = () => [].concat.apply([], Object.values(networkInterfaces()))
+const networkInterfaces = require('os').networkInterfaces();
+const allowedInterfaces = Object.keys(networkInterfaces).filter(it => it.indexOf('vbox') === -1)
+  .map(key => networkInterfaces[key]);
+const getLocalExternalIp = () => [].concat.apply([], Object.values(allowedInterfaces))
 .filter(details => details.family === 'IPv4' && !details.internal)
 .pop().address;
 
