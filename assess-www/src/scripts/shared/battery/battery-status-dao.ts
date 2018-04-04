@@ -497,7 +497,7 @@ export class BatteryStatusDAO {
         if (!this.appContext.withinCordova) {
             window.localStorage.setItem(STATUS_FILE, JSON.stringify(this.status));            
         } else {
-            this.logger.debug("Saving batterys status saveStatus");
+            this.logger.debug(`Saving batterys status saveStatus with ${JSON.stringify(this.status)}`);
             this.userStoreService.getUserHomeDir()
             .then(userDir => this.fileService.writeFile(userDir, STATUS_FILE, new Blob([JSON.stringify(this.status)], 
             { type: 'application/json'})))

@@ -120,26 +120,22 @@ export class FileService {
    * @param data 
    */
   public writeFile(dir: DirectoryEntry, fileName: string, data: Blob): Promise<FileEntry> {
-
-    return new Promise<FileEntry>((res, rej) => {
-      dir.getFile(fileName,
-        { create: true },
-        fileEntry => {
-          fileEntry.createWriter(writer => {
-            // cleaning up
-            writer.onwriteend = () => {
-              fileEntry.createWriter(writer1 => {
-                writer1.write(data);
-                res(fileEntry);
-              });
-            }
-            writer.truncate(0);
-          });
-        },
-        e => {
-          rej(e);
-        }
-      );
+    return this.deleteFileSilently(dir, fileName)
+    .then((stat)=> {
+      return new Promise<FileEntry>((res, rej) => {
+        dir.getFile(fileName,
+          { create: true },
+          fileEntry => {
+            fileEntry.createWriter(writer => {  
+                  writer.write(data);
+                  res(fileEntry);
+            });
+          },
+          e => {
+            rej(e);
+          }
+        );
+      });
     });
   }
 
