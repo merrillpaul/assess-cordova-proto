@@ -2,39 +2,39 @@
 This cordova upgrade or 'Vanilla Ice' project aims to upgrade the Cordova library and the Cordova project to be used to build the native build.
 
 ## Process
-~ Assess's give ./buildContent builds content and nonstim-all-tar which essentially is the www folder for Assess. These generate the various versions of homeUI, testDirector and stims
-~ The above process pulls in the cordova js api and the assess js plugins through bower
-~ The cordova based app presents the HTML5 login (and mfa) pages and authenticates with Central
-~ Ios 'NoCloud' folders are prepped for various uses, for eg saving current user, battery repop, content archive folder and so on
-~ The app downloads the content tars into a temp zip and untars these to a `www` folder in the above mentioned folder
-~ The content is extracted using a tar extraction process and preps the give-www folder
-~ The app decides which i18nized landing page , be it stim or homeUI
-~ The app's webview ( UI or WK) loads the give-www landing page at which point it loads the Assess.
+- Assess's give ./buildContent builds content and nonstim-all-tar which essentially is the www folder for Assess. These generate the various versions of homeUI, testDirector and stims
+- The above process pulls in the cordova js api and the assess js plugins through bower
+- The cordova based app presents the HTML5 login (and mfa) pages and authenticates with Central
+- Ios 'NoCloud' folders are prepped for various uses, for eg saving current user, battery repop, content archive folder and so on
+- The app downloads the content tars into a temp zip and untars these to a `www` folder in the above mentioned folder
+- The content is extracted using a tar extraction process and preps the give-www folder
+- The app decides which i18nized landing page , be it stim or homeUI
+- The app's webview ( UI or WK) loads the give-www landing page at which point it loads the Assess.
 
 ## Pre-Modules Plan
 
 ### Reuse /Refactor / Replace Native Plugins
-~ Just like File and Sync plugins have been migrated , we would need to reinstate functionality from Audio, BT etc. Due diligence is needed for any android counterparts as well like the TarPlugin we have moved.
+- Just like File and Sync plugins have been migrated , we would need to reinstate functionality from Audio, BT etc. Due diligence is needed for any android counterparts as well like the TarPlugin we have moved.
 
 ### Replace `PhoneGap.exec`
-~ Search for occurences of `PhoneGap.exec` and start replacing these with `AssessPlugins.<service>`
-~ The `AssessPlugins.<service>` methods (https://github.com/merrillpaul/assess-cordova-proto/blob/master/assess-www/src/scripts/app-plugin-lib.ts) typically return Promises or rxJs Observables.
-~ Change Give-www JS code to use Promise or Observable semantics wherever `PhoneGap.exec` gets replaced, instead of callbacks.
+- Search for occurences of `PhoneGap.exec` and start replacing these with `AssessPlugins.<service>`
+- The `AssessPlugins.<service>` methods (https://github.com/merrillpaul/assess-cordova-proto/blob/master/assess-www/src/scripts/app-plugin-lib.ts) typically return Promises or rxJs Observables.
+- Change Give-www JS code to use Promise or Observable semantics wherever `PhoneGap.exec` gets replaced, instead of callbacks.
 
 
 ### TestCases
-~ Smoke tests
-~ Regression
-~ Multi login and MFA
-~ Multiple syncs at the same time
-~ Battery image and audio upload
-~ BT Handling
-~ Memory warning error handling
-~ App backgrounding and resuming
-~ Resume battery 
+- Smoke tests
+- Regression
+- Multi login and MFA
+- Multiple syncs at the same time
+- Battery image and audio upload
+- BT Handling
+- Memory warning error handling
+- App backgrounding and resuming
+- Resume battery 
 
 ### Specs
-~ Last but not least , cover the new TS code with specs.
+- Last but not least , cover the new TS code with specs.
 
 # Setup
 * Install cordova npm tools 
@@ -99,10 +99,12 @@ They are automatically added to the project. However if you want to change some 
 * `cordova plugin add cordova-plugins/ -save ` to add the local plugin folder to our main cordova project
 * `cordova build` to build plugins and our apps
 
-~ contains www with the various plugin JS facades.
+- contains www with the various plugin JS facades.
+
+* Note: This is in a single project as there is potential of our exisitng pluigns to cross reference or reuse common code. 
 
 #### JS plugins
-While developing the replacement of the assess ios code with typescript , it occured to me that I was creating some components which can be resused as is within give-www directly. Case in point is the loggingService and probably others.
+While developing the replacement of the assess ios code with typescript , it occured that we are creating some components which can be resused, as is,  within give-www directly. Case in point is the loggingService and probably others.
 
 To achieve this:- 
 * Assess-www webpack generates a `plugin.js` from the `app-plugin-lib.ts`. With This was most of the components used in the typescript code is exposed to give-www using the `AssessPlugins`.
@@ -118,8 +120,6 @@ added entries in bower.json to pull in the browserified cordova and the assess-j
 This will be downloaded as part of the content download and extracted into a `persistentFolder` prescribed by cordova. Search for details here -> https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html. Once this content is extracted into the above folder , typically as `'persistentFolder'/give-www` , the login page on success, would call the homeUI etc using the `cdvfile://'persistentFolder'/give-www/homeUI.html`  url. This scheme is allowed in the config.xml . Look at where I got that inspired from -> https://github.com/murlex/UpdatableApp. Unfortunately we cannot use that plugin directly due to our content download which is specific for QI.
 
 ## TODOS   
-###  Integrate with existing build scripts 
-git branch etc...
 
 ### Update give-www
 Update all occurences of `PhoneGap.exec` and check to see if we need to embed custom plugins like we did for the TarPlugin or whether we can use AssessPlugins ( JS ), which could internally use any standard cordova plugin JS files or our custom ones.
