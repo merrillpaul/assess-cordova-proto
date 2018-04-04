@@ -1,3 +1,41 @@
+# Intro
+This cordova upgrade or 'Vanilla Ice' project aims to upgrade the Cordova library and the Cordova project to be used to build the native build.
+
+## Process
+~ Assess's give ./buildContent builds content and nonstim-all-tar which essentially is the www folder for Assess. These generate the various versions of homeUI, testDirector and stims
+~ The above process pulls in the cordova js api and the assess js plugins through bower
+~ The cordova based app presents the HTML5 login (and mfa) pages and authenticates with Central
+~ Ios 'NoCloud' folders are prepped for various uses, for eg saving current user, battery repop, content archive folder and so on
+~ The app downloads the content tars into a temp zip and untars these to a `www` folder in the above mentioned folder
+~ The content is extracted using a tar extraction process and preps the give-www folder
+~ The app decides which i18nized landing page , be it stim or homeUI
+~ The app's webview ( UI or WK) loads the give-www landing page at which point it loads the Assess.
+
+## Pre-Modules Plan
+
+### Reuse /Refactor / Replace Native Plugins
+~ Just like File and Sync plugins have been migrated , we would need to reinstate functionality from Audio, BT etc. Due diligence is needed for any android counterparts as well like the TarPlugin we have moved.
+
+### Replace `PhoneGap.exec`
+~ Search for occurences of `PhoneGap.exec` and start replacing these with `AssessPlugins.<service>`
+~ The `AssessPlugins.<service>` methods (https://github.com/merrillpaul/assess-cordova-proto/blob/master/assess-www/src/scripts/app-plugin-lib.ts) typically return Promises or rxJs Observables.
+~ Change Give-www JS code to use Promise or Observable semantics wherever `PhoneGap.exec` gets replaced, instead of callbacks.
+
+
+### TestCases
+~ Smoke tests
+~ Regression
+~ Multi login and MFA
+~ Multiple syncs at the same time
+~ Battery image and audio upload
+~ BT Handling
+~ Memory warning error handling
+~ App backgrounding and resuming
+~ Resume battery 
+
+### Specs
+~ Last but not least , cover the new TS code with specs.
+
 # Setup
 * Install cordova npm tools 
 * Run `npm install`
@@ -126,7 +164,6 @@ MP - Might need custom plugin like the TAR plugin
 - DeveloperToolsPlugin.showConsole  *DK
 - ErrorHandlerPlugin.didReceiveError *PA
 - PreferencesPlugin.getShowScaledCompositeScores *DK
-- LocalFileLoader.loadTestHierarchy2 - should be possible just using XHR just like we load i18n ( CSP is added to .html files )
 - FileManagerPlugin.savePngData *PA
 - ChooseSharePlugin.logoutAndForgetCredentials *PA
 - ChooseSharePlugin.logout *PA
@@ -148,12 +185,9 @@ MP - Might need custom plugin like the TAR plugin
 - TouchMaskPlugin.showMaskWithUnmaskedRegions *DK
 - TouchMaskPlugin.hideMask *DK
 
-### Application preferences ( Setting pane with 1i8n on the Root.strings)
-A plugin is available cordova-app-preferences but it falls short case its doesnt have any notion of i18n and updating the Root.strings. Looks like we would need to be inspried little bit from it :-) but then also use our logic to generated those Root.strings 
-
-### Relook some FileAPI calls
-Potential for perf improvement especially the logging part, prolly need to buffer and flush
 
 ### Investigate Crashlytics integration
 
 ### Offline Auth
+
+
